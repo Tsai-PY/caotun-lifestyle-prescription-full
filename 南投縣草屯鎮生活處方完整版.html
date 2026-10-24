@@ -1560,14 +1560,14 @@
     }
 
     .maint-map-top-controls {
-      padding: 8px 12px;
-      background: #f8fafc;
-      border-bottom: 1px solid #e2e8f0;
+      padding: 10px 14px;
+      background: #f0fdf4 !important; /* 淡綠色背景擴大至整個欄位 */
+      border-bottom: 1.5px solid #86efac !important;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 8px;
     }
 
     .mymaps-tool-pill {
@@ -1963,9 +1963,9 @@
           </button>
         </div>
         <!-- 新增生活處方服務點說明文字欄 -->
-        <div style="background:#ffffff; border:1.5px solid #86efac; border-radius:8px; padding:7px 10px; margin-bottom:8px;">
-          <div style="font-size:0.86rem; font-weight:800; color:#15803d; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
-            <span>➕ 新增生活處方服務點</span>
+        <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:8px; padding:8px 11px; margin-bottom:8px;">
+          <div style="font-size:1.02rem; font-weight:900; color:#14532d; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+            <span style="display:inline-flex; align-items:center; gap:4px;">➕ 新增生活處方服務點</span>
             <span style="font-size:0.68rem; font-weight:700; background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:999px; border:1px solid #bbf7d0;">
               加入至【<span id="currentAddLayerBadge">社交</span>】處方圖層
             </span>
@@ -2000,9 +2000,9 @@
     <!-- 右欄：Google My Maps 互動式維護地圖 -->
     <div class="right-column">
       <div class="map-card">
-        <div class="maint-map-top-controls">
-          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-            <span style="font-size:0.78rem; font-weight:800; color:#15803d; background:#dcfce7; padding:4px 9px; border-radius:6px; border:1px solid #86efac; display:inline-flex; align-items:center; gap:4px;">
+        <div class="maint-map-top-controls" style="background:#f0fdf4; border-bottom:1.5px solid #86efac; padding:10px 14px;">
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span style="font-size:1.05rem; font-weight:900; color:#14532d; background:#dcfce7; padding:5px 12px; border-radius:8px; border:1.5px solid #86efac; display:inline-flex; align-items:center; gap:5px; box-shadow:0 1px 2px rgba(22,101,52,0.08); letter-spacing:0.5px;">
               ➕ 新增生活處方服務點：
             </span>
             <button type="button" class="mymaps-tool-pill active" id="toolSelectModeBtn" title="點擊地圖上已有的 Google 地標名稱標記直接加入圖層">
@@ -2011,24 +2011,24 @@
             <button type="button" class="mymaps-tool-pill" id="toolAddPinModeBtn" title="在地圖上任意位置點擊座標點，再輸入名稱標記與說明">
               📍 選項 2：任意選座標點新增標記
             </button>
-            <button type="button" class="btn-undo-action" id="btnUndoTopAction" title="回復上一步動作" disabled style="padding:3px 9px;">
+            <button type="button" class="btn-undo-action" id="btnUndoTopAction" title="回復上一步動作" disabled style="padding:4px 10px;">
               ↩️ 回復上一步
             </button>
           </div>
           <!-- 搜尋 Google Map 上已有名稱地標以加入圖層 -->
-          <form id="maintMapSearchAddForm" style="display:flex; gap:4px; margin:0;" action="#" method="GET">
+          <form id="maintMapSearchAddForm" style="display:flex; gap:5px; margin:0;" action="#" method="GET">
             <input
               type="text"
               id="maintMapSearchInput"
               placeholder="🔍 搜尋 Google 地圖已有地標..."
-              style="padding:3px 7px; font-size:0.72rem; border:1px solid #cbd5e1; border-radius:6px; min-width:140px;"
+              style="padding:4px 8px; font-size:0.75rem; border:1.5px solid #86efac; border-radius:6px; min-width:150px; background:#ffffff;"
             />
-            <button type="submit" class="btn-kml-action primary" style="padding:3px 8px; font-size:0.72rem;">搜尋標記</button>
+            <button type="submit" class="btn-kml-action primary" style="padding:4px 10px; font-size:0.75rem;">搜尋標記</button>
           </form>
         </div>
-        <div style="padding:6px 12px; background:#f1f5f9; font-size:0.72rem; color:#475569; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+        <div style="padding:7px 14px; background:#dcfce7; border-bottom:1.5px solid #86efac; font-size:0.75rem; color:#14532d; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px; font-weight:600;">
           <span id="maintMapHint">💡 提示：點擊右側地圖上已有的 Google 地標名稱（或現有標記）即可查看詳情並新增至圖層</span>
-          <span style="font-weight:700; color:#1e293b;">Google My Maps 維護引擎</span>
+          <span style="font-weight:800; color:#15803d;">Google My Maps 維護引擎</span>
         </div>
         <!-- 維護模式 Google 地圖容器 -->
         <div id="maintMap" style="width:100%; height:calc(100vh - 180px); min-height:560px; max-height:860px; position:relative; background:#f1f5f9;"></div>
