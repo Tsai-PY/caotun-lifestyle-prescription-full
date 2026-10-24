@@ -1388,11 +1388,11 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 5px;
+      gap: 6px;
       margin-top: 8px;
       padding-top: 6px;
       border-top: 1px solid #e2e8f0;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
 
     .mymaps-icon-btn {
@@ -4905,8 +4905,8 @@
             </div>
           ` : ""}
 
-          <!-- Google My Maps 右下角五個選項工具列：1.樣式 2.編輯 3.新增圖片 4.到達路徑 5.刪除 -->
-          <div class="mymaps-five-toolbar" role="toolbar" aria-label="My Maps 服務點維護五項工具">
+          <!-- Google My Maps 維護工具列：1.樣式 2.編輯 3.圖片 4.刪除（刪除選項已上提至同一橫列） -->
+          <div class="mymaps-five-toolbar" role="toolbar" aria-label="My Maps 服務點維護工具列">
             <button type="button" class="mymaps-icon-btn ${activeSub === "STYLE" ? "active" : ""}" id="toolBtnStyle" title="更改點位顏色與圖示樣式">
               🪣 樣式
             </button>
@@ -4915,9 +4915,6 @@
             </button>
             <button type="button" class="mymaps-icon-btn ${activeSub === "IMAGE" ? "active" : ""}" id="toolBtnImage" title="新增或管理服務點圖片">
               📷 圖片 (${imgCount})
-            </button>
-            <button type="button" class="mymaps-icon-btn" id="toolBtnRoute" title="切換至查詢模式並規劃到達此處的道路路徑">
-              🧭 路徑
             </button>
             <button type="button" class="mymaps-icon-btn danger" id="toolBtnDelete" title="刪除此筆處方服務點資料">
               🗑️ 刪除
@@ -4941,12 +4938,7 @@
         maintState.activeSubPanel = "IMAGE";
         renderMaintInspector();
       });
-      document.getElementById("toolBtnRoute").addEventListener("click", () => {
-        state.selectedCategory = item.category;
-        state.selectedItem = item;
-        switchSystemMode("QUERY");
-        selectServicePoint(item);
-      });
+
       document.getElementById("toolBtnDelete").addEventListener("click", () => {
         deleteServicePoint(item.id);
       });
