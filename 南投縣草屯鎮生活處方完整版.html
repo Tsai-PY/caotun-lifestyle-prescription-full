@@ -1962,18 +1962,8 @@
             ↩️ 回復上一步
           </button>
         </div>
-        <!-- 新增生活處方服務點說明文字欄 -->
-        <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:8px; padding:8px 11px; margin-bottom:8px;">
-          <div style="font-size:1.02rem; font-weight:900; color:#14532d; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
-            <span style="display:inline-flex; align-items:center; gap:4px;">➕ 新增生活處方服務點</span>
-            <span style="font-size:0.68rem; font-weight:700; background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:999px; border:1px solid #bbf7d0;">
-              加入至【<span id="currentAddLayerBadge">社交</span>】處方圖層
-            </span>
-          </div>
-          <div style="font-size:0.71rem; color:#166534; margin-top:3px; line-height:1.4;">
-            請由下方點選新增方式，可點選 Google 地圖上已有的店家地標，或在任意座標點建立新服務點加入此處方圖層：
-          </div>
-        </div>
+        <!-- 隱藏之圖層名稱錨點（保持JS相容性） -->
+        <span id="currentAddLayerBadge" style="display:none;"></span>
 
         <div class="add-marker-two-options">
           <button type="button" class="add-option-card active" id="optAddFromGooglePoiBtn" style="border-color:#bbf7d0;">
