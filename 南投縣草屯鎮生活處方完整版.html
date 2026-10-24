@@ -4404,12 +4404,18 @@
     function renderPendingCustomPinStyleSelectors() {
       const colorGrid = document.getElementById("newCustomPinColorGrid");
       const iconGrid = document.getElementById("newCustomPinIconGrid");
-      if (!colorGrid || !iconGrid || !maintState.pendingCustomPin) return;
+      if (!iconGrid || !maintState.pendingCustomPin) return;
 
-      // 六大生活處方圖層專屬樣式選項卡片（對應圖片中的六個選項）
+      const curLayer = maintState.selectedLayer || "社交";
+      const layerStyles = MYMAPS_ICON_PALETTE.filter(ic => ic.cat === curLayer);
+      const displayStyles = layerStyles.length > 0 ? layerStyles : [
+        MYMAPS_ICON_PALETTE.find(ic => ic.cat === curLayer) || MYMAPS_ICON_PALETTE[0]
+      ];
+
+      // 依使用者指示：使用哪個圖層時只需保留該圖層樣式，其餘樣式不須顯示
       iconGrid.innerHTML = `
-        <div class="maint-style-options-grid" style="grid-template-columns: repeat(2, 1fr); gap:6px; margin-top:4px; margin-bottom:4px;">
-          ${MYMAPS_ICON_PALETTE.map(ic => {
+        <div class="maint-style-options-grid" style="grid-template-columns: 1fr; gap:6px; margin-top:4px; margin-bottom:4px;">
+          ${displayStyles.map(ic => {
             const isSelected = maintState.pendingCustomPin.iconCode === ic.code;
             return `
               <button
@@ -4418,18 +4424,18 @@
                 data-style-code="${ic.code}"
                 data-style-cat="${ic.cat}"
                 data-style-color="${ic.defaultColor}"
-                style="padding:6px 8px;"
-                title="套用「${ic.label}」處方樣式（${ic.colorName} ${ic.defaultColor}）"
+                style="padding:8px 10px;"
+                title="套用「${ic.label}」處方標準樣式（${ic.colorName} ${ic.defaultColor}）"
               >
-                <div class="maint-style-card-left" style="gap:7px;">
-                  ${getMyMapsCategoryIcon(ic.cat, 26)}
+                <div class="maint-style-card-left" style="gap:9px;">
+                  ${getMyMapsCategoryIcon(ic.cat, 28)}
                   <div class="maint-style-card-text">
-                    <div class="maint-style-card-title" style="font-size:0.8rem;">${ic.label}</div>
-                    <div class="maint-style-card-sub" style="font-size:0.64rem;">${ic.colorName} · ${ic.desc}</div>
+                    <div class="maint-style-card-title" style="font-size:0.84rem;">${ic.label} 處方專屬標準樣式</div>
+                    <div class="maint-style-card-sub" style="font-size:0.68rem;">${ic.colorName} (${ic.defaultColor}) · ${ic.desc}</div>
                   </div>
                 </div>
-                <div class="maint-style-card-badge" style="font-size:0.64rem; padding:2px 6px;">
-                  ${isSelected ? "✓ 目前" : "選取"}
+                <div class="maint-style-card-badge" style="font-size:0.68rem; padding:3px 8px;">
+                  ${isSelected ? "✓ 本圖層樣式（已選用）" : "選取"}
                 </div>
               </button>
             `;
@@ -4437,32 +4443,18 @@
         </div>
       `;
 
-      colorGrid.innerHTML = MYMAPS_COLOR_PALETTE.map(c => `
-        <button
-          type="button"
-          class="color-swatch-btn ${maintState.pendingCustomPin.color.toUpperCase() === c.hex.toUpperCase() ? "selected" : ""}"
-          style="background:${c.hex};"
-          data-new-color="${c.hex}"
-          title="${c.name} (${c.hex})"
-        ></button>
-      `).join("");
+      if (colorGrid) {
+        colorGrid.innerHTML = "";
+        colorGrid.style.display = "none";
+      }
 
       iconGrid.querySelectorAll(".maint-style-card").forEach(btn => {
         btn.addEventListener("click", () => {
           const code = btn.getAttribute("data-style-code");
-          const cat = btn.getAttribute("data-style-cat");
           const color = btn.getAttribute("data-style-color");
           maintState.pendingCustomPin.iconCode = code;
           maintState.pendingCustomPin.color = color;
           maintState.pendingCustomPin.styleUrl = `#icon-${code}-${color.replace("#", "")}`;
-          renderPendingCustomPinStyleSelectors();
-        });
-      });
-
-      colorGrid.querySelectorAll("[data-new-color]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          maintState.pendingCustomPin.color = btn.getAttribute("data-new-color");
-          maintState.pendingCustomPin.styleUrl = `#icon-${maintState.pendingCustomPin.iconCode || "1603"}-${maintState.pendingCustomPin.color.replace("#", "")}`;
           renderPendingCustomPinStyleSelectors();
         });
       });
@@ -4633,20 +4625,26 @@
       // 子面板 1：🪣 更改/設定樣式（顏色調色盤 + 圖示選擇）
       let subPanelHtml = "";
       if (activeSub === "STYLE") {
+        const curLayer = item.category || maintState.selectedLayer || "社交";
+        const layerStyles = MYMAPS_ICON_PALETTE.filter(ic => ic.cat === curLayer);
+        const displayStyles = layerStyles.length > 0 ? layerStyles : [
+          MYMAPS_ICON_PALETTE.find(ic => ic.cat === curLayer) || MYMAPS_ICON_PALETTE[0]
+        ];
+
         subPanelHtml = `
           <div class="mymaps-subpanel">
             <div style="font-size:0.76rem; font-weight:800; color:#0f172a; margin-bottom:4px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
-              <span>🪣 更改點位樣式（請點選下列六大生活處方圖示）</span>
-              <span style="font-size:0.68rem; color:#64748b;">目前樣式代碼：<code>${escapeHtml(item.styleUrl || "自訂")}</code></span>
+              <span>🪣 更改點位樣式（目前圖層：【${escapeHtml(curLayer)}處方】）</span>
+              <span style="font-size:0.68rem; color:#64748b;">樣式代碼：<code>${escapeHtml(item.styleUrl || "自訂")}</code></span>
             </div>
             <div style="font-size:0.7rem; color:#475569; margin-bottom:8px;">
-              點擊下列六個生活處方選項之一，即可變更此點位的顏色與圖示樣式：
+              目前使用<strong>【${escapeHtml(curLayer)}】</strong>圖層，依圖層規範僅保留本圖層專屬樣式（其餘圖層樣式已隱藏）：
             </div>
 
-            <!-- 圖片中六大生活處方專屬選項卡片 -->
-            <div class="maint-style-options-grid">
-              ${MYMAPS_ICON_PALETTE.map(ic => {
-                const isSelected = (item.iconCode === ic.code) || (!item.iconCode && item.category === ic.cat);
+            <!-- 依使用者指示：僅保留與目前圖層一致的專屬樣式選項，其餘樣式不顯示 -->
+            <div class="maint-style-options-grid" style="grid-template-columns: 1fr;">
+              ${displayStyles.map(ic => {
+                const isSelected = (item.iconCode === ic.code && item.color.toUpperCase() === ic.defaultColor.toUpperCase()) || (!item.iconCode && item.category === ic.cat);
                 return `
                   <button
                     type="button"
@@ -4654,43 +4652,22 @@
                     data-style-code="${ic.code}"
                     data-style-cat="${ic.cat}"
                     data-style-color="${ic.defaultColor}"
-                    title="點擊套用「${ic.label}」處方樣式（${ic.colorName} ${ic.defaultColor}）"
+                    title="套用「${ic.label}」處方標準樣式（${ic.colorName} ${ic.defaultColor}）"
                   >
                     <div class="maint-style-card-left">
-                      ${getMyMapsCategoryIcon(ic.cat, 28)}
+                      ${getMyMapsCategoryIcon(ic.cat, 32)}
                       <div class="maint-style-card-text">
-                        <div class="maint-style-card-title">${ic.label}</div>
-                        <div class="maint-style-card-sub">${ic.colorName} · ${ic.desc}</div>
+                        <div class="maint-style-card-title">${ic.label} 處方專屬標準樣式</div>
+                        <div class="maint-style-card-sub">${ic.colorName} (${ic.defaultColor}) · ${ic.desc}</div>
                       </div>
                     </div>
                     <div class="maint-style-card-badge">
-                      ${isSelected ? "✓ 目前樣式" : "點擊套用"}
+                      ${isSelected ? "✓ 本圖層樣式（已套用）" : "點擊套用本圖層樣式"}
                     </div>
                   </button>
                 `;
               }).join("")}
             </div>
-
-            <!-- 進階微調底色（選用） -->
-            <details style="margin-top:10px; padding:6px 9px; background:#ffffff; border:1px dashed #cbd5e1; border-radius:8px;">
-              <summary style="font-size:0.7rem; font-weight:700; color:#475569; cursor:pointer;">
-                🎨 進階微調：手動更換其他底色（選用）
-              </summary>
-              <div style="font-size:0.67rem; color:#64748b; margin-top:4px;">
-                目前底色：<span style="display:inline-block; width:11px; height:11px; border-radius:50%; background:${item.color}; vertical-align:middle; margin:0 4px; border:1px solid #cbd5e1;"></span><code>${item.color}</code>
-              </div>
-              <div class="color-palette-grid" style="margin-top:6px;">
-                ${MYMAPS_COLOR_PALETTE.map(c => `
-                  <button
-                    type="button"
-                    class="color-swatch-btn ${item.color.toUpperCase() === c.hex.toUpperCase() ? "selected" : ""}"
-                    style="background:${c.hex};"
-                    data-color="${c.hex}"
-                    title="${c.name} (${c.hex})"
-                  ></button>
-                `).join("")}
-              </div>
-            </details>
           </div>
         `;
       } else if (activeSub === "IMAGE") {
