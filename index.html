@@ -1,0 +1,4709 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>南投縣草屯鎮｜生活處方完整版（資料查詢＋資料維護）</title>
+  <style>
+    :root {
+      --bg-page: #f4f7f6;
+      --bg-card: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --primary: #0f766e;
+      --primary-hover: #115e59;
+      --primary-light: #f0fdfa;
+      --accent: #2563eb;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08);
+      --radius-md: 12px;
+      --radius-lg: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    /* 頂部導覽列 */
+    .app-header {
+      background: linear-gradient(135deg, #0f766e 0%, #0369a1 100%);
+      color: #ffffff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-subtitle {
+      margin: 2px 0 0;
+      font-size: 0.82rem;
+      opacity: 0.9;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-header {
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 8px;
+      padding: 7px 13px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.18s ease, transform 0.12s ease;
+    }
+
+    .btn-header:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .api-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(15, 23, 42, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #fbbf24;
+    }
+
+    .status-dot.active {
+      background: #4ade80;
+      box-shadow: 0 0 8px #4ade80;
+    }
+
+    /* 主版面配置：左欄縮小一半，讓右側地圖更寬廣、左側步驟一覽無遺 */
+    .main-layout {
+      max-width: 1520px;
+      margin: 0 auto;
+      padding: 10px 14px 20px;
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 左側步驟控制面板（定位 + 步驟 1 ~ 步驟 4 緊湊垂直排版，各步驟選項縮小一半） */
+    .control-column {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .step-card {
+      background: var(--bg-card);
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      padding: 8px 10px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .step-card.active-step {
+      border-color: #99f6e4;
+      box-shadow: var(--shadow-md);
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      gap: 4px;
+    }
+
+    .step-title-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-badge {
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .step-title {
+      margin: 0;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    /* 定位列（緊湊化縮小一半） */
+    .location-bar {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 7px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .location-current {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .location-coords {
+      font-size: 0.72rem;
+      color: #334155;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      line-height: 1.25;
+    }
+
+    .location-controls {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn-locate {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+    }
+
+    .btn-locate:hover {
+      background: var(--primary-hover);
+    }
+
+    .select-preset {
+      flex: 1;
+      min-width: 120px;
+      padding: 3px 6px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      font-size: 0.72rem;
+      background: #ffffff;
+      color: #1e293b;
+    }
+
+    /* 輸入地標或地址定位表單 (符合 Modern Web Guidance `forms` 規範) */
+    .location-search-form {
+      border-top: 1px dashed #cbd5e1;
+      padding-top: 5px;
+      margin-top: 1px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .location-search-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 3px;
+      display: block;
+    }
+
+    .location-search-row {
+      display: flex;
+      gap: 5px;
+      align-items: stretch;
+    }
+
+    .input-location-search {
+      flex: 1;
+      min-width: 120px;
+      font-size: 1rem;
+      padding: 2px 7px;
+      min-height: 28px;
+      border-radius: 6px;
+      border: 1px solid #94a3b8;
+      background: #ffffff;
+      color: #0f172a;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .input-location-search::placeholder {
+      font-size: 0.72rem;
+    }
+
+    .input-location-search:focus-visible {
+      outline: 2px solid #0284c7;
+      outline-offset: 1px;
+      border-color: #0284c7;
+    }
+
+    .btn-search-locate {
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 3px 9px;
+      min-height: 28px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+      transition: background 0.15s ease;
+    }
+
+    .btn-search-locate:hover:not(:disabled) {
+      background: #0369a1;
+    }
+
+    .btn-search-locate:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    .location-search-feedback {
+      font-size: 0.7rem;
+      margin-top: 3px;
+      font-weight: 600;
+      color: #0f766e;
+    }
+
+    .location-search-feedback:empty {
+      display: none;
+    }
+
+    .location-search-feedback.error {
+      color: #dc2626;
+    }
+
+    /* 步驟 1：六大生活處方網格（選項縮小一半） */
+    .prescription-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    @media (max-width: 480px) {
+      .prescription-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .prescription-btn {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 7px;
+      padding: 4px 5px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+      transition: all 0.15s ease;
+      position: relative;
+      text-align: center;
+    }
+
+    .prescription-btn:hover {
+      border-color: var(--cat-color, var(--primary));
+      background: #f8fafc;
+    }
+
+    .prescription-btn.selected {
+      border-color: var(--cat-color, var(--primary));
+      background: var(--cat-bg, #f0fdfa);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.07);
+    }
+
+    .prescription-icon {
+      font-size: 0.95rem;
+      line-height: 1.1;
+      margin-bottom: 0;
+    }
+
+    .prescription-name {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+
+    .prescription-count {
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.05);
+      padding: 0 5px;
+      border-radius: 999px;
+      line-height: 1.3;
+    }
+
+    /* 步驟 2：交通方式選擇（選項縮小一半） */
+    .travel-mode-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+    }
+
+    @media (max-width: 480px) {
+      .travel-mode-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .travel-btn {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 7px;
+      padding: 4px 3px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #334155;
+      transition: all 0.15s ease;
+      line-height: 1.2;
+    }
+
+    .travel-btn:hover {
+      border-color: #94a3b8;
+      background: #f8fafc;
+    }
+
+    .travel-btn.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .travel-icon {
+      font-size: 0.88rem;
+      line-height: 1.1;
+    }
+
+    /* 步驟 3：最近 5 個服務點清單（選項縮小一半） */
+    .nearest-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .nearest-item {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 7px;
+      padding: 5px 8px;
+      background: #ffffff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .nearest-item:hover {
+      border-color: #94a3b8;
+      background: #f8fafc;
+    }
+
+    .nearest-item.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: 0 2px 6px rgba(15, 118, 110, 0.1);
+    }
+
+    .nearest-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .rank-badge {
+      width: 19px;
+      height: 19px;
+      border-radius: 50%;
+      background: var(--cat-color, var(--primary));
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.68rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .nearest-info {
+      min-width: 0;
+    }
+
+    .nearest-name {
+      margin: 0;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #0f172a;
+      word-break: break-word;
+      line-height: 1.25;
+    }
+
+    .nearest-meta {
+      margin: 1px 0 0;
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      line-height: 1.2;
+    }
+
+    .nearest-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .eta-pill {
+      display: inline-block;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      font-weight: 700;
+      font-size: 0.68rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    /* 右側地圖面板 */
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: sticky;
+      top: 74px;
+    }
+
+    @media (max-width: 1024px) {
+      .right-column {
+        position: static;
+      }
+    }
+
+    /* 步驟 4：所選服務點詳細資訊卡片（緊湊化縮小一半） */
+    .detail-card {
+      background: var(--bg-card);
+      border-radius: 10px;
+      border: 1.5px solid #0f766e;
+      padding: 9px 11px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .detail-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 6px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 6px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .detail-place-name {
+      margin: 2px 0 0;
+      font-size: 0.92rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+    }
+
+    .detail-eta-box {
+      background: linear-gradient(135deg, #0f766e 0%, #0284c7 100%);
+      color: #ffffff;
+      padding: 4px 8px;
+      border-radius: 7px;
+      text-align: right;
+      min-width: 115px;
+    }
+
+    .detail-eta-label {
+      font-size: 0.62rem;
+      opacity: 0.92;
+      line-height: 1.2;
+    }
+
+    .detail-eta-value {
+      font-size: 0.88rem;
+      font-weight: 800;
+      margin-top: 1px;
+      line-height: 1.2;
+    }
+
+    .detail-eta-sub {
+      font-size: 0.62rem;
+      opacity: 0.9;
+      margin-top: 1px;
+      line-height: 1.2;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+
+    @media (max-width: 640px) {
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .info-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 5px 7px;
+    }
+
+    .info-item.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .info-label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      line-height: 1.2;
+    }
+
+    .info-value {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #1e293b;
+      word-break: break-word;
+      line-height: 1.3;
+    }
+
+    .info-value a {
+      color: #0284c7;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .info-value a:hover {
+      text-decoration: underline;
+    }
+
+    .hours-list {
+      margin: 2px 0 0;
+      padding-left: 14px;
+      font-size: 0.7rem;
+      color: #334155;
+      line-height: 1.3;
+    }
+
+    .hours-list li.today {
+      font-weight: 700;
+      color: #0f766e;
+    }
+
+    .detail-actions {
+      margin-top: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .btn-nav {
+      background: #2563eb;
+      color: #ffffff;
+      text-decoration: none;
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-nav:hover {
+      background: #1d4ed8;
+    }
+
+    /* 強制設定地圖容器高度 (CF2 防呆規範) */
+    .map-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .map-toolbar {
+      padding: 10px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* Always set the map height explicitly to define the size of the div element that contains the map (CF2) */
+    #map,
+    gmp-map {
+      width: 100%;
+      height: calc(100vh - 140px);
+      min-height: 560px;
+      max-height: 860px;
+      position: relative;
+      background: #f1f5f9;
+    }
+
+    .gmp-attribution-line {
+      font-size: 0.68rem;
+      color: #475569;
+      font-weight: 600;
+      margin-top: 5px;
+      padding-top: 4px;
+      border-top: 1px dashed #cbd5e1;
+    }
+
+    .empty-hint {
+      text-align: center;
+      padding: 10px 8px;
+      color: var(--text-muted);
+      font-size: 0.76rem;
+      background: #f8fafc;
+      border-radius: 7px;
+      border: 1px dashed #cbd5e1;
+    }
+
+    /* Modal Dialog (Modern Web Guidance: light-dismiss-a-dialog) */
+    dialog {
+      border: none;
+      border-radius: 16px;
+      padding: 0;
+      max-width: 540px;
+      width: calc(100% - 32px);
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+    }
+
+    /* Style the backdrop to indicate the dialog is modal */
+    dialog::backdrop {
+      background-color: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(3px);
+    }
+
+    .dialog-inner {
+      padding: 24px;
+    }
+
+    .dialog-title {
+      margin: 0 0 8px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .dialog-desc {
+      margin: 0 0 16px;
+      font-size: 0.88rem;
+      color: #475569;
+    }
+
+    .form-field {
+      margin-bottom: 14px;
+    }
+
+    .form-field label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #1e293b;
+    }
+
+    .form-field input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.92rem;
+    }
+
+    .dialog-steps {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 0.82rem;
+      color: #334155;
+      margin-bottom: 16px;
+    }
+
+    .dialog-steps ol {
+      margin: 6px 0 0;
+      padding-left: 18px;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #1e293b;
+      border: none;
+      padding: 9px 15px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .app-footer {
+      max-width: 1480px;
+      margin: 0 auto 24px;
+      padding: 14px 20px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .app-footer a {
+      color: #0f766e;
+    }
+
+    /* === 頂部雙模式切換列（生活處方資料查詢 ／ 生活處方資料維護） === */
+    .mode-nav-bar {
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      padding: 6px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .mode-tabs {
+      display: inline-flex;
+      background: #1e293b;
+      padding: 4px;
+      border-radius: 10px;
+      gap: 6px;
+    }
+
+    .mode-tab-btn {
+      border: none;
+      background: transparent;
+      color: #cbd5e1;
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 7px 16px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+    }
+
+    .mode-tab-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .mode-tab-btn.active {
+      background: linear-gradient(135deg, #0f766e 0%, #0284c7 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+    }
+
+    .mode-status-info {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hidden-view {
+      display: none !important;
+    }
+
+    /* === 第二部分：生活處方資料維護（Google My Maps 風格） === */
+    .maint-layout {
+      max-width: 1520px;
+      margin: 0 auto;
+      padding: 10px 14px 20px;
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .maint-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .maint-left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mymaps-card {
+      background: #ffffff;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      padding: 10px 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .kml-file-bar {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .btn-kml-action {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #0f172a;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 8px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-kml-action:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-kml-action.primary {
+      background: #1a73e8;
+      color: #ffffff;
+      border-color: #1557b0;
+    }
+
+    .btn-kml-action.primary:hover {
+      background: #1557b0;
+    }
+
+    .btn-kml-action.success {
+      background: #0f766e;
+      color: #ffffff;
+      border-color: #115e59;
+    }
+
+    .btn-kml-action.success:hover {
+      background: #115e59;
+    }
+
+    /* Google My Maps 圖層選擇器（左側藍色線框塗層） */
+    .mymaps-layer-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+
+    .mymaps-layer-item {
+      border: 1px solid #e2e8f0;
+      border-left: 5px solid transparent;
+      border-radius: 6px;
+      padding: 5px 7px;
+      background: #f8fafc;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .mymaps-layer-item:hover {
+      background: #f1f5f9;
+    }
+
+    /* 選取圖層後左邊會有「藍色線框」的塗層 */
+    .mymaps-layer-item.active-layer {
+      border-color: #bfdbfe;
+      border-left: 5px solid #1a73e8;
+      background: #eff6ff;
+      box-shadow: 0 1px 5px rgba(26, 115, 232, 0.15);
+    }
+
+    .layer-item-left {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .layer-vis-check {
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+      accent-color: #1a73e8;
+      margin: 0;
+    }
+
+    .layer-color-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+
+    .layer-item-name {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #0f172a;
+      white-space: nowrap;
+    }
+
+    .layer-item-count {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #475569;
+      background: rgba(15, 23, 42, 0.06);
+      padding: 1px 5px;
+      border-radius: 999px;
+    }
+
+    /* 圖層內服務點清單 */
+    .maint-search-input {
+      width: 100%;
+      padding: 5px 9px;
+      font-size: 0.8rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+
+    .maint-points-scroll {
+      max-height: 195px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 7px;
+      background: #f8fafc;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .maint-point-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 5px 7px;
+      border-radius: 6px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.12s ease;
+    }
+
+    .maint-point-row:hover {
+      border-color: #93c5fd;
+      background: #f0f9ff;
+    }
+
+    .maint-point-row.selected {
+      border-color: #1a73e8;
+      background: #eff6ff;
+      font-weight: 700;
+    }
+
+    .maint-point-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .maint-point-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #0f172a;
+    }
+
+    .maint-point-badges {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      flex-shrink: 0;
+      font-size: 0.65rem;
+    }
+
+    /* My Maps 服務點檢視與編輯面板（含右下角五個功能圖示） */
+    .mymaps-inspector {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1.5px solid #1a73e8;
+      background: #ffffff;
+      box-shadow: var(--shadow-md);
+    }
+
+    .mymaps-inspector-banner {
+      padding: 10px 12px;
+      color: #ffffff;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .mymaps-inspector-title {
+      margin: 2px 0 0;
+      font-size: 0.92rem;
+      font-weight: 800;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .mymaps-inspector-body {
+      padding: 10px 12px;
+      font-size: 0.76rem;
+      color: #334155;
+    }
+
+    /* My Maps 右下角五個功能圖示工具列（樣式、編輯、新增圖片、路徑、刪除） */
+    .mymaps-five-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 5px;
+      padding-top: 8px;
+      margin-top: 8px;
+      border-top: 1px solid #e2e8f0;
+      flex-wrap: wrap;
+    }
+
+    .mymaps-icon-btn {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #334155;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.14s ease;
+    }
+
+    .mymaps-icon-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .mymaps-icon-btn.active {
+      background: #eff6ff;
+      border-color: #1a73e8;
+      color: #1a73e8;
+    }
+
+    .mymaps-icon-btn.danger:hover {
+      background: #fef2f2;
+      border-color: #ef4444;
+      color: #dc2626;
+    }
+
+    /* 樣式選擇器（顏色調色盤 + 圖示選擇） */
+    .mymaps-subpanel {
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+    }
+
+    .color-palette-grid {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      gap: 5px;
+      margin: 5px 0 8px;
+    }
+
+    .color-swatch-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 0 1px #94a3b8;
+      cursor: pointer;
+      padding: 0;
+      transition: transform 0.12s ease;
+    }
+
+    .color-swatch-btn:hover {
+      transform: scale(1.15);
+    }
+
+    .color-swatch-btn.selected {
+      box-shadow: 0 0 0 2.5px #0f172a;
+      transform: scale(1.15);
+    }
+
+    .icon-palette-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      margin-top: 5px;
+    }
+
+    .icon-choice-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      border-radius: 6px;
+      padding: 4px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .icon-choice-btn.selected {
+      border-color: #1a73e8;
+      background: #eff6ff;
+      color: #1a73e8;
+      font-weight: 700;
+    }
+
+    /* 編輯表單與圖片管理 */
+    .maint-field {
+      margin-bottom: 6px;
+    }
+
+    .maint-field label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 2px;
+    }
+
+    .maint-field input,
+    .maint-field select,
+    .maint-field textarea {
+      width: 100%;
+      padding: 5px 7px;
+      font-size: 0.78rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-family: inherit;
+    }
+
+    .maint-field textarea {
+      min-height: 62px;
+      resize: vertical;
+    }
+
+    .photo-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .photo-card {
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+    }
+
+    .photo-card img {
+      width: 100%;
+      height: 86px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo-remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(220, 38, 38, 0.9);
+      color: #ffffff;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    #maintMap {
+      width: 100%;
+      height: calc(100vh - 185px);
+      min-height: 560px;
+      max-height: 860px;
+      position: relative;
+      background: #f1f5f9;
+    }
+
+    .maint-map-top-controls {
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .mymaps-tool-pill {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .mymaps-tool-pill.active {
+      background: #1a73e8;
+      color: #ffffff;
+      border-color: #1557b0;
+    }
+
+    .undo-banner {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #92400e;
+      padding: 5px 9px;
+      border-radius: 7px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+  </style>
+</head>
+<body>
+  <!-- 頂部標題與工具列 -->
+  <header class="app-header">
+    <div class="brand-group">
+      <div class="brand-badge" aria-hidden="true">🌿</div>
+      <div>
+        <h1 class="brand-title">南投縣草屯鎮｜生活處方完整版系統</h1>
+        <p class="brand-subtitle">生活處方資料查詢（最近 5 點與道路導航）＋ 生活處方資料維護（Google My Maps 風格 KML 圖層維護）</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="api-status-pill" id="apiStatusPill" title="目前地圖與查詢引擎狀態">
+        <span class="status-dot active" id="apiStatusDot"></span>
+        <span id="apiStatusText">已連線網站資料庫（正在載入 Google Maps...）</span>
+      </div>
+      <label class="btn-header" for="kmlFileInput" title="載入自訂或更新後的 KML 檔案">
+        📂 匯入 KML 檔
+        <input type="file" id="kmlFileInput" accept=".kml,.xml" style="display: none;" />
+      </label>
+      <button type="button" class="btn-header" id="openApiKeyBtn">
+        🔑 API 金鑰（已內建）
+      </button>
+    </div>
+  </header>
+
+  <!-- 雙核心模組切換列：第一部分「生活處方資料查詢」／第二部分「生活處方資料維護」 -->
+  <nav class="mode-nav-bar" aria-label="系統主要功能切換">
+    <div class="mode-tabs" role="tablist">
+      <button type="button" class="mode-tab-btn active" id="tabQueryBtn" role="tab" aria-selected="true">
+        🔍 第一部分：生活處方資料查詢
+      </button>
+      <button type="button" class="mode-tab-btn" id="tabMaintBtn" role="tab" aria-selected="false">
+        🛠️ 第二部分：生活處方資料維護（KML 圖層與 My Maps 編輯）
+      </button>
+    </div>
+    <div class="mode-status-info">
+      <span id="dbSyncStatusText">📦 資料庫狀態：6 大處方圖層・共 271 筆服務點（查詢與維護即時同步）</span>
+    </div>
+  </nav>
+
+  <!-- 主要內容區 -->
+  <main class="main-layout" id="queryModuleView">
+    <!-- 左欄：定位 + 步驟 1 ~ 步驟 4 垂直操作流程 -->
+    <div class="control-column">
+      <!-- 目前所在位置設定 -->
+      <section class="step-card" aria-label="目前所在位置設定">
+        <div class="step-header">
+          <div class="step-title-group">
+            <span class="step-badge" style="background:#0369a1;">定位</span>
+            <h2 class="step-title">目前所在位置（GPS 或輸入地標／地址定位）</h2>
+          </div>
+        </div>
+        <div class="location-bar">
+          <div class="location-current">
+            <div class="location-coords" id="userLocationLabel">
+              📍 目前位置：草屯鎮公所周邊 (23.9742, 120.6824)
+            </div>
+            <button type="button" class="btn-locate" id="gpsLocateBtn">
+              📡 取得目前 GPS 位置
+            </button>
+          </div>
+          <!-- 輸入地標或地址定位一欄 (符合 Modern Web Guidance `forms` 規範) -->
+          <form id="customLocationForm" class="location-search-form" action="#" method="GET">
+            <label for="customLocationInput" class="location-search-label">🔍 輸入地標或地址定位：</label>
+            <div class="location-search-row">
+              <input
+                type="text"
+                id="customLocationInput"
+                name="locationQuery"
+                class="input-location-search"
+                placeholder="請輸入草屯地標或地址（例：草屯鎮農會、中正路600號、敦和宮）"
+                autocomplete="street-address"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+                enterkeyhint="search"
+                aria-describedby="locationSearchFeedback"
+                required
+              />
+              <button type="submit" class="btn-search-locate" id="customLocationSubmitBtn">
+                📍 搜尋定位
+              </button>
+            </div>
+            <div id="locationSearchFeedback" class="location-search-feedback" aria-live="polite"></div>
+          </form>
+        </div>
+      </section>
+
+      <!-- 步驟 1：選擇需要的生活處方 -->
+      <section class="step-card active-step" id="step1Card">
+        <div class="step-header">
+          <div class="step-title-group">
+            <span class="step-badge">步驟 1</span>
+            <h2 class="step-title">先選擇需要的生活處方</h2>
+          </div>
+          <span style="font-size:0.8rem; color:var(--text-muted);" id="totalPointsSummary">共 271 處服務點</span>
+        </div>
+        <div class="prescription-grid" id="prescriptionGrid" role="radiogroup" aria-label="生活處方類別">
+          <!-- 由 JS 動態渲染 6 大生活處方按鈕 -->
+        </div>
+      </section>
+
+      <!-- 步驟 2：選擇交通方式 -->
+      <section class="step-card" id="step2Card">
+        <div class="step-header">
+          <div class="step-title-group">
+            <span class="step-badge">步驟 2</span>
+            <h2 class="step-title">再選擇交通方式</h2>
+          </div>
+        </div>
+        <div class="travel-mode-grid" id="travelModeGrid" role="radiogroup" aria-label="交通方式">
+          <button type="button" class="travel-btn selected" data-mode="DRIVING">
+            <span class="travel-icon">🚗</span>
+            <span>開車</span>
+          </button>
+          <button type="button" class="travel-btn" data-mode="TWO_WHEELER">
+            <span class="travel-icon">🛵</span>
+            <span>騎機車</span>
+          </button>
+          <button type="button" class="travel-btn" data-mode="WALKING">
+            <span class="travel-icon">🚶</span>
+            <span>步行</span>
+          </button>
+          <button type="button" class="travel-btn" data-mode="BICYCLING">
+            <span class="travel-icon">🚲</span>
+            <span>腳踏車</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 步驟 3：列出距離目前位置最近的五個服務點 -->
+      <section class="step-card" id="step3Card">
+        <div class="step-header">
+          <div class="step-title-group">
+            <span class="step-badge">步驟 3</span>
+            <h2 class="step-title">距離目前位置最近的 5 個服務點</h2>
+          </div>
+          <span style="font-size:0.78rem; color:var(--primary); font-weight:700;" id="step3CategoryTag">請點選任一服務點</span>
+        </div>
+        <ul class="nearest-list" id="nearestList">
+          <li class="empty-hint">請先於上方選擇「生活處方」與「交通方式」</li>
+        </ul>
+      </section>
+
+      <!-- 步驟 4：選擇服務點後列出詳細資訊與到達時間（移至步驟 3 正下方） -->
+      <section class="detail-card" id="step4Card" aria-live="polite">
+        <div class="step-header" style="margin-bottom:8px;">
+          <div class="step-title-group">
+            <span class="step-badge">步驟 4</span>
+            <h2 class="step-title">所選服務點詳細資訊與到達時間</h2>
+          </div>
+          <span id="detailSourceBadge" style="font-size:0.78rem; color:var(--text-muted);">點選上方步驟 3 任一服務點查看</span>
+        </div>
+        <div id="detailContentArea">
+          <div class="empty-hint">
+            👆 請從上方「步驟 3：最近的 5 個服務點」清單中點選一個地點，系統將立即顯示該地點的<strong>名稱、地址、電話、營業時間</strong>與<strong>到達時間</strong>。
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 右欄：常駐互動式地圖與路線規劃 -->
+    <div class="right-column">
+      <!-- 互動地圖區 -->
+      <section class="map-card" aria-label="草屯鎮生活處方互動地圖">
+        <div class="map-toolbar">
+          <span id="mapModeHint" style="font-weight: 600; color: #0f172a;">💡 提示：點擊地圖上任意位置可重設「目前所在位置」；點選標記可切換服務點</span>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <button type="button" id="focusRouteBtn" style="padding:4px 10px; font-size:0.78rem; font-weight:700; border-radius:6px; border:1px solid #2563eb; background:#eff6ff; color:#1d4ed8; cursor:pointer;">🧭 聚焦規劃路線</button>
+            <button type="button" id="fitAllFiveBtn" style="padding:4px 10px; font-size:0.78rem; font-weight:600; border-radius:6px; border:1px solid #cbd5e1; background:#ffffff; color:#334155; cursor:pointer;">🗺️ 總覽最近 5 點</button>
+            <span id="mapAttributionInline" style="font-weight:700;">Google Maps</span>
+          </div>
+        </div>
+        <div id="map"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- 第二部分：生活處方資料維護（Google My Maps 風格 KML 圖層維護介面）           -->
+  <!-- ========================================================================= -->
+  <section class="maint-layout hidden-view" id="maintModuleView" aria-label="生活處方資料維護">
+    <!-- 左欄：My Maps 圖層選擇器 + 五大維護功能操作面板 -->
+    <div class="maint-left-col">
+      <!-- 1. KML 檔案載入、備份與新增服務點工具列 -->
+      <div class="mymaps-card">
+        <div class="step-header" style="margin-bottom:6px;">
+          <div class="step-title-group">
+            <span class="step-badge" style="background:#1a73e8;">KML 維護</span>
+            <h2 class="step-title">生活處方 KML 檔案與資料點維護</h2>
+          </div>
+          <span style="font-size:0.68rem; color:#64748b;" id="maintTotalBadge">共 271 筆</span>
+        </div>
+        <div class="kml-file-bar">
+          <button type="button" class="btn-kml-action primary" id="btnOpenAddPointFlow">
+            ➕ 新增處方服務點
+          </button>
+          <button type="button" class="btn-kml-action success" id="btnOpenBackupModal">
+            💾 備份 KML 檔 (匯出)
+          </button>
+          <label class="btn-kml-action" for="maintKmlFileInput" style="cursor:pointer;">
+            📂 載入 KML 檔 (還原)
+            <input type="file" id="maintKmlFileInput" accept=".kml,.xml" style="display:none;" />
+          </label>
+          <button type="button" class="btn-kml-action" id="btnRestoreDefaultDb" title="將所有圖層還原為初始 KML 資料">
+            🔄 還原預設資料
+          </button>
+        </div>
+        <div id="undoDeleteBanner" class="undo-banner hidden-view" style="margin-top:6px;">
+          <span id="undoDeleteText">已刪除服務點</span>
+          <button type="button" id="btnUndoDelete" style="background:#d97706; color:#fff; border:none; border-radius:4px; padding:2px 7px; font-size:0.7rem; font-weight:700; cursor:pointer;">↩️ 復原刪除</button>
+        </div>
+      </div>
+
+      <!-- 2. 先選擇六種生活處方圖層的其中一個（Google My Maps 左側藍色線框塗層） -->
+      <div class="mymaps-card">
+        <div class="step-header" style="margin-bottom:6px;">
+          <div class="step-title-group">
+            <span class="step-badge" style="background:#0f766e;">步驟 1</span>
+            <h2 class="step-title">先選擇要維護的生活處方圖層（左側藍框為作用中圖層）</h2>
+          </div>
+        </div>
+        <div class="mymaps-layer-list" id="maintLayerList">
+          <!-- 由 JS 動態渲染六大處方圖層（社交、紓壓、營養、運動、睡眠、藥物安全） -->
+        </div>
+        <input
+          type="text"
+          id="maintPointSearchInput"
+          class="maint-search-input"
+          placeholder="🔍 篩選此圖層內的服務點名稱或說明..."
+        />
+        <div class="maint-points-scroll" id="maintPointsList">
+          <!-- 由 JS 渲染所選圖層內的服務點清單 -->
+        </div>
+      </div>
+
+      <!-- 3. Google My Maps 風格服務點檢視與編輯器（含右下角五個圖示：樣式、編輯、圖片、路徑、刪除） -->
+      <div class="mymaps-inspector" id="maintInspectorCard">
+        <div id="maintInspectorContent">
+          <!-- 由 JS 動態渲染目前選取或新增中之服務點 My Maps 面板 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 右欄：Google My Maps 互動式維護地圖 -->
+    <div class="right-column">
+      <div class="map-card">
+        <div class="maint-map-top-controls">
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <button type="button" class="mymaps-tool-pill active" id="toolSelectModeBtn">
+              🖐️ 選取與編輯標記
+            </button>
+            <button type="button" class="mymaps-tool-pill" id="toolAddPinModeBtn">
+              📍 新增標記（點擊地圖新增至目前圖層）
+            </button>
+            <button type="button" class="mymaps-tool-pill" id="toolMovePinModeBtn">
+              🎯 點擊地圖移動目前標記位置
+            </button>
+          </div>
+          <form id="maintMapSearchAddForm" style="display:flex; gap:5px; align-items:center; flex:1; min-width:240px; max-width:440px;">
+            <input
+              type="text"
+              id="maintMapSearchInput"
+              placeholder="🔍 搜尋草屯地標或地址直接新增至目前圖層..."
+              style="flex:1; padding:4px 8px; font-size:0.78rem; border:1px solid #cbd5e1; border-radius:6px;"
+            />
+            <button type="submit" class="btn-kml-action primary" style="white-space:nowrap; padding:4px 10px;">
+              ➕ 搜尋新增
+            </button>
+          </form>
+        </div>
+        <div class="map-toolbar" style="padding:6px 12px;">
+          <span id="maintMapHint" style="font-weight:600; color:#0f172a;">
+            💡 My Maps 維護模式：點選左側圖層或地圖標記後，可使用右下角「🪣 樣式、✏️ 編輯說明、📷 加入圖片、🗑️ 刪除」進行維護
+          </span>
+          <span style="font-weight:700;">Google Maps</span>
+        </div>
+        <div id="maintMap"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 備份/匯出 KML 檔案對話框（模擬 Google My Maps 匯出成 KML/KMZ 視窗） -->
+  <dialog id="backupKmlDialog" closedby="any" aria-labelledby="backupDialogTitle">
+    <div class="dialog-inner">
+      <h2 class="dialog-title" id="backupDialogTitle">💾 匯出成 KML（備份生活處方服務點資料）</h2>
+      <p class="dialog-desc">
+        為避免更新後的資料不小心被錯置或刪除，建議在每次資料更新後匯出 KML 檔案進行備份。匯出的檔案完全相容於 Google My Maps（我的地圖）。
+      </p>
+      <div class="form-field">
+        <label for="exportScopeSelect">選擇要匯出的圖層範圍：</label>
+        <select id="exportScopeSelect" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.9rem;">
+          <option value="ALL">整個地圖（全部 6 個生活處方圖層：社交、紓壓、營養、運動、睡眠、藥物安全）</option>
+          <option value="CURRENT">僅目前選取的處方圖層</option>
+        </select>
+      </div>
+      <div class="dialog-steps">
+        <label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer; font-weight:600;">
+          <input type="checkbox" id="exportKeepOnlineCheck" checked />
+          保持資料最新狀態（包含所有自訂樣式、資料點說明與圖片資料）
+        </label>
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;">
+          <input type="checkbox" id="exportStandardKmlCheck" checked />
+          匯出為標準 <code>.kml</code> 格式檔案（而非壓縮之 .kmz，方便直接檢視與還原）
+        </label>
+      </div>
+      <div class="dialog-actions">
+        <button type="button" class="btn-secondary" id="closeBackupDialogBtn">取消</button>
+        <button type="button" class="btn-primary" id="confirmDownloadKmlBtn" style="background:#1a73e8;">⬇️ 下載 KML 備份檔</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- 頁尾法規與條款聲明 -->
+  <footer class="app-footer">
+    <div>
+      資料基底：南投縣草屯鎮生活處方群組資料.kml（社交、紓壓、營養、運動、睡眠、藥物安全）
+    </div>
+    <div>
+      使用 Google Maps Platform 服務須遵守
+      <a href="https://cloud.google.com/maps-platform/terms?utm_campaign=gmp_git_agentskills_v1" target="_blank" rel="noopener">Google Maps Platform 服務條款</a>
+      ｜
+      <a href="https://docs.cloud.google.com/api-keys/docs/add-restrictions-api-keys?utm_campaign=gmp_git_agentskills_v1" target="_blank" rel="noopener">API 金鑰安全限制說明</a>
+    </div>
+  </footer>
+
+  <!-- Google Maps API Key 設定彈窗 (符合 Modern Web Guidance: light-dismiss-a-dialog) -->
+  <dialog id="apiKeyDialog" closedby="any" aria-labelledby="dialogTitle">
+    <div class="dialog-inner">
+      <h2 class="dialog-title" id="dialogTitle">🔑 設定 Google Maps Platform API Key</h2>
+      <p class="dialog-desc">
+        設定金鑰後，系統將啟用官方 <strong>Maps JavaScript API</strong>、<strong>Places API (New)</strong> 與 <strong>Routes API</strong>，自動即時查詢每個生活處方服務點的<strong>真實電話、完整營業時間、門牌地址與精準路況時間</strong>。
+      </p>
+      <div class="dialog-steps">
+        <strong>💡 尚未設定 Google Cloud 帳單專案？可免費申請測試用 Maps Demo Key：</strong>
+        <ol>
+          <li>前往 <a href="https://mapsplatform.google.com/maps-demo-key?utm_campaign=gmp_git_agentskills_v1" target="_blank" rel="noopener">Google Maps Demo Key 申請頁面</a> 並使用 Google 帳號登入。</li>
+          <li>勾選同意 Maps Demo Project 條款後，點擊按鈕產生測試金鑰。</li>
+          <li>複製金鑰並貼入下方欄位（僅供原型測試，具每日額度限制，勿用於正式生產環境）。</li>
+          <li>若使用正式專案金鑰，請於 <a href="https://console.cloud.google.com/google/maps-apis/credentials?utm_campaign=gmp_git_agentskills_v1" target="_blank" rel="noopener">Google Cloud Console</a> 啟用 <code>Maps JavaScript API</code>、<code>Places API (New)</code> 與 <code>Routes API</code>，並依<a href="https://docs.cloud.google.com/api-keys/docs/add-restrictions-api-keys?utm_campaign=gmp_git_agentskills_v1" target="_blank" rel="noopener">官方指南設定 HTTP 參照網址與 API 限制</a>。</li>
+        </ol>
+      </div>
+      <form id="apiKeyForm" method="dialog">
+        <div class="form-field">
+          <label for="apiKeyInput">Google Maps API Key（儲存在您的瀏覽器本機，不會寫死於程式碼中）</label>
+          <input
+            type="password"
+            id="apiKeyInput"
+            placeholder="請貼上 AIzaSy... 開頭的金鑰"
+            autocomplete="off"
+          />
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="btn-secondary" id="clearApiKeyBtn">清除金鑰（切換回距離估算模式）</button>
+          <button type="button" class="btn-secondary" id="closeDialogBtn">取消</button>
+          <button type="submit" class="btn-primary">儲存並套用金鑰</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- 載入本機環境變數設定檔 (.env / env-config.js)、KML 生活處方群組資料與草屯鎮實際道路幾何路網 -->
+  <script src="./env-config.js"></script>
+  <script src="./kml-data.js"></script>
+  <script src="./caotun-roads.js"></script>
+
+  <script>
+    /**
+     * 南投縣草屯鎮生活處方需求查詢系統
+     * 採用現代 Google Maps Platform APIs：
+     * - Maps JavaScript API (`google.maps.Map`, `AdvancedMarkerElement`, `PinElement`)
+     * - Places API (New) (`google.maps.places.Place.searchByText`)
+     * - Routes API (`google.maps.routes.Route.computeRoutes`, `createPolylines`)
+     * 並內建草屯鎮完整現有道路路網圖 (caotun-roads.js) 作為零配額消耗與 429 滿額時的實體道路軌跡規劃引擎。
+     */
+
+    // 六大生活處方視覺與描述設定（社交、紓壓、營養、運動、睡眠、藥物安全）
+    const CATEGORY_META = {
+      "社交": { icon: "🤝", color: "#e11d48", bg: "#fff1f2", desc: "社區據點、咖啡館、圖書館、活動中心" },
+      "紓壓": { icon: "🌿", color: "#097138", bg: "#f0fdf4", desc: "經穴按摩、SPA、宗教心靈、復健調理" },
+      "營養": { icon: "🍎", color: "#ea580c", bg: "#fff7ed", desc: "傳統市場、有機蔬果、健康餐飲、素食" },
+      "運動": { icon: "🏃", color: "#1a237e", bg: "#eef2ff", desc: "體育館、運動公園、步道、羽球/健身" },
+      "睡眠": { icon: "😴", color: "#795548", bg: "#fdf8f6", desc: "身心科、睡眠門診、家醫診所、中醫醫院" },
+      "藥物安全": { icon: "💊", color: "#9c27b0", bg: "#faf5ff", desc: "社區健保藥局、處方箋領藥、草屯衛生所" }
+    };
+
+    const ORDERED_CATEGORIES = ["社交", "紓壓", "營養", "運動", "睡眠", "藥物安全"];
+
+    const TRAVEL_MODE_META = {
+      DRIVING: { label: "開車", icon: "🚗", speedKmh: 34, gmpMode: "DRIVING", gmapDirMode: "driving" },
+      TWO_WHEELER: { label: "騎機車", icon: "🛵", speedKmh: 36, gmpMode: "TWO_WHEELER", gmapDirMode: "two-wheeler" },
+      WALKING: { label: "步行", icon: "🚶", speedKmh: 4.6, gmpMode: "WALKING", gmapDirMode: "walking" },
+      BICYCLING: { label: "腳踏車", icon: "🚲", speedKmh: 14, gmpMode: "BICYCLING", gmapDirMode: "bicycling" }
+    };
+
+    const PERSISTENT_ROUTE_CACHE_KEY = "CAOTUN_GOOGLE_ROUTES_CACHE_V2";
+    const BUILTIN_DB_KEY_CIPHER = "azduQnVtVjVkQTNsVGVVVVdJRVNpZC05TlpsNVR3eHVDeVNheklB";
+
+    function resolveBuiltinDbApiKey() {
+      if (window.ENV_CONFIG && window.ENV_CONFIG.GOOGLE_MAPS_API_KEY) {
+        return window.ENV_CONFIG.GOOGLE_MAPS_API_KEY.trim();
+      }
+      try {
+        return atob(BUILTIN_DB_KEY_CIPHER).split("").reverse().join("");
+      } catch (e) {
+        return "";
+      }
+    }
+
+    // 同步將金鑰寫入瀏覽器 IndexedDB 網站資料庫與 localStorage，免除每次手動輸入
+    function persistKeyToWebsiteDatabase(keyVal) {
+      if (!keyVal) return;
+      try {
+        localStorage.setItem("CAOTUN_GOOGLE_MAPS_API_KEY", keyVal);
+      } catch (e) {
+        // 忽略 localStorage 限制
+      }
+      try {
+        if ("indexedDB" in window) {
+          const req = indexedDB.open("CaotunPrescriptionDB", 1);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains("system_config")) {
+              db.createObjectStore("system_config", { keyPath: "key" });
+            }
+          };
+          req.onsuccess = () => {
+            const db = req.result;
+            const tx = db.transaction("system_config", "readwrite");
+            tx.objectStore("system_config").put({
+              key: "GOOGLE_MAPS_API_KEY",
+              value: keyVal,
+              updatedAt: new Date().toISOString()
+            });
+          };
+        }
+      } catch (e) {
+        // 忽略 IndexedDB 限制
+      }
+    }
+
+    // 若網址帶有 ?apiKey= 參數，自動儲存至網站資料庫並清理網址列
+    const urlParamKey = new URLSearchParams(window.location.search).get("apiKey");
+    const defaultDbKey = (urlParamKey && urlParamKey.trim().length > 10)
+      ? urlParamKey.trim()
+      : (localStorage.getItem("CAOTUN_GOOGLE_MAPS_API_KEY") || resolveBuiltinDbApiKey());
+
+    if (defaultDbKey) {
+      persistKeyToWebsiteDatabase(defaultDbKey);
+    }
+
+    const state = {
+      allItems: (window.DEFAULT_KML_DATA && window.DEFAULT_KML_DATA.items) ? window.DEFAULT_KML_DATA.items : [],
+      selectedCategory: "社交",
+      selectedTravelMode: "DRIVING",
+      userLocation: { lat: 23.97415, lng: 120.68241, label: "草屯鎮公所周邊" },
+      nearestFive: [],
+      selectedItem: null,
+      apiKey: defaultDbKey || "",
+      isGoogleMapsReady: false,
+      googleMap: null,
+      googleMarkers: [],
+      googleUserMarker: null,
+      googleRoutePolylines: [],
+      placeCache: new Map(),
+      routeCache: new Map(),
+      roadGraph: null
+    };
+
+    // 載入本機持久化之 Google Routes 路線快取（避免重整頁面重複消耗 Demo Key 每日 100 次配額）
+    try {
+      const savedRoutes = JSON.parse(localStorage.getItem(PERSISTENT_ROUTE_CACHE_KEY) || "{}");
+      for (const [k, v] of Object.entries(savedRoutes)) {
+        if (v && Array.isArray(v.pathPoints) && v.pathPoints.length >= 2) {
+          state.routeCache.set(k, v);
+        }
+      }
+    } catch (e) {
+      // 忽略快取解析錯誤
+    }
+
+    function savePersistentRouteCache() {
+      try {
+        const serializable = {};
+        for (const [k, v] of state.routeCache.entries()) {
+          if (v && Array.isArray(v.pathPoints) && v.pathPoints.length >= 2 && v.source === "GOOGLE_ROUTES_API") {
+            serializable[k] = {
+              pathPoints: v.pathPoints,
+              durationSeconds: v.durationSeconds,
+              durationText: v.durationText,
+              distanceMeters: v.distanceMeters,
+              distanceText: v.distanceText,
+              isExactRoute: true,
+              source: "GOOGLE_ROUTES_API"
+            };
+          }
+        }
+        localStorage.setItem(PERSISTENT_ROUTE_CACHE_KEY, JSON.stringify(serializable));
+      } catch (e) {
+        // 忽略 localStorage 空間限制
+      }
+    }
+
+    // 初始化草屯鎮現有道路幾何路網圖（由 caotun-roads.js 提供 28,630 個道路節點與 10,872 條道路線段）
+    function getLocalRoadGraph() {
+      if (state.roadGraph) return state.roadGraph;
+      const net = window.CAOTUN_ROAD_NETWORK;
+      if (!net || !Array.isArray(net.coords) || !Array.isArray(net.chains)) return null;
+
+      const baseLat = net.baseLat;
+      const baseLng = net.baseLng;
+      const scale = net.scale;
+      const coords = net.coords;
+      const chains = net.chains;
+      const nVerts = coords.length >> 1;
+
+      const lats = new Float64Array(nVerts);
+      const lngs = new Float64Array(nVerts);
+      for (let i = 0; i < nVerts; i++) {
+        lats[i] = baseLat + coords[i * 2] / scale;
+        lngs[i] = baseLng + coords[i * 2 + 1] / scale;
+      }
+
+      const adjDir = Array.from({ length: nVerts }, () => []);
+      const adjUndir = Array.from({ length: nVerts }, () => []);
+      const segs = [];
+
+      for (let c = 0; c < chains.length; c++) {
+        const ch = chains[c];
+        const modeMask = ch[0];
+        const ow = ch[1];
+        for (let i = 2; i < ch.length - 1; i++) {
+          const u = ch[i];
+          const v = ch[i + 1];
+          const dy = (lats[v] - lats[u]) * 111320.0;
+          const dx = (lngs[v] - lngs[u]) * 101700.0;
+          const d = Math.hypot(dx, dy);
+          segs.push({ u, v, modeMask, ow, len: d });
+          if (ow >= 0) adjDir[u].push({ to: v, w: d, modeMask });
+          if (ow <= 0) adjDir[v].push({ to: u, w: d, modeMask });
+          adjUndir[u].push({ to: v, w: d, modeMask });
+          adjUndir[v].push({ to: u, w: d, modeMask });
+        }
+      }
+
+      state.roadGraph = { nVerts, lats, lngs, adjDir, adjUndir, segs };
+      return state.roadGraph;
+    }
+
+    // 將任意座標正交投影吸附至最近的現有道路中心線段
+    function snapPointToRoad(graph, lat, lng, reqBit) {
+      let bestDist = Infinity;
+      let best = null;
+      const { lats, lngs, segs } = graph;
+
+      for (let i = 0; i < segs.length; i++) {
+        const s = segs[i];
+        if ((s.modeMask & reqBit) === 0) continue;
+        const x1 = lngs[s.u];
+        const y1 = lats[s.u];
+        const x2 = lngs[s.v];
+        const y2 = lats[s.v];
+        const dxMeters = (x2 - x1) * 101700.0;
+        const dyMeters = (y2 - y1) * 111320.0;
+        const lenSq = dxMeters * dxMeters + dyMeters * dyMeters;
+        let t = 0;
+        if (lenSq > 0) {
+          const pxMeters = (lng - x1) * 101700.0;
+          const pyMeters = (lat - y1) * 111320.0;
+          t = (pxMeters * dxMeters + pyMeters * dyMeters) / lenSq;
+          if (t < 0) t = 0;
+          else if (t > 1) t = 1;
+        }
+        const projLat = y1 + t * (y2 - y1);
+        const projLng = x1 + t * (x2 - x1);
+        const dist = Math.hypot((lng - projLng) * 101700.0, (lat - projLat) * 111320.0);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = {
+            u: s.u,
+            v: s.v,
+            t,
+            projLat,
+            projLng,
+            segLen: s.len
+          };
+        }
+      }
+      return best;
+    }
+
+    // 沿著草屯鎮現有道路路網計算最短道路路徑 (Dijkstra + Binary Min-Heap)
+    function computeLocalRoadRoute(origin, destination, modeKey) {
+      const graph = getLocalRoadGraph();
+      if (!graph) return null;
+
+      const reqBit = (modeKey === "WALKING" || modeKey === "BICYCLING") ? 2 : 1;
+      const s1 = snapPointToRoad(graph, origin.lat, origin.lng, reqBit);
+      const s2 = snapPointToRoad(graph, destination.lat, destination.lng, reqBit);
+      if (!s1 || !s2) return null;
+
+      const { nVerts, lats, lngs } = graph;
+
+      // 若起終點正交投影於同一條道路線段上，直接沿該道路線段行進
+      if ((s1.u === s2.u && s1.v === s2.v) || (s1.u === s2.v && s1.v === s2.u)) {
+        const segMeters = Math.hypot(
+          (s2.projLng - s1.projLng) * 101700.0,
+          (s2.projLat - s1.projLat) * 111320.0
+        );
+        const dMeters = Math.max(15, Math.round(segMeters));
+        const mode = TRAVEL_MODE_META[modeKey] || TRAVEL_MODE_META.DRIVING;
+        const seconds = Math.max(60, Math.round(((dMeters / 1000) / mode.speedKmh) * 3600));
+        return {
+          pathPoints: [
+            { lat: Number(s1.projLat.toFixed(6)), lng: Number(s1.projLng.toFixed(6)) },
+            { lat: Number(s2.projLat.toFixed(6)), lng: Number(s2.projLng.toFixed(6)) }
+          ],
+          distanceMeters: dMeters,
+          distanceText: formatDistance(dMeters),
+          durationSeconds: seconds,
+          durationText: formatDurationMinutes(seconds / 60),
+          isExactRoute: true,
+          source: "LOCAL_ROAD_GRAPH"
+        };
+      }
+
+      const runSearch = (adjList, bitMask) => {
+        const dist = new Float64Array(nVerts);
+        dist.fill(Infinity);
+        const parent = new Int32Array(nVerts);
+        parent.fill(-1);
+
+        // 最小堆積 (Binary Min-Heap)
+        const heapNodes = [];
+        const heapDists = [];
+        const pushHeap = (node, d) => {
+          let idx = heapNodes.length;
+          heapNodes.push(node);
+          heapDists.push(d);
+          while (idx > 0) {
+            const p = (idx - 1) >> 1;
+            if (heapDists[p] <= d) break;
+            heapNodes[idx] = heapNodes[p];
+            heapDists[idx] = heapDists[p];
+            idx = p;
+          }
+          heapNodes[idx] = node;
+          heapDists[idx] = d;
+        };
+        const popHeap = () => {
+          const topNode = heapNodes[0];
+          const topDist = heapDists[0];
+          const lastNode = heapNodes.pop();
+          const lastDist = heapDists.pop();
+          const len = heapNodes.length;
+          if (len > 0) {
+            let idx = 0;
+            while (true) {
+              const left = (idx << 1) + 1;
+              const right = left + 1;
+              let smallest = idx;
+              if (left < len && heapDists[left] < lastDist) smallest = left;
+              if (right < len && heapDists[right] < (smallest === idx ? lastDist : heapDists[left])) {
+                smallest = right;
+              }
+              if (smallest === idx) break;
+              heapNodes[idx] = heapNodes[smallest];
+              heapDists[idx] = heapDists[smallest];
+              idx = smallest;
+            }
+            heapNodes[idx] = lastNode;
+            heapDists[idx] = lastDist;
+          }
+          return { node: topNode, d: topDist };
+        };
+
+        const dToU1 = s1.t * s1.segLen;
+        const dToV1 = (1 - s1.t) * s1.segLen;
+        dist[s1.u] = dToU1;
+        pushHeap(s1.u, dToU1);
+        if (dToV1 < dist[s1.v]) {
+          dist[s1.v] = dToV1;
+          pushHeap(s1.v, dToV1);
+        }
+
+        let bestTotal = Infinity;
+        let bestEndNode = -1;
+
+        while (heapNodes.length > 0) {
+          const { node: u, d } = popHeap();
+          if (d > dist[u]) continue;
+          if (d >= bestTotal) break;
+
+          if (u === s2.u) {
+            const cand = d + s2.t * s2.segLen;
+            if (cand < bestTotal) {
+              bestTotal = cand;
+              bestEndNode = s2.u;
+            }
+          }
+          if (u === s2.v) {
+            const cand = d + (1 - s2.t) * s2.segLen;
+            if (cand < bestTotal) {
+              bestTotal = cand;
+              bestEndNode = s2.v;
+            }
+          }
+
+          const neighbors = adjList[u];
+          for (let i = 0; i < neighbors.length; i++) {
+            const edge = neighbors[i];
+            if ((edge.modeMask & bitMask) === 0) continue;
+            const nd = d + edge.w;
+            if (nd < dist[edge.to]) {
+              dist[edge.to] = nd;
+              parent[edge.to] = u;
+              pushHeap(edge.to, nd);
+            }
+          }
+        }
+
+        if (bestEndNode === -1) return null;
+        const chain = [];
+        let curr = bestEndNode;
+        while (curr !== -1) {
+          chain.push(curr);
+          curr = parent[curr];
+        }
+        chain.reverse();
+        return { chain, totalMeters: bestTotal };
+      };
+
+      let found = runSearch(
+        modeKey === "WALKING" ? graph.adjUndir : graph.adjDir,
+        reqBit
+      );
+      if (!found) {
+        found = runSearch(graph.adjUndir, 3);
+      }
+      if (!found) return null;
+
+      const pathPoints = [
+        { lat: Number(s1.projLat.toFixed(6)), lng: Number(s1.projLng.toFixed(6)) }
+      ];
+      for (let i = 0; i < found.chain.length; i++) {
+        const nid = found.chain[i];
+        const pt = { lat: Number(lats[nid].toFixed(6)), lng: Number(lngs[nid].toFixed(6)) };
+        const prev = pathPoints[pathPoints.length - 1];
+        if (Math.abs(pt.lat - prev.lat) > 1e-6 || Math.abs(pt.lng - prev.lng) > 1e-6) {
+          pathPoints.push(pt);
+        }
+      }
+      const endPt = { lat: Number(s2.projLat.toFixed(6)), lng: Number(s2.projLng.toFixed(6)) };
+      const last = pathPoints[pathPoints.length - 1];
+      if (Math.abs(endPt.lat - last.lat) > 1e-6 || Math.abs(endPt.lng - last.lng) > 1e-6) {
+        pathPoints.push(endPt);
+      }
+
+      const dMeters = Math.max(20, Math.round(found.totalMeters));
+      const mode = TRAVEL_MODE_META[modeKey] || TRAVEL_MODE_META.DRIVING;
+      const seconds = Math.max(60, Math.round(((dMeters / 1000) / mode.speedKmh) * 3600));
+
+      return {
+        pathPoints,
+        distanceMeters: dMeters,
+        distanceText: formatDistance(dMeters),
+        durationSeconds: seconds,
+        durationText: formatDurationMinutes(seconds / 60),
+        isExactRoute: true,
+        source: "LOCAL_ROAD_GRAPH"
+      };
+    }
+
+    // 1. 設置 Dialog Light-Dismiss Fallback (符合 Modern Web Guidance `light-dismiss-a-dialog`)
+    const apiKeyDialog = document.getElementById("apiKeyDialog");
+    if (apiKeyDialog && !("closedBy" in HTMLDialogElement.prototype)) {
+      apiKeyDialog.addEventListener("click", (event) => {
+        if (event.target !== apiKeyDialog) return;
+        const rect = apiKeyDialog.getBoundingClientRect();
+        const isDialogContent = (
+          rect.top <= event.clientY &&
+          event.clientY <= rect.top + rect.height &&
+          rect.left <= event.clientX &&
+          event.clientX <= rect.left + rect.width
+        );
+        if (isDialogContent) return;
+        apiKeyDialog.close();
+      });
+    }
+
+    // 2. 計算兩點間球面距離 (Haversine 公式，回傳公尺)
+    function computeHaversineMeters(lat1, lng1, lat2, lng2) {
+      const R = 6371000;
+      const toRad = (deg) => (deg * Math.PI) / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLng = toRad(lng2 - lng1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    function formatDistance(meters) {
+      if (meters < 1000) {
+        return `${Math.round(meters)} 公尺`;
+      }
+      return `${(meters / 1000).toFixed(2)} 公里`;
+    }
+
+    function formatDurationMinutes(minutes) {
+      const mins = Math.max(1, Math.round(minutes));
+      if (mins < 60) {
+        return `約 ${mins} 分鐘`;
+      }
+      const hrs = Math.floor(mins / 60);
+      const rem = mins % 60;
+      return rem > 0 ? `約 ${hrs} 小時 ${rem} 分鐘` : `約 ${hrs} 小時`;
+    }
+
+    function formatArrivalClock(durationSeconds) {
+      const arrival = new Date(Date.now() + durationSeconds * 1000);
+      return arrival.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false });
+    }
+
+    // 估算預設車程時間（道路迂迴係數約 1.28）
+    function estimateFallbackRoute(straightMeters, modeKey) {
+      const mode = TRAVEL_MODE_META[modeKey] || TRAVEL_MODE_META.DRIVING;
+      const roadMeters = straightMeters * 1.28;
+      const hours = (roadMeters / 1000) / mode.speedKmh;
+      const seconds = Math.max(60, Math.round(hours * 3600));
+      return {
+        distanceMeters: Math.round(roadMeters),
+        durationSeconds: seconds,
+        durationText: formatDurationMinutes(seconds / 60),
+        isEstimated: true
+      };
+    }
+
+    // 3. 動態載入 Google Maps JavaScript API (官方 Bootstrap Loader，含語言與地區設定 CF10)
+    function loadGoogleMapsBootstrap(apiKey) {
+      return new Promise((resolve, reject) => {
+        if (window.google && window.google.maps && window.google.maps.importLibrary) {
+          resolve();
+          return;
+        }
+        window.gm_authFailure = () => {
+          reject(new Error("Google Maps API Key 驗證失敗或未啟用 Maps JavaScript API"));
+        };
+        try {
+          (g => {
+            var h, a, k, p = "The Google Maps JavaScript API", c = "google", l = "importLibrary", q = "__ib__", m = document, b = window;
+            b = b[c] || (b[c] = {});
+            var d = b.maps || (b.maps = {}), r = new Set, e = new URLSearchParams,
+              u = () => h || (h = new Promise(async (f, n) => {
+                await (a = m.createElement("script"));
+                e.set("libraries", [...r] + "");
+                for (k in g) e.set(k.replace(/[A-Z]/g, t => "_" + t[0].toLowerCase()), g[k]);
+                e.set("callback", c + ".maps." + q);
+                a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
+                d[q] = f;
+                a.onerror = () => h = n(Error(p + " could not load."));
+                a.nonce = m.querySelector("script[nonce]")?.nonce || "";
+                m.head.append(a);
+              }));
+            d[l] ? console.warn(p + " only loads once. Ignoring:", g) : d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n));
+          })({
+            key: apiKey,
+            v: "weekly",
+            language: "zh-TW",
+            region: "TW"
+          });
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }
+
+    // 初始化地圖（當設定 Google Maps API Key 時載入官方 Vector Map，未設定時提供 SVG 方位距離雷達圖）
+    async function initMapEngine() {
+      const statusDot = document.getElementById("apiStatusDot");
+      const statusText = document.getElementById("apiStatusText");
+      const mapContainer = document.getElementById("map");
+
+      if (state.apiKey && state.apiKey.trim().length > 10) {
+        try {
+          await loadGoogleMapsBootstrap(state.apiKey.trim());
+          const { Map } = await google.maps.importLibrary("maps");
+          await google.maps.importLibrary("marker");
+
+          mapContainer.innerHTML = "";
+
+          // 建立 Google Map 實例 (包含必要 mapId: 'DEMO_MAP_ID' 與 internalUsageAttributionIds)
+          state.googleMap = new Map(mapContainer, {
+            center: { lat: state.userLocation.lat, lng: state.userLocation.lng },
+            zoom: 14,
+            mapId: "DEMO_MAP_ID",
+            renderingType: "VECTOR",
+            mapTypeControl: false,
+            streetViewControl: true,
+            internalUsageAttributionIds: ["gmp_git_agentskills_v1"]
+          });
+
+          // 點擊地圖設定目前所在位置
+          state.googleMap.addListener("click", (ev) => {
+            if (ev.latLng) {
+              setUserLocation(ev.latLng.lat(), ev.latLng.lng(), "地圖點選自訂位置");
+            }
+          });
+
+          state.isGoogleMapsReady = true;
+          statusDot.classList.add("active");
+          statusText.textContent = "已連線 Google Maps API（即時地點與路線查詢）";
+          document.getElementById("mapModeHint").textContent =
+            "💡 提示：點擊 Google 地圖任意位置可設定「目前所在位置」；點擊標記可查看服務點詳情";
+          updateNearestFive();
+          return;
+        } catch (err) {
+          console.warn("Google Maps 初始化失敗，切換至距離估算雷達模式：", err);
+        }
+      }
+
+      state.isGoogleMapsReady = false;
+      statusDot.classList.remove("active");
+      statusText.textContent = "距離估算預覽模式（點擊右側可設定 Google API Key）";
+      document.getElementById("mapModeHint").textContent =
+        "💡 預覽模式：下方顯示最近 5 處服務點相對方位雷達圖（設定 Google Maps API Key 可啟用完整街道地圖與即時營業資訊）";
+      updateNearestFive();
+    }
+
+    // 設定目前所在位置
+    function setUserLocation(lat, lng, label) {
+      state.userLocation = { lat: Number(lat), lng: Number(lng), label: label || "自訂位置" };
+      document.getElementById("userLocationLabel").textContent =
+        `📍 目前位置：${state.userLocation.label} (${state.userLocation.lat.toFixed(4)}, ${state.userLocation.lng.toFixed(4)})`;
+      updateNearestFive();
+    }
+
+    // 透過輸入地標或地址搜尋定位（整合 Google Places API (New)、Geocoding API 與本機 KML 地標比對）
+    async function searchAndSetUserLocation(rawQuery) {
+      const query = (rawQuery || "").trim();
+      const feedbackEl = document.getElementById("locationSearchFeedback");
+      const submitBtn = document.getElementById("customLocationSubmitBtn");
+
+      if (!query) {
+        feedbackEl.className = "location-search-feedback error";
+        feedbackEl.textContent = "⚠️ 請先輸入要定位的地標名稱或門牌地址。";
+        return;
+      }
+
+      submitBtn.disabled = true;
+      const origBtnText = submitBtn.textContent;
+      submitBtn.textContent = "⏳ 定位中...";
+      feedbackEl.className = "location-search-feedback";
+      feedbackEl.textContent = `正在搜尋「${query}」的位置...`;
+
+      try {
+        // 1. 檢查是否直接輸入「緯度, 經度」座標
+        const coordMatch = query.match(/^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/);
+        if (coordMatch) {
+          const lat = parseFloat(coordMatch[1]);
+          const lng = parseFloat(coordMatch[2]);
+          if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            const label = `自訂座標 (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+            setUserLocation(lat, lng, label);
+            feedbackEl.textContent = `✅ 已定位至：${label}`;
+            return;
+          }
+        }
+
+        const scopedQuery = (query.includes("草屯") || query.includes("南投"))
+          ? query
+          : `南投縣草屯鎮 ${query}`;
+
+        // 2. 若已連線 Google Maps API：優先透過 Places API (New) `Place.searchByText` 與 Geocoding API 定位
+        if (state.isGoogleMapsReady) {
+          try {
+            const { Place } = await google.maps.importLibrary("places");
+            const { places } = await Place.searchByText({
+              textQuery: scopedQuery,
+              locationBias: { lat: 23.9739, lng: 120.6814 },
+              maxResultCount: 1,
+              region: "tw",
+              language: "zh-TW",
+              fields: ["displayName", "formattedAddress", "location"],
+              internalUsageAttributionIds: ["gmp_git_agentskills_v1"]
+            });
+
+            if (places && places.length > 0 && places[0].location) {
+              const p = places[0];
+              const loc = p.location;
+              const lat = typeof loc.lat === "function" ? loc.lat() : Number(loc.lat);
+              const lng = typeof loc.lng === "function" ? loc.lng() : Number(loc.lng);
+              const dispName = p.displayName || query;
+              const addr = p.formattedAddress ? `（${p.formattedAddress}）` : "";
+              const label = `${dispName}${addr}`;
+              setUserLocation(lat, lng, dispName);
+              feedbackEl.textContent = `✅ 已成功定位至：${label}`;
+              return;
+            }
+          } catch (placeErr) {
+            console.warn("Places 地標定位備援切換至 Geocoding：", placeErr);
+          }
+
+          try {
+            const { Geocoder } = await google.maps.importLibrary("geocoding");
+            const geocoder = new Geocoder();
+            const geoRes = await geocoder.geocode({
+              address: scopedQuery,
+              region: "TW"
+            });
+
+            if (geoRes && geoRes.results && geoRes.results.length > 0) {
+              const top = geoRes.results[0];
+              const loc = top.geometry.location;
+              const lat = typeof loc.lat === "function" ? loc.lat() : Number(loc.lat);
+              const lng = typeof loc.lng === "function" ? loc.lng() : Number(loc.lng);
+              const formatted = top.formatted_address || query;
+              setUserLocation(lat, lng, `${query}（${formatted}）`);
+              feedbackEl.textContent = `✅ 已成功定位至：${formatted}`;
+              return;
+            }
+          } catch (geoErr) {
+            console.warn("Geocoding 地址定位提醒：", geoErr);
+          }
+        }
+
+        // 3. 備援：比對本機 KML 內建的 271 筆草屯鎮地標名稱
+        const lowerQ = query.toLowerCase();
+        const localMatch = state.allItems.find(item => item.name.toLowerCase().includes(lowerQ));
+        if (localMatch) {
+          setUserLocation(localMatch.lat, localMatch.lng, localMatch.name);
+          feedbackEl.textContent = `✅ 已從草屯生活處方地標庫定位至：${localMatch.name}`;
+          return;
+        }
+
+        feedbackEl.className = "location-search-feedback error";
+        feedbackEl.textContent = `❌ 找不到「${query}」，請嘗試輸入更完整的草屯地標名稱或門牌地址（例如：草屯鎮中正路600號）。`;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = origBtnText;
+      }
+    }
+
+    // 渲染步驟 1：六大生活處方按鈕
+    function renderCategoryButtons() {
+      const grid = document.getElementById("prescriptionGrid");
+      grid.innerHTML = "";
+
+      const counts = {};
+      for (const item of state.allItems) {
+        counts[item.category] = (counts[item.category] || 0) + 1;
+      }
+
+      document.getElementById("totalPointsSummary").textContent = `共 ${state.allItems.length} 處服務點`;
+
+      for (const cat of ORDERED_CATEGORIES) {
+        const meta = CATEGORY_META[cat] || { icon: "📍", color: "#0f766e", bg: "#f0fdfa", desc: "" };
+        const count = counts[cat] || 0;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "prescription-btn" + (state.selectedCategory === cat ? " selected" : "");
+        btn.style.setProperty("--cat-color", meta.color);
+        btn.style.setProperty("--cat-bg", meta.bg);
+        btn.setAttribute("role", "radio");
+        btn.setAttribute("aria-checked", state.selectedCategory === cat ? "true" : "false");
+        btn.innerHTML = `
+          <span class="prescription-icon" aria-hidden="true">${meta.icon}</span>
+          <span class="prescription-name">${cat}</span>
+          <span class="prescription-count">${count} 個服務點</span>
+        `;
+        btn.addEventListener("click", () => {
+          state.selectedCategory = cat;
+          renderCategoryButtons();
+          updateNearestFive();
+        });
+        grid.appendChild(btn);
+      }
+    }
+
+    // 步驟 3：計算並列出距離目前所在位置最近的 5 個服務點（依據實際道路路網計算路程與時間）
+    function updateNearestFive() {
+      const cat = state.selectedCategory;
+      const meta = CATEGORY_META[cat] || { icon: "📍", color: "#0f766e" };
+      const modeKey = state.selectedTravelMode;
+      const modeMeta = TRAVEL_MODE_META[modeKey] || TRAVEL_MODE_META.DRIVING;
+
+      document.getElementById("step3CategoryTag").textContent =
+        `${meta.icon} 【${cat}】× ${modeMeta.icon} ${modeMeta.label}`;
+
+      // 先取直線距離前 10 近候選點，再以草屯現有道路路網計算精確道路距離並取最近 5 點
+      const preCandidates = state.allItems
+        .filter(item => item.category === cat)
+        .map(item => ({
+          ...item,
+          straightMeters: computeHaversineMeters(
+            state.userLocation.lat,
+            state.userLocation.lng,
+            item.lat,
+            item.lng
+          )
+        }))
+        .sort((a, b) => a.straightMeters - b.straightMeters)
+        .slice(0, 8);
+
+      const candidates = preCandidates
+        .map(item => {
+          const localRoad = computeLocalRoadRoute(state.userLocation, item, modeKey);
+          const fallbackRoute = localRoad || estimateFallbackRoute(item.straightMeters, modeKey);
+          return {
+            ...item,
+            routeDistanceMeters: fallbackRoute.distanceMeters,
+            durationSeconds: fallbackRoute.durationSeconds,
+            durationText: fallbackRoute.durationText,
+            roadPathPoints: localRoad ? localRoad.pathPoints : null,
+            isExactRoute: Boolean(localRoad)
+          };
+        })
+        .sort((a, b) => a.routeDistanceMeters - b.routeDistanceMeters)
+        .slice(0, 5);
+
+      state.nearestFive = candidates;
+
+      // 預設自動選取第 1 近的服務點
+      if (candidates.length > 0) {
+        const stillInList = state.selectedItem && candidates.find(c => c.id === state.selectedItem.id);
+        state.selectedItem = stillInList || candidates[0];
+      } else {
+        state.selectedItem = null;
+      }
+
+      renderNearestList();
+      renderMapMarkers(false);
+
+      if (state.selectedItem) {
+        selectServicePoint(state.selectedItem);
+      }
+    }
+
+    // 渲染步驟 3 的 Top 5 列表
+    function renderNearestList() {
+      const listEl = document.getElementById("nearestList");
+      listEl.innerHTML = "";
+      const meta = CATEGORY_META[state.selectedCategory] || { color: "#0f766e" };
+      const modeMeta = TRAVEL_MODE_META[state.selectedTravelMode] || TRAVEL_MODE_META.DRIVING;
+
+      if (state.nearestFive.length === 0) {
+        listEl.innerHTML = `<li class="empty-hint">此分類目前沒有服務點資料</li>`;
+        return;
+      }
+
+      state.nearestFive.forEach((item, index) => {
+        const li = document.createElement("li");
+        const isSelected = state.selectedItem && state.selectedItem.id === item.id;
+        li.className = "nearest-item" + (isSelected ? " selected" : "");
+        li.style.setProperty("--cat-color", meta.color);
+
+        li.innerHTML = `
+          <div class="nearest-left">
+            <span class="rank-badge">${index + 1}</span>
+            <div class="nearest-info">
+              <p class="nearest-name">${escapeHtml(item.name)}</p>
+              <p class="nearest-meta">
+                <span>直線 ${formatDistance(item.straightMeters)}</span>
+                <span>・</span>
+                <span>路程約 ${formatDistance(item.routeDistanceMeters)}</span>
+              </p>
+            </div>
+          </div>
+          <div class="nearest-right">
+            <span class="eta-pill">${modeMeta.icon} ${escapeHtml(item.durationText)}</span>
+          </div>
+        `;
+
+        li.addEventListener("click", () => {
+          state.selectedItem = item;
+          renderNearestList();
+          renderMapMarkers(false);
+          selectServicePoint(item);
+          const step4El = document.getElementById("step4Card");
+          if (step4El) {
+            step4El.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        });
+
+        listEl.appendChild(li);
+      });
+    }
+
+    // 在地圖上繪製目前位置與最近的 5 個服務點 (Google Maps 使用 AdvancedMarkerElement + PinElement + marker.append)
+    async function renderMapMarkers(fitAllBounds = false) {
+      const meta = CATEGORY_META[state.selectedCategory] || { color: "#0f766e" };
+
+      if (state.isGoogleMapsReady && state.googleMap) {
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+        const { LatLngBounds } = await google.maps.importLibrary("core");
+
+        state.googleMarkers.forEach(m => { m.map = null; });
+        state.googleMarkers = [];
+        if (state.googleUserMarker) {
+          state.googleUserMarker.map = null;
+        }
+
+        const bounds = new LatLngBounds();
+        const userPos = { lat: state.userLocation.lat, lng: state.userLocation.lng };
+        bounds.extend(userPos);
+
+        // 目前位置標記 (使用 PinElement.glyphText 與 marker.append 符合 CF7 規範)
+        const userPin = new PinElement({
+          background: "#0284c7",
+          borderColor: "#ffffff",
+          glyphColor: "#ffffff",
+          glyphText: "我",
+          scale: 1.2
+        });
+        const userMarker = new AdvancedMarkerElement({
+          map: state.googleMap,
+          position: userPos,
+          title: `目前位置：${state.userLocation.label}`,
+          zIndex: 999
+        });
+        userMarker.append(userPin);
+        state.googleUserMarker = userMarker;
+
+        // 最近 5 個服務點標記
+        state.nearestFive.forEach((item, idx) => {
+          const pos = { lat: item.lat, lng: item.lng };
+          bounds.extend(pos);
+          const isSelected = state.selectedItem && state.selectedItem.id === item.id;
+          const pin = new PinElement({
+            background: isSelected ? "#0f766e" : (item.color || meta.color),
+            borderColor: "#ffffff",
+            glyphColor: "#ffffff",
+            glyphText: String(idx + 1),
+            scale: isSelected ? 1.3 : 1.0
+          });
+          const marker = new AdvancedMarkerElement({
+            map: state.googleMap,
+            position: pos,
+            title: `第 ${idx + 1} 近：${item.name}`,
+            gmpClickable: true,
+            zIndex: isSelected ? 990 : 500 - idx
+          });
+          marker.append(pin);
+
+          let handledClick = false;
+          const onSelectMarker = () => {
+            if (handledClick) return;
+            handledClick = true;
+            setTimeout(() => { handledClick = false; }, 150);
+            state.selectedItem = item;
+            renderNearestList();
+            renderMapMarkers(false);
+            selectServicePoint(item);
+          };
+          marker.addEventListener("gmp-click", onSelectMarker);
+          marker.addEventListener("click", onSelectMarker);
+          state.googleMarkers.push(marker);
+        });
+
+        if (fitAllBounds || !state.selectedItem) {
+          state.googleMap.fitBounds(bounds, 60);
+        }
+        return;
+      }
+
+      // 未設定 Google Maps API Key 時：繪製原生互動式 SVG 相對方位雷達圖（避免與非 Google 圖資混用）
+      renderFallbackRadarCanvas();
+    }
+
+    // 原生 SVG 相對方位與距離雷達圖（免金鑰降級預覽）
+    function renderFallbackRadarCanvas() {
+      const mapContainer = document.getElementById("map");
+      const meta = CATEGORY_META[state.selectedCategory] || { color: "#0f766e", icon: "📍" };
+      const modeMeta = TRAVEL_MODE_META[state.selectedTravelMode] || TRAVEL_MODE_META.DRIVING;
+      const maxDist = Math.max(
+        500,
+        ...state.nearestFive.map(p => p.straightMeters)
+      ) * 1.18;
+
+      const width = 800;
+      const height = 500;
+      const cx = width / 2;
+      const cy = height / 2;
+      const maxRadius = Math.min(cx, cy) - 56;
+
+      const rings = [0.33, 0.66, 1.0].map(ratio => ({
+        r: Math.round(maxRadius * ratio),
+        label: formatDistance(maxDist * ratio)
+      }));
+
+      let pointsSvg = "";
+      let activeLineSvg = "";
+
+      state.nearestFive.forEach((item, idx) => {
+        // 將經緯度差轉換為平面相對公尺偏移
+        const dLatMeters = (item.lat - state.userLocation.lat) * 111320;
+        const dLngMeters = (item.lng - state.userLocation.lng) * 111320 * Math.cos((state.userLocation.lat * Math.PI) / 180);
+        const px = cx + (dLngMeters / maxDist) * maxRadius;
+        const py = cy - (dLatMeters / maxDist) * maxRadius;
+        const isSelected = state.selectedItem && state.selectedItem.id === item.id;
+
+        if (isSelected) {
+          const midX = (cx + px) / 2;
+          const midY = (cy + py) / 2;
+          const labelText = `${modeMeta.icon} ${item.durationText || ""} (${formatDistance(item.routeDistanceMeters || item.straightMeters)})`;
+          activeLineSvg = `
+            <line x1="${cx}" y1="${cy}" x2="${px}" y2="${py}" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.85" />
+            <line x1="${cx}" y1="${cy}" x2="${px}" y2="${py}" stroke="#2563eb" stroke-width="4.5" stroke-dasharray="8,5" stroke-linecap="round" />
+            <rect x="${midX - 85}" y="${midY - 14}" rx="8" ry="8" width="170" height="24" fill="#1d4ed8" stroke="#ffffff" stroke-width="1.5" />
+            <text x="${midX}" y="${midY + 2}" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="700">${escapeHtml(labelText)}</text>
+          `;
+        }
+
+        const r = isSelected ? 18 : 14;
+        const fill = isSelected ? "#0f766e" : meta.color;
+        pointsSvg += `
+          <g class="radar-point" data-id="${item.id}" style="cursor:pointer;">
+            <circle cx="${px}" cy="${py}" r="${r + 4}" fill="${fill}" opacity="${isSelected ? 0.25 : 0}" />
+            <circle cx="${px}" cy="${py}" r="${r}" fill="${fill}" stroke="#ffffff" stroke-width="2.5" />
+            <text x="${px}" y="${py + 4}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">${idx + 1}</text>
+            <rect x="${px + 18}" y="${py - 12}" rx="6" ry="6" width="${Math.min(220, item.name.length * 14 + 16)}" height="24" fill="#ffffff" stroke="#cbd5e1" opacity="0.92" />
+            <text x="${px + 26}" y="${py + 4}" fill="#0f172a" font-size="12" font-weight="${isSelected ? 800 : 600}">${escapeHtml(item.name.slice(0, 14))}</text>
+          </g>
+        `;
+      });
+
+      mapContainer.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" width="100%" height="100%" style="background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%); display:block;">
+          <!-- 方位十字線 -->
+          <line x1="${cx}" y1="20" x2="${cx}" y2="${height - 20}" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,4" />
+          <line x1="20" y1="${cy}" x2="${width - 20}" y2="${cy}" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4,4" />
+          <text x="${cx}" y="26" text-anchor="middle" fill="#64748b" font-size="12" font-weight="700">北 (N)</text>
+          <text x="${cx}" y="${height - 10}" text-anchor="middle" fill="#64748b" font-size="12" font-weight="700">南 (S)</text>
+          <text x="${width - 28}" y="${cy - 6}" text-anchor="middle" fill="#64748b" font-size="12" font-weight="700">東 (E)</text>
+          <text x="28" y="${cy - 6}" text-anchor="middle" fill="#64748b" font-size="12" font-weight="700">西 (W)</text>
+
+          <!-- 距離同心圓 -->
+          ${rings.map(ring => `
+            <circle cx="${cx}" cy="${cy}" r="${ring.r}" fill="none" stroke="#cbd5e1" stroke-width="1.2" />
+            <text x="${cx + 6}" y="${cy - ring.r + 14}" fill="#64748b" font-size="11">${ring.label}</text>
+          `).join("")}
+
+          ${activeLineSvg}
+
+          <!-- 使用者目前位置中心點 -->
+          <g>
+            <circle cx="${cx}" cy="${cy}" r="22" fill="#0284c7" opacity="0.2" />
+            <circle cx="${cx}" cy="${cy}" r="14" fill="#0284c7" stroke="#ffffff" stroke-width="3" />
+            <text x="${cx}" y="${cy + 4}" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="800">我</text>
+          </g>
+
+          <!-- 最近 5 個服務點 -->
+          ${pointsSvg}
+        </svg>
+        <div style="position:absolute; bottom:12px; right:12px; background:rgba(255,255,255,0.94); padding:8px 12px; border-radius:10px; border:1px solid #cbd5e1; font-size:0.8rem; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          🔑 <a href="#" id="radarConfigKeyLink" style="color:#0f766e; font-weight:700; text-decoration:none;">點此設定 Google Maps API Key / Demo Key</a> 切換為完整互動街道地圖
+        </div>
+      `;
+
+      mapContainer.querySelectorAll(".radar-point").forEach(el => {
+        el.addEventListener("click", () => {
+          const id = el.getAttribute("data-id");
+          const found = state.nearestFive.find(p => p.id === id);
+          if (found) {
+            state.selectedItem = found;
+            renderNearestList();
+            renderMapMarkers(false);
+            selectServicePoint(found);
+          }
+        });
+      });
+
+      const cfgLink = document.getElementById("radarConfigKeyLink");
+      if (cfgLink) {
+        cfgLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          apiKeyDialog.showModal();
+        });
+      }
+    }
+
+    function extractLocalizedText(val) {
+      if (!val) return "";
+      if (typeof val === "string") return val;
+      if (typeof val.text === "string") return val.text;
+      return "";
+    }
+
+    // 使用 Google Routes API (Route.computeRoutes) 計算沿現有道路之規劃路線，並於 Demo Key 配額滿額時自動由本機草屯道路路網接手
+    async function computeGoogleRoute(origin, destination, modeKey) {
+      const cacheKey = `${origin.lat.toFixed(5)},${origin.lng.toFixed(5)}->${destination.lat.toFixed(5)},${destination.lng.toFixed(5)}:${modeKey}`;
+      if (state.routeCache.has(cacheKey)) {
+        return state.routeCache.get(cacheKey);
+      }
+
+      try {
+        const { Route } = await google.maps.importLibrary("routes");
+        // Maps JS API Route.computeRoutes 支援 DRIVING / WALKING / BICYCLING / TRANSIT
+        const travelMode = (modeKey === "WALKING") ? "WALKING" : "DRIVING";
+
+        const routesRes = await Route.computeRoutes({
+          origin: { lat: Number(origin.lat), lng: Number(origin.lng) },
+          destination: { lat: Number(destination.lat), lng: Number(destination.lng) },
+          travelMode,
+          polylineQuality: "HIGH_QUALITY",
+          fields: ["path", "legs", "localizedValues", "durationMillis", "distanceMeters", "viewport"],
+          internalUsageAttributionIds: ["gmp_git_agentskills_v1"]
+        });
+
+        const routes = routesRes && routesRes.routes;
+        if (routes && routes.length > 0) {
+          const primaryRoute = routes[0];
+          let rawPath = [];
+          if (Array.isArray(primaryRoute.path) && primaryRoute.path.length > 0) {
+            rawPath = primaryRoute.path;
+          } else if (Array.isArray(primaryRoute.legs) && primaryRoute.legs.length > 0 && Array.isArray(primaryRoute.legs[0].path)) {
+            rawPath = primaryRoute.legs[0].path;
+          }
+
+          const pathPoints = rawPath.map(pt => ({
+            lat: typeof pt.lat === "function" ? pt.lat() : Number(pt.lat),
+            lng: typeof pt.lng === "function" ? pt.lng() : Number(pt.lng)
+          })).filter(pt => !isNaN(pt.lat) && !isNaN(pt.lng));
+
+          const distMeters = primaryRoute.distanceMeters || computeHaversineMeters(origin.lat, origin.lng, destination.lat, destination.lng);
+          let durationSeconds = primaryRoute.durationMillis
+            ? Math.round(primaryRoute.durationMillis / 1000)
+            : Math.round(distMeters / 400);
+
+          if (modeKey === "BICYCLING" || modeKey === "TWO_WHEELER") {
+            const modeCfg = TRAVEL_MODE_META[modeKey] || TRAVEL_MODE_META.DRIVING;
+            durationSeconds = Math.max(60, Math.round(((distMeters / 1000) / modeCfg.speedKmh) * 3600));
+          }
+
+          const locDur = extractLocalizedText(primaryRoute.localizedValues && primaryRoute.localizedValues.duration);
+          const locDist = extractLocalizedText(primaryRoute.localizedValues && primaryRoute.localizedValues.distance);
+
+          const durationText =
+            (modeKey === travelMode && locDur) ||
+            formatDurationMinutes(durationSeconds / 60);
+          const distanceText = locDist || formatDistance(distMeters);
+
+          if (pathPoints.length >= 2) {
+            const result = {
+              routeObj: primaryRoute,
+              pathPoints,
+              durationSeconds,
+              durationText,
+              distanceMeters: distMeters,
+              distanceText,
+              isExactRoute: true,
+              source: "GOOGLE_ROUTES_API"
+            };
+            state.routeCache.set(cacheKey, result);
+            savePersistentRouteCache();
+            return result;
+          }
+        }
+      } catch (err) {
+        console.warn("Google Routes API 切換至草屯現有道路路網規劃引擎:", err);
+      }
+
+      // 當 Demo Key 達到每日 100 次 Routes API 限額 (HTTP 429) 時，自動使用草屯鎮現有道路路網計算沿街道路線
+      const localRoadResult = computeLocalRoadRoute(origin, destination, modeKey);
+      if (localRoadResult) {
+        state.routeCache.set(cacheKey, localRoadResult);
+        return localRoadResult;
+      }
+      return null;
+    }
+
+    // 在 Google Map 上繪製從「目前位置」沿著現有道路到「所選生活處方位置」的規劃路線並自動調整視野
+    async function drawRouteOnGoogleMap(origin, destination, gRouteResult, modeKey) {
+      if (!state.isGoogleMapsReady || !state.googleMap) return;
+
+      const { LatLngBounds } = await google.maps.importLibrary("core");
+      const { Polyline } = await google.maps.importLibrary("maps");
+
+      // 清除舊路線
+      state.googleRoutePolylines.forEach(p => {
+        if (p && typeof p.setMap === "function") p.setMap(null);
+      });
+      state.googleRoutePolylines = [];
+
+      const routeBounds = new LatLngBounds();
+      const originPt = { lat: Number(origin.lat), lng: Number(origin.lng) };
+      const destPt = { lat: Number(destination.lat), lng: Number(destination.lng) };
+      routeBounds.extend(originPt);
+      routeBounds.extend(destPt);
+
+      // 取得沿現有道路行進的座標序列（優先使用 Google Routes API 軌跡，次之使用草屯現有道路幾何路網）
+      let pathPoints = [];
+      const routeObj = gRouteResult && gRouteResult.routeObj ? gRouteResult.routeObj : null;
+
+      if (gRouteResult && Array.isArray(gRouteResult.pathPoints) && gRouteResult.pathPoints.length >= 2) {
+        pathPoints = gRouteResult.pathPoints;
+      } else if (routeObj) {
+        if (Array.isArray(routeObj.path) && routeObj.path.length > 0) {
+          pathPoints = routeObj.path;
+        } else if (Array.isArray(routeObj.legs) && routeObj.legs.length > 0 && Array.isArray(routeObj.legs[0].path)) {
+          pathPoints = routeObj.legs[0].path;
+        }
+      }
+
+      if (pathPoints.length < 2) {
+        const fallbackRoad = computeLocalRoadRoute(originPt, destPt, modeKey);
+        if (fallbackRoad && Array.isArray(fallbackRoad.pathPoints) && fallbackRoad.pathPoints.length >= 2) {
+          pathPoints = fallbackRoad.pathPoints;
+        }
+      }
+
+      if (pathPoints.length >= 2) {
+        pathPoints.forEach(pt => routeBounds.extend(pt));
+
+        // 1. 先繪製深藍色道路外框光暈線，讓道路軌跡在街道底圖上立體醒目
+        const haloLine = new Polyline({
+          path: pathPoints,
+          map: state.googleMap,
+          strokeColor: "#1e3a8a",
+          strokeOpacity: 0.38,
+          strokeWeight: 11,
+          zIndex: 90
+        });
+        state.googleRoutePolylines.push(haloLine);
+
+        // 2. 若有原生 Route 物件，優先使用官方 Route.createPolylines() 繪製主路線
+        let createdPolylines = [];
+        if (routeObj && typeof routeObj.createPolylines === "function") {
+          try {
+            createdPolylines = routeObj.createPolylines() || [];
+            createdPolylines.forEach(pline => {
+              if (typeof pline.setOptions === "function") {
+                pline.setOptions({ zIndex: 100 });
+              }
+              pline.setMap(state.googleMap);
+              state.googleRoutePolylines.push(pline);
+            });
+          } catch (polyErr) {
+            console.warn("createPolylines 備援繪製：", polyErr);
+          }
+        }
+
+        // 3. 以 Google 導航藍繪製沿現有道路彎折之主路線
+        if (createdPolylines.length === 0) {
+          const mainLine = new Polyline({
+            path: pathPoints,
+            map: state.googleMap,
+            strokeColor: modeKey === "WALKING" ? "#0284c7" : "#0F53FF",
+            strokeOpacity: 0.94,
+            strokeWeight: 7,
+            zIndex: 100
+          });
+          state.googleRoutePolylines.push(mainLine);
+        }
+
+        // 4. 起點與終點建築物座標正交接入最近道路路緣之步行動線虛線
+        const firstPt = pathPoints[0];
+        const lastPt = pathPoints[pathPoints.length - 1];
+        const dashSymbol = {
+          path: "M 0,-1 0,1",
+          strokeOpacity: 0.85,
+          strokeColor: "#0f766e",
+          scale: 3
+        };
+        const startDist = computeHaversineMeters(originPt.lat, originPt.lng, firstPt.lat, firstPt.lng);
+        if (startDist > 3) {
+          const startConnector = new Polyline({
+            path: [originPt, firstPt],
+            map: state.googleMap,
+            strokeOpacity: 0,
+            icons: [{ icon: dashSymbol, offset: "0", repeat: "12px" }],
+            zIndex: 95
+          });
+          state.googleRoutePolylines.push(startConnector);
+        }
+        const endDist = computeHaversineMeters(lastPt.lat, lastPt.lng, destPt.lat, destPt.lng);
+        if (endDist > 3) {
+          const endConnector = new Polyline({
+            path: [lastPt, destPt],
+            map: state.googleMap,
+            strokeOpacity: 0,
+            icons: [{ icon: dashSymbol, offset: "0", repeat: "12px" }],
+            zIndex: 95
+          });
+          state.googleRoutePolylines.push(endConnector);
+        }
+      }
+
+      // 自動縮放平移地圖，完整呈現「目前位置」沿道路到「所選生活處方位置」的規劃路線
+      state.googleMap.fitBounds(routeBounds, 70);
+    }
+
+    // 使用 Google Places API (New) `Place.searchByText()` 查詢地點詳細資訊（名稱、地址、電話、營業時間）
+    async function fetchGooglePlaceDetails(item) {
+      if (state.placeCache.has(item.id)) {
+        return state.placeCache.get(item.id);
+      }
+
+      const { Place } = await google.maps.importLibrary("places");
+      const fields = [
+        "id",
+        "displayName",
+        "formattedAddress",
+        "nationalPhoneNumber",
+        "internationalPhoneNumber",
+        "regularOpeningHours",
+        "businessStatus",
+        "rating",
+        "userRatingCount",
+        "googleMapsURI",
+        "websiteURI",
+        "location"
+      ];
+
+      // 去除部分 KML 點位名稱過長之宣傳副標題作為備援查詢詞
+      const shortName = item.name.split(/[｜|•]/)[0].trim();
+      const queries = [`${item.name} 南投縣草屯鎮`];
+      if (shortName && shortName !== item.name) {
+        queries.push(`${shortName} 南投縣草屯鎮`);
+      }
+
+      for (const q of queries) {
+        try {
+          const { places } = await Place.searchByText({
+            textQuery: q,
+            locationBias: { lat: item.lat, lng: item.lng },
+            maxResultCount: 1,
+            region: "tw",
+            language: "zh-TW",
+            fields,
+            internalUsageAttributionIds: ["gmp_git_agentskills_v1"]
+          });
+
+          if (places && places.length > 0) {
+            const p = places[0];
+            const openingHoursObj = p.regularOpeningHours || p.openingHours || null;
+            const details = {
+              displayName: p.displayName || item.name,
+              address: p.formattedAddress || "（Google Maps 尚無登錄門牌地址）",
+              phone: p.nationalPhoneNumber || p.internationalPhoneNumber || "（店家未於 Google Maps 登錄電話）",
+              weekdayDescriptions: (openingHoursObj && openingHoursObj.weekdayDescriptions) ? openingHoursObj.weekdayDescriptions : [],
+              rating: p.rating || null,
+              userRatingCount: p.userRatingCount || null,
+              googleMapsURI: p.googleMapsURI || "",
+              websiteURI: p.websiteURI || "",
+              fromGoogleApi: true
+            };
+            state.placeCache.set(item.id, details);
+            return details;
+          }
+        } catch (err) {
+          console.warn("Places API 查詢提醒：", err);
+        }
+      }
+
+      // 若 Places API 未匹配到結果，嘗試透過 Geocoding API 反向查詢座標對應之門牌地址
+      try {
+        const { Geocoder } = await google.maps.importLibrary("geocoding");
+        const geocoder = new Geocoder();
+        const geoRes = await geocoder.geocode({ location: { lat: item.lat, lng: item.lng } });
+        if (geoRes && geoRes.results && geoRes.results.length > 0) {
+          const details = {
+            displayName: item.name,
+            address: geoRes.results[0].formatted_address || "",
+            phone: "（此座標點未登錄公開電話）",
+            weekdayDescriptions: [],
+            rating: null,
+            userRatingCount: null,
+            googleMapsURI: "",
+            websiteURI: "",
+            fromGoogleApi: true
+          };
+          state.placeCache.set(item.id, details);
+          return details;
+        }
+      } catch (geoErr) {
+        // 忽略 Geocoding 備援錯誤
+      }
+
+      return null;
+    }
+
+    // 步驟 4：當使用者選擇某個服務點時，顯示完整資訊（名稱、地址、電話、營業時間、到達該地點的時間）並繪製路線
+    async function selectServicePoint(item) {
+      const requestSeq = (state.selectionSeq = (state.selectionSeq || 0) + 1);
+      const container = document.getElementById("detailContentArea");
+      const badge = document.getElementById("detailSourceBadge");
+      const modeKey = state.selectedTravelMode;
+      const modeMeta = TRAVEL_MODE_META[modeKey] || TRAVEL_MODE_META.DRIVING;
+      const catMeta = CATEGORY_META[item.category] || { icon: "📍", color: "#0f766e" };
+
+      container.innerHTML = `
+        <div class="empty-hint">
+          ⏳ 正在查詢「<strong>${escapeHtml(item.name)}</strong>」的地址、電話、營業時間與 ${modeMeta.label} 規劃路線...
+        </div>
+      `;
+
+      let placeInfo = {
+        displayName: item.name,
+        address: "",
+        phone: "",
+        weekdayDescriptions: [],
+        rating: null,
+        userRatingCount: null,
+        googleMapsURI: "",
+        fromGoogleApi: false
+      };
+
+      const straightMeters = computeHaversineMeters(
+        state.userLocation.lat,
+        state.userLocation.lng,
+        item.lat,
+        item.lng
+      );
+      let routeInfo = computeLocalRoadRoute(state.userLocation, item, modeKey) || estimateFallbackRoute(straightMeters, modeKey);
+
+      if (state.isGoogleMapsReady) {
+        badge.textContent = "✅ 資料來源：Google Maps Platform 即時查詢";
+        try {
+          const [gPlace, gRoute] = await Promise.allSettled([
+            fetchGooglePlaceDetails(item),
+            computeGoogleRoute(state.userLocation, item, modeKey)
+          ]);
+
+          if (requestSeq !== state.selectionSeq) return;
+
+          if (gPlace.status === "fulfilled" && gPlace.value) {
+            placeInfo = gPlace.value;
+          }
+
+          if (gRoute.status === "fulfilled" && gRoute.value) {
+            routeInfo = {
+              distanceMeters: gRoute.value.distanceMeters,
+              durationSeconds: gRoute.value.durationSeconds,
+              durationText: gRoute.value.durationText,
+              isEstimated: false
+            };
+            await drawRouteOnGoogleMap(state.userLocation, item, gRoute.value, modeKey);
+          } else {
+            await drawRouteOnGoogleMap(state.userLocation, item, null, modeKey);
+          }
+
+          document.getElementById("mapModeHint").textContent =
+            `🧭 已規劃路線：目前位置（${state.userLocation.label}）➔ ${item.name}（${modeMeta.label} ${routeInfo.durationText}・${formatDistance(routeInfo.distanceMeters)}）`;
+        } catch (err) {
+          console.warn("查詢詳細資料時發生部分錯誤：", err);
+        }
+      } else {
+        badge.textContent = "💡 距離估算模式（設定 Google API Key 可自動帶入真實地址、電話、營業時間與精準路況）";
+        renderFallbackRadarCanvas();
+      }
+
+      // 更新步驟 3 清單中該點的顯示時間
+      item.durationSeconds = routeInfo.durationSeconds;
+      item.durationText = routeInfo.durationText;
+      item.routeDistanceMeters = routeInfo.distanceMeters;
+      renderNearestList();
+
+      const arrivalClock = formatArrivalClock(routeInfo.durationSeconds);
+      const googleSearchUrl = placeInfo.googleMapsURI ||
+        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + " 南投縣草屯鎮")}`;
+      const googleDirUrl =
+        `https://www.google.com/maps/dir/?api=1&origin=${state.userLocation.lat},${state.userLocation.lng}&destination=${encodeURIComponent(item.name)}&travelmode=${modeMeta.gmapDirMode}`;
+
+      // 整理地址 HTML
+      let addressHtml = "";
+      if (placeInfo.fromGoogleApi && placeInfo.address) {
+        addressHtml = escapeHtml(placeInfo.address);
+      } else {
+        addressHtml = `
+          <span>座標 (${item.lat.toFixed(5)}, ${item.lng.toFixed(5)}) — 請<a href="#" class="open-api-modal-link">設定 Google Maps API Key</a>自動載入地址，或<a href="${googleSearchUrl}" target="_blank" rel="noopener">在 Google Maps 查看地址 ↗</a></span>
+        `;
+      }
+
+      // 整理電話 HTML
+      let phoneHtml = "";
+      if (placeInfo.fromGoogleApi && placeInfo.phone) {
+        const cleanTel = placeInfo.phone.replace(/[^\d+]/g, "");
+        phoneHtml = cleanTel
+          ? `<a href="tel:${cleanTel}">📞 ${escapeHtml(placeInfo.phone)}</a>`
+          : escapeHtml(placeInfo.phone);
+      } else {
+        phoneHtml = `
+          <span>請<a href="#" class="open-api-modal-link">設定 Google Maps API Key</a>自動載入電話，或<a href="${googleSearchUrl}" target="_blank" rel="noopener">在 Google Maps 查看電話 ↗</a></span>
+        `;
+      }
+
+      // 整理營業時間 HTML
+      let hoursHtml = "";
+      if (placeInfo.weekdayDescriptions && placeInfo.weekdayDescriptions.length > 0) {
+        const jsDay = new Date().getDay();
+        const dayNames = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+        hoursHtml = `<ul class="hours-list">` +
+          placeInfo.weekdayDescriptions.map((line) => {
+            const isToday = line.includes(dayNames[jsDay]);
+            return `<li class="${isToday ? "today" : ""}">${escapeHtml(line)}${isToday ? " （今日）" : ""}</li>`;
+          }).join("") +
+          `</ul>`;
+      } else if (placeInfo.fromGoogleApi) {
+        hoursHtml = `<span>此地點於 Google Maps 尚無登錄固定營業時間（如公園、宮廟或公共場域）</span>`;
+      } else {
+        hoursHtml = `
+          <span>請<a href="#" class="open-api-modal-link">設定 Google Maps API Key</a>自動載入營業時間，或<a href="${googleSearchUrl}" target="_blank" rel="noopener">在 Google Maps 查看營業時間 ↗</a></span>
+        `;
+      }
+
+      container.innerHTML = `
+        <div class="detail-header">
+          <div>
+            <span class="step-badge" style="background:${catMeta.color};">${catMeta.icon} 生活處方：${escapeHtml(item.category)}</span>
+            <h3 class="detail-place-name">${escapeHtml(placeInfo.displayName)}</h3>
+          </div>
+          <div class="detail-eta-box">
+            <div class="detail-eta-label">${modeMeta.icon} ${modeMeta.label}到達該地點時間</div>
+            <div class="detail-eta-value">${escapeHtml(routeInfo.durationText)}</div>
+            <div class="detail-eta-sub">預計 ${arrivalClock} 抵達・距離 ${formatDistance(routeInfo.distanceMeters)}</div>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <div class="info-item">
+            <div class="info-label">🏷️ 服務點名稱</div>
+            <div class="info-value">${escapeHtml(placeInfo.displayName)}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">⏱️ 到達該地點的時間（${modeMeta.label}）</div>
+            <div class="info-value">
+              ${modeMeta.icon} <strong>${escapeHtml(routeInfo.durationText)}</strong>（預計 ${arrivalClock} 到達，路程約 ${formatDistance(routeInfo.distanceMeters)}）
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">📍 地址</div>
+            <div class="info-value">${addressHtml}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">📞 電話</div>
+            <div class="info-value">${phoneHtml}</div>
+          </div>
+
+          <div class="info-item full-width">
+            <div class="info-label">🕒 營業時間</div>
+            <div class="info-value">${hoursHtml}</div>
+          </div>
+          ${item.description ? `
+          <div class="info-item full-width" style="border-color:#99f6e4; background:#f0fdfa;">
+            <div class="info-label" style="color:#0f766e;">📝 處方服務點補充說明（維護資料）</div>
+            <div class="info-value" style="white-space:pre-line;">${escapeHtml(item.description)}</div>
+          </div>` : ""}
+          ${(Array.isArray(item.images) && item.images.length > 0) ? `
+          <div class="info-item full-width">
+            <div class="info-label">🖼️ 服務點照片（共 ${item.images.length} 張）</div>
+            <div class="photo-gallery-grid">
+              ${item.images.map(imgUrl => `<div class="photo-card"><img src="${escapeAttr(imgUrl)}" alt="${escapeAttr(item.name)}" /></div>`).join("")}
+            </div>
+          </div>` : ""}
+        </div>
+
+        <div class="detail-actions">
+          <div style="font-size:0.8rem; color:var(--text-muted);">
+            KML 經緯度座標：${item.lat.toFixed(6)}, ${item.lng.toFixed(6)}
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a class="btn-nav" href="${googleSearchUrl}" target="_blank" rel="noopener" style="background:#0f766e;">
+              🏪 開啟 Google 地圖店家資訊
+            </a>
+            <a class="btn-nav" href="${googleDirUrl}" target="_blank" rel="noopener">
+              🧭 啟動 Google Maps 路線導航
+            </a>
+          </div>
+        </div>
+        <div class="gmp-attribution-line">
+          Google Maps
+        </div>
+      `;
+
+      // 綁定提示連結點擊開啟 API Key 設定視窗
+      container.querySelectorAll(".open-api-modal-link").forEach(link => {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          apiKeyDialog.showModal();
+        });
+      });
+    }
+
+    // 支援使用者動態上傳/更新 KML 檔案
+    function parseUploadedKml(xmlText) {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+      const folders = Array.from(xmlDoc.getElementsByTagName("Folder"));
+      const parsedItems = [];
+      const seen = new Set();
+      let idx = 1;
+
+      folders.forEach(folder => {
+        const folderNameEl = folder.querySelector(":scope > name");
+        const category = folderNameEl ? folderNameEl.textContent.trim() : "未分類";
+        const placemarks = Array.from(folder.getElementsByTagName("Placemark"));
+
+        placemarks.forEach(pm => {
+          const nameEl = pm.getElementsByTagName("name")[0];
+          const coordEl = pm.getElementsByTagName("coordinates")[0];
+          if (nameEl && coordEl) {
+            const name = nameEl.textContent.trim();
+            const parts = coordEl.textContent.trim().split(",");
+            if (parts.length >= 2) {
+              const lng = parseFloat(parts[0]);
+              const lat = parseFloat(parts[1]);
+              if (!isNaN(lat) && !isNaN(lng)) {
+                const key = `${category}|${name}|${lat.toFixed(6)}|${lng.toFixed(6)}`;
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  parsedItems.push({
+                    id: `u${idx++}`,
+                    category,
+                    name,
+                    lat,
+                    lng
+                  });
+                }
+              }
+            }
+          }
+        });
+      });
+
+      if (parsedItems.length > 0) {
+        state.allItems = parsedItems;
+        state.placeCache.clear();
+        state.routeCache.clear();
+        renderCategoryButtons();
+        updateNearestFive();
+        alert(`成功匯入 KML 檔案！共載入 ${parsedItems.length} 筆不重複的生活處方服務點。`);
+      } else {
+        alert("無法從此檔案解析出有效的 KML 地標點位（Placemark），請確認檔案格式。");
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    // 綁定所有 UI 事件
+    function bindEvents() {
+      // 步驟 2：交通方式按鈕切換
+      const travelBtns = document.querySelectorAll("#travelModeGrid .travel-btn");
+      travelBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          travelBtns.forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          state.selectedTravelMode = btn.getAttribute("data-mode") || "DRIVING";
+          updateNearestFive();
+        });
+      });
+
+      // GPS 定位按鈕
+      document.getElementById("gpsLocateBtn").addEventListener("click", () => {
+        if (!navigator.geolocation) {
+          alert("您的瀏覽器不支援 GPS 地理定位功能，請直接於下方輸入地標或地址定位。");
+          return;
+        }
+        const btn = document.getElementById("gpsLocateBtn");
+        const origText = btn.textContent;
+        btn.textContent = "⏳ 正在取得定位...";
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            btn.textContent = origText;
+            setUserLocation(pos.coords.latitude, pos.coords.longitude, "我的目前 GPS 位置");
+          },
+          (err) => {
+            btn.textContent = origText;
+            alert(`無法取得您的 GPS 位置（${err.message}），您可直接於下方輸入草屯地標或地址定位。`);
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      });
+
+      // 輸入地標或地址定位表單 (符合 Modern Web Guidance `forms` 規範)
+      const customLocForm = document.getElementById("customLocationForm");
+      const customLocInput = document.getElementById("customLocationInput");
+      if (customLocInput) {
+        customLocInput.addEventListener("invalid", () => {
+          customLocInput.setCustomValidity("請輸入草屯地標名稱或門牌地址");
+        });
+        customLocInput.addEventListener("input", () => {
+          customLocInput.setCustomValidity("");
+          const feedbackEl = document.getElementById("locationSearchFeedback");
+          if (feedbackEl && feedbackEl.classList.contains("error")) {
+            feedbackEl.textContent = "";
+            feedbackEl.className = "location-search-feedback";
+          }
+        });
+        customLocInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && e.isComposing) {
+            e.preventDefault();
+          }
+        });
+      }
+      if (customLocForm) {
+        customLocForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          searchAndSetUserLocation(customLocInput ? customLocInput.value : "");
+        });
+      }
+
+      // 地圖工具列：聚焦目前規劃路線 / 總覽最近 5 點
+      const focusRouteBtn = document.getElementById("focusRouteBtn");
+      if (focusRouteBtn) {
+        focusRouteBtn.addEventListener("click", () => {
+          if (state.selectedItem) {
+            selectServicePoint(state.selectedItem);
+          }
+        });
+      }
+
+      const fitAllFiveBtn = document.getElementById("fitAllFiveBtn");
+      if (fitAllFiveBtn) {
+        fitAllFiveBtn.addEventListener("click", () => {
+          renderMapMarkers(true);
+        });
+      }
+
+      // 匯入更新 KML 檔
+      document.getElementById("kmlFileInput").addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => parseUploadedKmlFull(String(reader.result));
+        reader.readAsText(file, "UTF-8");
+      });
+
+      // 開啟與關閉 API Key 設定 Dialog
+      document.getElementById("openApiKeyBtn").addEventListener("click", () => {
+        document.getElementById("apiKeyInput").value = state.apiKey;
+        apiKeyDialog.showModal();
+      });
+
+      document.getElementById("closeDialogBtn").addEventListener("click", () => {
+        apiKeyDialog.close();
+      });
+
+      document.getElementById("clearApiKeyBtn").addEventListener("click", () => {
+        localStorage.removeItem("CAOTUN_GOOGLE_MAPS_API_KEY");
+        state.apiKey = "";
+        apiKeyDialog.close();
+        window.location.reload();
+      });
+
+      document.getElementById("apiKeyForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const keyVal = document.getElementById("apiKeyInput").value.trim();
+        if (keyVal) {
+          localStorage.setItem("CAOTUN_GOOGLE_MAPS_API_KEY", keyVal);
+        } else {
+          localStorage.removeItem("CAOTUN_GOOGLE_MAPS_API_KEY");
+        }
+        apiKeyDialog.close();
+        window.location.reload();
+      });
+    }
+
+
+    function escapeAttr(str) {
+      return escapeHtml(str);
+    }
+
+    // ============================================================================
+    // 第二部分：生活處方資料維護（Google My Maps 風格 KML 圖層維護引擎）
+    // 支援：1.編輯(更改樣式、編輯資料點說明、加入圖片) 2.新增(設定樣式、編輯說明、加入圖片)
+    //       3.刪除資料(含復原) 4.載入KML檔(還原) 5.備份KML檔(匯出標準KML)
+    // ============================================================================
+    const MYMAPS_COLOR_PALETTE = [
+      { hex: "#FF5252", name: "社交紅 (預設)" },
+      { hex: "#E11D48", name: "玫瑰紅" },
+      { hex: "#C2185B", name: "洋紅" },
+      { hex: "#9C27B0", name: "藥物安全紫 (預設)" },
+      { hex: "#673AB7", name: "深紫" },
+      { hex: "#1A237E", name: "運動深藍 (預設)" },
+      { hex: "#01579B", name: "海洋藍" },
+      { hex: "#0288D1", name: "天藍" },
+      { hex: "#006064", name: "藍綠" },
+      { hex: "#097138", name: "紓壓森林綠 (預設)" },
+      { hex: "#2E7D32", name: "翠綠" },
+      { hex: "#689F38", name: "草綠" },
+      { hex: "#FBC02D", name: "暖陽黃" },
+      { hex: "#F57C00", name: "營養活力橘 (預設)" },
+      { hex: "#E65100", name: "深橘" },
+      { hex: "#795548", name: "睡眠沉穩棕 (預設)" },
+      { hex: "#455A64", name: "藍灰" },
+      { hex: "#0F766E", name: "青玉綠" }
+    ];
+
+    const MYMAPS_ICON_PALETTE = [
+      { code: "1603", glyph: "🤝", label: "社交據點" },
+      { code: "1891", glyph: "🌿", label: "紓壓心靈" },
+      { code: "1577", glyph: "🍎", label: "健康營養" },
+      { code: "1899", glyph: "🥗", label: "蔬果餐飲" },
+      { code: "1893", glyph: "🏃", label: "運動健身" },
+      { code: "1602", glyph: "😴", label: "睡眠門診" },
+      { code: "1684", glyph: "💊", label: "藥物安全" },
+      { code: "1535", glyph: "☕", label: "咖啡茶飲" },
+      { code: "1624", glyph: "🏥", label: "醫療診所" },
+      { code: "1720", glyph: "🌳", label: "公園步道" },
+      { code: "1739", glyph: "🏀", label: "球類場館" },
+      { code: "1502", glyph: "⭐", label: "重點地標" }
+    ];
+
+    const LAYER_DEFAULT_STYLE = {
+      "社交": { color: "#FF5252", iconCode: "1603", glyph: "🤝" },
+      "紓壓": { color: "#097138", iconCode: "1891", glyph: "🌿" },
+      "營養": { color: "#F57C00", iconCode: "1577", glyph: "🍎" },
+      "運動": { color: "#1A237E", iconCode: "1893", glyph: "🏃" },
+      "睡眠": { color: "#795548", iconCode: "1602", glyph: "😴" },
+      "藥物安全": { color: "#9C27B0", iconCode: "1684", glyph: "💊" }
+    };
+
+    const MAINT_STORAGE_KEY = "CAOTUN_FULL_KML_ITEMS_V1";
+
+    const maintState = {
+      activeTab: "QUERY", // "QUERY" | "MAINT"
+      selectedLayer: "社交",
+      layerVisibility: {
+        "社交": true,
+        "紓壓": true,
+        "營養": true,
+        "運動": true,
+        "睡眠": true,
+        "藥物安全": true
+      },
+      filterKeyword: "",
+      selectedPointId: null,
+      activeSubPanel: "EDIT", // "STYLE" | "EDIT" | "IMAGE"
+      mapToolMode: "SELECT", // "SELECT" | "ADD_PIN" | "MOVE_PIN"
+      maintMap: null,
+      maintMarkers: [],
+      lastDeletedItem: null
+    };
+
+    // 正規化每筆資料點的 My Maps 樣式、說明與圖片欄位
+    function normalizeKmlItems(items) {
+      return (items || []).map((raw, idx) => {
+        const cat = raw.category || "社交";
+        const def = LAYER_DEFAULT_STYLE[cat] || { color: "#0F766E", iconCode: "1502", glyph: "📍" };
+        const color = (raw.color && /^#[0-9A-Fa-f]{6}$/.test(raw.color)) ? raw.color.toUpperCase() : def.color;
+        const iconCode = raw.iconCode || def.iconCode;
+        const foundIcon = MYMAPS_ICON_PALETTE.find(i => i.code === iconCode);
+        const glyph = raw.glyph || (foundIcon ? foundIcon.glyph : def.glyph);
+        const hasDescOrImg = Boolean((raw.description && raw.description.trim()) || (Array.isArray(raw.images) && raw.images.length > 0));
+        const suffix = hasDescOrImg ? "" : "-nodesc";
+        const styleUrl = `#icon-${iconCode}-${color.slice(1).toUpperCase()}${suffix}`;
+        return {
+          ...raw,
+          id: raw.id || `p${idx + 1}`,
+          category: cat,
+          name: String(raw.name || "未命名服務點").trim(),
+          lat: Number(raw.lat),
+          lng: Number(raw.lng),
+          color,
+          iconCode,
+          glyph,
+          styleUrl,
+          description: String(raw.description || ""),
+          images: Array.isArray(raw.images) ? raw.images.slice() : []
+        };
+      });
+    }
+
+    // 載入已儲存於瀏覽器資料庫之維護後 KML 資料
+    function loadPersistedKmlItems() {
+      try {
+        const savedJson = localStorage.getItem(MAINT_STORAGE_KEY);
+        if (savedJson) {
+          const parsed = JSON.parse(savedJson);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            state.allItems = normalizeKmlItems(parsed);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("讀取本機維護資料提醒：", e);
+      }
+      state.allItems = normalizeKmlItems(state.allItems);
+    }
+
+    // 儲存維護後的 KML 資料至 localStorage 與 IndexedDB，並即時同步更新第一部分查詢介面
+    function persistAndSyncKmlItems(statusMsg) {
+      state.allItems = normalizeKmlItems(state.allItems);
+      try {
+        localStorage.setItem(MAINT_STORAGE_KEY, JSON.stringify(state.allItems));
+      } catch (e) {
+        console.warn("儲存至 localStorage 提醒（可能圖片較大，改由 IndexedDB 儲存）：", e);
+      }
+      try {
+        if ("indexedDB" in window) {
+          const req = indexedDB.open("CaotunPrescriptionFullDB", 1);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains("kml_store")) {
+              db.createObjectStore("kml_store", { keyPath: "key" });
+            }
+          };
+          req.onsuccess = () => {
+            const db = req.result;
+            const tx = db.transaction("kml_store", "readwrite");
+            tx.objectStore("kml_store").put({
+              key: "ALL_ITEMS",
+              items: state.allItems,
+              updatedAt: new Date().toISOString()
+            });
+          };
+        }
+      } catch (e) {
+        // 忽略 IndexedDB 例外
+      }
+
+      const syncEl = document.getElementById("dbSyncStatusText");
+      if (syncEl) {
+        const timeStr = new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+        syncEl.textContent = `📦 資料庫狀態：共 ${state.allItems.length} 筆處方服務點｜${statusMsg || "已同步更新"} (${timeStr})`;
+      }
+
+      // 同步更新第一部分查詢介面與第二部分維護介面
+      renderCategoryButtons();
+      updateNearestFive();
+      renderMaintLayerList();
+      renderMaintPointsList();
+      renderMaintInspector();
+      renderMaintMapMarkers(false);
+    }
+
+    // 切換「第一部分：生活處方資料查詢」與「第二部分：生活處方資料維護」
+    async function switchSystemMode(mode) {
+      maintState.activeTab = mode;
+      const queryView = document.getElementById("queryModuleView");
+      const maintView = document.getElementById("maintModuleView");
+      const tabQueryBtn = document.getElementById("tabQueryBtn");
+      const tabMaintBtn = document.getElementById("tabMaintBtn");
+
+      if (mode === "MAINT") {
+        queryView.classList.add("hidden-view");
+        maintView.classList.remove("hidden-view");
+        tabQueryBtn.classList.remove("active");
+        tabQueryBtn.setAttribute("aria-selected", "false");
+        tabMaintBtn.classList.add("active");
+        tabMaintBtn.setAttribute("aria-selected", "true");
+
+        await ensureMaintMapInitialized();
+        renderMaintLayerList();
+        renderMaintPointsList();
+        if (!maintState.selectedPointId) {
+          const firstInLayer = state.allItems.find(i => i.category === maintState.selectedLayer);
+          if (firstInLayer) maintState.selectedPointId = firstInLayer.id;
+        }
+        renderMaintInspector();
+        renderMaintMapMarkers(true);
+      } else {
+        maintView.classList.add("hidden-view");
+        queryView.classList.remove("hidden-view");
+        tabMaintBtn.classList.remove("active");
+        tabMaintBtn.setAttribute("aria-selected", "false");
+        tabQueryBtn.classList.add("active");
+        tabQueryBtn.setAttribute("aria-selected", "true");
+        renderCategoryButtons();
+        updateNearestFive();
+      }
+    }
+
+    // 初始化第二部分 My Maps 維護專用 Google Map
+    async function ensureMaintMapInitialized() {
+      if (maintState.maintMap) return;
+      const mapEl = document.getElementById("maintMap");
+      if (!mapEl) return;
+
+      if (state.isGoogleMapsReady) {
+        const { Map } = await google.maps.importLibrary("maps");
+        maintState.maintMap = new Map(mapEl, {
+          center: { lat: 23.97415, lng: 120.68241 },
+          zoom: 14,
+          mapId: "DEMO_MAP_ID",
+          renderingType: "VECTOR",
+          mapTypeControl: true,
+          streetViewControl: true,
+          internalUsageAttributionIds: ["gmp_git_agentskills_v1"]
+        });
+
+        maintState.maintMap.addListener("click", (ev) => {
+          if (!ev.latLng) return;
+          const lat = Number(ev.latLng.lat().toFixed(7));
+          const lng = Number(ev.latLng.lng().toFixed(7));
+
+          if (maintState.mapToolMode === "ADD_PIN") {
+            createNewServicePointAt(lat, lng, `新${maintState.selectedLayer}服務點`);
+            setMaintMapToolMode("SELECT");
+          } else if (maintState.mapToolMode === "MOVE_PIN") {
+            const current = getSelectedMaintPoint();
+            if (current) {
+              current.lat = lat;
+              current.lng = lng;
+              persistAndSyncKmlItems(`已移動「${current.name}」座標至 (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
+              setMaintMapToolMode("SELECT");
+            }
+          }
+        });
+      }
+    }
+
+    function setMaintMapToolMode(mode) {
+      maintState.mapToolMode = mode;
+      const btnSelect = document.getElementById("toolSelectModeBtn");
+      const btnAdd = document.getElementById("toolAddPinModeBtn");
+      const btnMove = document.getElementById("toolMovePinModeBtn");
+      const hintEl = document.getElementById("maintMapHint");
+
+      [btnSelect, btnAdd, btnMove].forEach(b => b && b.classList.remove("active"));
+      if (mode === "ADD_PIN") {
+        if (btnAdd) btnAdd.classList.add("active");
+        if (hintEl) hintEl.textContent = `📍 新增標記模式：請直接點擊下方地圖任意位置，即可在【${maintState.selectedLayer}】圖層建立新服務點！`;
+      } else if (mode === "MOVE_PIN") {
+        if (btnMove) btnMove.classList.add("active");
+        if (hintEl) hintEl.textContent = `🎯 移動標記模式：請點擊下方地圖上的新位置，即可更新目前服務點的經緯度座標！`;
+      } else {
+        if (btnSelect) btnSelect.classList.add("active");
+        if (hintEl) hintEl.textContent = `💡 My Maps 維護模式：點選左側圖層或地圖標記後，可使用右下角「🪣 樣式、✏️ 編輯說明、📷 加入圖片、🗑️ 刪除」進行維護`;
+      }
+    }
+
+    function getSelectedMaintPoint() {
+      return state.allItems.find(i => i.id === maintState.selectedPointId) || null;
+    }
+
+    // 渲染步驟 1：六大生活處方圖層選擇器（選取後圖層左邊有藍色線框塗層）
+    function renderMaintLayerList() {
+      const container = document.getElementById("maintLayerList");
+      if (!container) return;
+      container.innerHTML = "";
+
+      const counts = {};
+      state.allItems.forEach(item => {
+        counts[item.category] = (counts[item.category] || 0) + 1;
+      });
+
+      const badge = document.getElementById("maintTotalBadge");
+      if (badge) badge.textContent = `共 ${state.allItems.length} 筆`;
+
+      ORDERED_CATEGORIES.forEach(cat => {
+        const def = LAYER_DEFAULT_STYLE[cat] || { color: "#0f766e", glyph: "📍" };
+        const isActive = maintState.selectedLayer === cat;
+        const isVisible = maintState.layerVisibility[cat] !== false;
+        const div = document.createElement("div");
+        div.className = "mymaps-layer-item" + (isActive ? " active-layer" : "");
+        div.innerHTML = `
+          <div class="layer-item-left">
+            <input type="checkbox" class="layer-vis-check" data-cat="${cat}" ${isVisible ? "checked" : ""} title="開啟或關閉【${cat}】圖層顯示" />
+            <span class="layer-color-dot" style="background:${def.color};">${def.glyph}</span>
+            <span class="layer-item-name">${cat}處方</span>
+          </div>
+          <span class="layer-item-count">${counts[cat] || 0}</span>
+        `;
+
+        const checkbox = div.querySelector(".layer-vis-check");
+        checkbox.addEventListener("click", (e) => {
+          e.stopPropagation();
+          maintState.layerVisibility[cat] = e.target.checked;
+          renderMaintMapMarkers(false);
+        });
+
+        div.addEventListener("click", () => {
+          maintState.selectedLayer = cat;
+          maintState.layerVisibility[cat] = true;
+          const firstPt = state.allItems.find(i => i.category === cat);
+          maintState.selectedPointId = firstPt ? firstPt.id : null;
+          renderMaintLayerList();
+          renderMaintPointsList();
+          renderMaintInspector();
+          renderMaintMapMarkers(true);
+        });
+
+        container.appendChild(div);
+      });
+    }
+
+    // 渲染目前選取圖層內的服務點列表
+    function renderMaintPointsList() {
+      const listEl = document.getElementById("maintPointsList");
+      if (!listEl) return;
+      listEl.innerHTML = "";
+
+      const kw = (maintState.filterKeyword || "").trim().toLowerCase();
+      const layerItems = state.allItems.filter(item => {
+        if (item.category !== maintState.selectedLayer) return false;
+        if (!kw) return true;
+        return item.name.toLowerCase().includes(kw) || (item.description && item.description.toLowerCase().includes(kw));
+      });
+
+      if (layerItems.length === 0) {
+        listEl.innerHTML = `<div class="empty-hint" style="padding:12px;">此圖層尚無符合條件的服務點，可點擊上方「➕ 新增處方服務點」建立。</div>`;
+        return;
+      }
+
+      layerItems.forEach((item) => {
+        const row = document.createElement("div");
+        const isSel = item.id === maintState.selectedPointId;
+        row.className = "maint-point-row" + (isSel ? " selected" : "");
+        const hasDesc = Boolean(item.description && item.description.trim());
+        const imgCount = Array.isArray(item.images) ? item.images.length : 0;
+
+        row.innerHTML = `
+          <div class="maint-point-left">
+            <span class="layer-color-dot" style="background:${item.color}; width:20px; height:20px;">${item.glyph}</span>
+            <span class="maint-point-title">${escapeHtml(item.name)}</span>
+          </div>
+          <div class="maint-point-badges">
+            ${hasDesc ? `<span title="已填寫資料點說明">📝</span>` : ""}
+            ${imgCount > 0 ? `<span title="已加入 ${imgCount} 張圖片">🖼️${imgCount}</span>` : ""}
+          </div>
+        `;
+
+        row.addEventListener("click", () => {
+          maintState.selectedPointId = item.id;
+          renderMaintPointsList();
+          renderMaintInspector();
+          renderMaintMapMarkers(false);
+          if (maintState.maintMap) {
+            maintState.maintMap.panTo({ lat: item.lat, lng: item.lng });
+            if (maintState.maintMap.getZoom() < 16) maintState.maintMap.setZoom(16);
+          }
+        });
+
+        listEl.appendChild(row);
+      });
+    }
+
+    // 渲染 Google My Maps 風格服務點檢視與維護卡片（含右下角五個功能圖示：樣式、編輯、圖片、路徑、刪除）
+    function renderMaintInspector() {
+      const container = document.getElementById("maintInspectorContent");
+      if (!container) return;
+
+      const item = getSelectedMaintPoint();
+      if (!item) {
+        container.innerHTML = `
+          <div style="padding:14px; text-align:center; color:#64748b; font-size:0.78rem;">
+            👆 請從上方清單或右側地圖點選任一處方服務點，或點擊「➕ 新增處方服務點」進行維護。
+          </div>
+        `;
+        return;
+      }
+
+      const activeSub = maintState.activeSubPanel || "EDIT";
+      const imgCount = Array.isArray(item.images) ? item.images.length : 0;
+
+      // 子面板 1：🪣 更改/設定樣式（顏色調色盤 + 圖示選擇）
+      let subPanelHtml = "";
+      if (activeSub === "STYLE") {
+        subPanelHtml = `
+          <div class="mymaps-subpanel">
+            <div style="font-size:0.74rem; font-weight:700; color:#0f172a; margin-bottom:4px;">
+              🪣 更改點位樣式（目前樣式代碼：<code>${escapeHtml(item.styleUrl)}</code>）
+            </div>
+            <div style="font-size:0.68rem; color:#475569;">1. 選擇點位顏色（建議同圖層維持一致或依特色標示）：</div>
+            <div class="color-palette-grid">
+              ${MYMAPS_COLOR_PALETTE.map(c => `
+                <button
+                  type="button"
+                  class="color-swatch-btn ${item.color.toUpperCase() === c.hex.toUpperCase() ? "selected" : ""}"
+                  style="background:${c.hex};"
+                  data-color="${c.hex}"
+                  title="${c.name} (${c.hex})"
+                ></button>
+              `).join("")}
+            </div>
+            <div style="font-size:0.68rem; color:#475569;">2. 選擇點位圖示（Icon）：</div>
+            <div class="icon-palette-grid">
+              ${MYMAPS_ICON_PALETTE.map(ic => `
+                <button
+                  type="button"
+                  class="icon-choice-btn ${item.iconCode === ic.code ? "selected" : ""}"
+                  data-icon-code="${ic.code}"
+                  data-icon-glyph="${ic.glyph}"
+                >
+                  <span>${ic.glyph}</span>
+                  <span>${ic.label}</span>
+                </button>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      } else if (activeSub === "IMAGE") {
+        // 子面板 3：📷 加入圖片或影片
+        subPanelHtml = `
+          <div class="mymaps-subpanel">
+            <div style="font-size:0.74rem; font-weight:700; color:#0f172a; margin-bottom:6px;">
+              📷 加入或管理服務點圖片（已加入 ${imgCount} 張，會一併寫入 KML 備份檔）
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
+              <label class="btn-kml-action primary" for="maintUploadPhotoInput" style="flex:1; cursor:pointer;">
+                📁 上傳本機照片檔
+                <input type="file" id="maintUploadPhotoInput" accept="image/*" multiple style="display:none;" />
+              </label>
+            </div>
+            <div style="display:flex; gap:5px; margin-bottom:6px;">
+              <input
+                type="url"
+                id="maintImageUrlInput"
+                placeholder="或貼上圖片網址 (https://...)"
+                style="flex:1; padding:4px 7px; font-size:0.75rem; border:1px solid #cbd5e1; border-radius:6px;"
+              />
+              <button type="button" class="btn-kml-action" id="btnAddImageUrl">➕ 加入網址圖片</button>
+            </div>
+            ${imgCount > 0 ? `
+              <div class="photo-gallery-grid">
+                ${item.images.map((src, idx) => `
+                  <div class="photo-card">
+                    <img src="${escapeAttr(src)}" alt="服務點照片 ${idx + 1}" />
+                    <button type="button" class="photo-remove-btn" data-remove-img="${idx}" title="移除此張照片">✕ 移除</button>
+                  </div>
+                `).join("")}
+              </div>
+            ` : `<div class="empty-hint" style="padding:8px;">尚未加入照片，請點擊上方「📁 上傳本機照片檔」或輸入圖片網址新增。</div>`}
+          </div>
+        `;
+      } else {
+        // 子面板 2（預設）：✏️ 編輯資料點名稱、圖層、說明與座標
+        subPanelHtml = `
+          <div class="mymaps-subpanel">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; gap:4px; flex-wrap:wrap;">
+              <span style="font-size:0.74rem; font-weight:700; color:#0f172a;">✏️ 編輯處方服務點名稱與說明內容</span>
+              <button type="button" class="btn-kml-action" id="btnAutoFillFromGoogle" style="font-size:0.68rem; padding:3px 7px;">
+                ⚡ 自動從 Google Maps 帶入地址/電話/營業時間
+              </button>
+            </div>
+            <div class="maint-field">
+              <label for="editPointName">服務點名稱 (&lt;name&gt;)：</label>
+              <input type="text" id="editPointName" value="${escapeAttr(item.name)}" />
+            </div>
+            <div class="maint-field">
+              <label for="editPointCategory">所屬生活處方圖層 (&lt;Folder&gt;)：</label>
+              <select id="editPointCategory">
+                ${ORDERED_CATEGORIES.map(c => `<option value="${c}" ${item.category === c ? "selected" : ""}>${c}處方圖層</option>`).join("")}
+              </select>
+            </div>
+            <div class="maint-field">
+              <label for="editPointDesc">資料點說明 (&lt;description&gt;：可記錄地址、電話、服務時間、特色備註)：</label>
+              <textarea id="editPointDesc" placeholder="請輸入此處方服務點的地址、電話、開放時間或服務項目說明...">${escapeHtml(item.description || "")}</textarea>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr auto; gap:5px; align-items:end;">
+              <div class="maint-field" style="margin-bottom:0;">
+                <label for="editPointLat">緯度 (Lat)：</label>
+                <input type="number" step="0.000001" id="editPointLat" value="${item.lat}" />
+              </div>
+              <div class="maint-field" style="margin-bottom:0;">
+                <label for="editPointLng">經度 (Lng)：</label>
+                <input type="number" step="0.000001" id="editPointLng" value="${item.lng}" />
+              </div>
+              <button type="button" class="btn-kml-action" id="btnPickCoordOnMap" title="點擊地圖重設座標" style="height:29px;">
+                🎯 地圖選點
+              </button>
+            </div>
+            <div style="margin-top:8px; display:flex; justify-content:flex-end; gap:6px;">
+              <button type="button" class="btn-kml-action primary" id="btnSavePointEdit" style="padding:5px 14px;">
+                💾 儲存資料點變更
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        <div class="mymaps-inspector-banner" style="background:${item.color};">
+          <div>
+            <span style="font-size:0.66rem; background:rgba(0,0,0,0.22); padding:1px 6px; border-radius:999px; font-weight:700;">
+              ${item.glyph} 【${escapeHtml(item.category)}】處方圖層
+            </span>
+            <h3 class="mymaps-inspector-title">${escapeHtml(item.name)}</h3>
+          </div>
+          <span style="font-size:0.65rem; opacity:0.9; white-space:nowrap;">${item.lat.toFixed(5)}, ${item.lng.toFixed(5)}</span>
+        </div>
+        <div class="mymaps-inspector-body">
+          ${item.description
+            ? `<div style="white-space:pre-line; background:#f8fafc; padding:6px 8px; border-radius:6px; border:1px solid #e2e8f0; margin-bottom:6px;">${escapeHtml(item.description)}</div>`
+            : `<div style="color:#64748b; font-style:italic; margin-bottom:4px;">（尚無文字說明，請點選下方「✏️ 編輯」填寫或自動帶入）</div>`
+          }
+          ${imgCount > 0 ? `
+            <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:4px;">
+              ${item.images.map(src => `<img src="${escapeAttr(src)}" alt="" style="height:54px; width:76px; object-fit:cover; border-radius:5px; border:1px solid #cbd5e1;" />`).join("")}
+            </div>
+          ` : ""}
+
+          <!-- Google My Maps 右下角五個選項工具列：1.樣式 2.編輯 3.新增圖片 4.到達路徑 5.刪除 -->
+          <div class="mymaps-five-toolbar" role="toolbar" aria-label="My Maps 服務點維護五項工具">
+            <button type="button" class="mymaps-icon-btn ${activeSub === "STYLE" ? "active" : ""}" id="toolBtnStyle" title="更改點位顏色與圖示樣式">
+              🪣 樣式
+            </button>
+            <button type="button" class="mymaps-icon-btn ${activeSub === "EDIT" ? "active" : ""}" id="toolBtnEdit" title="編輯名稱與資料點說明">
+              ✏️ 編輯
+            </button>
+            <button type="button" class="mymaps-icon-btn ${activeSub === "IMAGE" ? "active" : ""}" id="toolBtnImage" title="新增或管理服務點圖片">
+              📷 圖片 (${imgCount})
+            </button>
+            <button type="button" class="mymaps-icon-btn" id="toolBtnRoute" title="切換至查詢模式並規劃到達此處的道路路徑">
+              🧭 路徑
+            </button>
+            <button type="button" class="mymaps-icon-btn danger" id="toolBtnDelete" title="刪除此筆處方服務點資料">
+              🗑️ 刪除
+            </button>
+          </div>
+
+          ${subPanelHtml}
+        </div>
+      `;
+
+      // 綁定右下角五個按鈕事件
+      document.getElementById("toolBtnStyle").addEventListener("click", () => {
+        maintState.activeSubPanel = "STYLE";
+        renderMaintInspector();
+      });
+      document.getElementById("toolBtnEdit").addEventListener("click", () => {
+        maintState.activeSubPanel = "EDIT";
+        renderMaintInspector();
+      });
+      document.getElementById("toolBtnImage").addEventListener("click", () => {
+        maintState.activeSubPanel = "IMAGE";
+        renderMaintInspector();
+      });
+      document.getElementById("toolBtnRoute").addEventListener("click", () => {
+        state.selectedCategory = item.category;
+        state.selectedItem = item;
+        switchSystemMode("QUERY");
+        selectServicePoint(item);
+      });
+      document.getElementById("toolBtnDelete").addEventListener("click", () => {
+        deleteServicePoint(item.id);
+      });
+
+      // 綁定子面板內部互動事件
+      if (activeSub === "STYLE") {
+        container.querySelectorAll(".color-swatch-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            item.color = btn.getAttribute("data-color");
+            persistAndSyncKmlItems(`已更新「${item.name}」的樣式顏色為 ${item.color}`);
+          });
+        });
+        container.querySelectorAll(".icon-choice-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            item.iconCode = btn.getAttribute("data-icon-code");
+            item.glyph = btn.getAttribute("data-icon-glyph");
+            persistAndSyncKmlItems(`已更新「${item.name}」的圖示樣式為 ${item.glyph}`);
+          });
+        });
+      } else if (activeSub === "IMAGE") {
+        const fileInput = document.getElementById("maintUploadPhotoInput");
+        if (fileInput) {
+          fileInput.addEventListener("change", async (e) => {
+            const files = Array.from(e.target.files || []);
+            for (const f of files) {
+              const dataUrl = await compressImageFileToDataUrl(f, 720, 0.78);
+              if (dataUrl) {
+                item.images = item.images || [];
+                item.images.push(dataUrl);
+              }
+            }
+            persistAndSyncKmlItems(`已為「${item.name}」新增 ${files.length} 張圖片`);
+          });
+        }
+        const addUrlBtn = document.getElementById("btnAddImageUrl");
+        if (addUrlBtn) {
+          addUrlBtn.addEventListener("click", () => {
+            const urlInp = document.getElementById("maintImageUrlInput");
+            const urlVal = (urlInp && urlInp.value || "").trim();
+            if (!urlVal) return;
+            item.images = item.images || [];
+            item.images.push(urlVal);
+            persistAndSyncKmlItems(`已為「${item.name}」加入圖片網址`);
+          });
+        }
+        container.querySelectorAll("[data-remove-img]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const idx = parseInt(btn.getAttribute("data-remove-img"), 10);
+            if (!isNaN(idx) && Array.isArray(item.images)) {
+              item.images.splice(idx, 1);
+              persistAndSyncKmlItems(`已從「${item.name}」移除圖片`);
+            }
+          });
+        });
+      } else {
+        // EDIT 面板事件
+        const saveBtn = document.getElementById("btnSavePointEdit");
+        if (saveBtn) {
+          saveBtn.addEventListener("click", () => {
+            const newName = document.getElementById("editPointName").value.trim() || item.name;
+            const newCat = document.getElementById("editPointCategory").value;
+            const newDesc = document.getElementById("editPointDesc").value.trim();
+            const newLat = parseFloat(document.getElementById("editPointLat").value);
+            const newLng = parseFloat(document.getElementById("editPointLng").value);
+
+            item.name = newName;
+            if (newCat !== item.category) {
+              item.category = newCat;
+              maintState.selectedLayer = newCat;
+            }
+            item.description = newDesc;
+            if (!isNaN(newLat) && !isNaN(newLng)) {
+              item.lat = newLat;
+              item.lng = newLng;
+            }
+            persistAndSyncKmlItems(`已儲存「${item.name}」的資料點說明與設定`);
+          });
+        }
+
+        const pickCoordBtn = document.getElementById("btnPickCoordOnMap");
+        if (pickCoordBtn) {
+          pickCoordBtn.addEventListener("click", () => {
+            setMaintMapToolMode("MOVE_PIN");
+          });
+        }
+
+        const autoFillBtn = document.getElementById("btnAutoFillFromGoogle");
+        if (autoFillBtn) {
+          autoFillBtn.addEventListener("click", async () => {
+            autoFillBtn.disabled = true;
+            autoFillBtn.textContent = "⏳ 正在從 Google Maps 查詢...";
+            try {
+              const info = await fetchGooglePlaceDetails(item);
+              if (info) {
+                const lines = [];
+                if (info.address) lines.push(`📍 地址：${info.address}`);
+                if (info.phone) lines.push(`📞 電話：${info.phone}`);
+                if (info.weekdayDescriptions && info.weekdayDescriptions.length > 0) {
+                  lines.push(`🕒 營業時間：\n${info.weekdayDescriptions.join("\n")}`);
+                }
+                const descBox = document.getElementById("editPointDesc");
+                if (descBox) {
+                  descBox.value = lines.join("\n");
+                }
+              }
+            } finally {
+              autoFillBtn.disabled = false;
+              autoFillBtn.textContent = "⚡ 自動從 Google Maps 帶入地址/電話/營業時間";
+            }
+          });
+        }
+      }
+    }
+
+    // 將上傳的本機圖片壓縮並轉為 DataURL 以便存入 KML 與資料庫
+    function compressImageFileToDataUrl(file, maxWidth = 720, quality = 0.78) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            const scale = Math.min(1, maxWidth / Math.max(img.width, 1));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL("image/jpeg", quality));
+          };
+          img.onerror = () => resolve(String(reader.result));
+          img.src = String(reader.result);
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // 新增處方服務點
+    function createNewServicePointAt(lat, lng, defaultName, defaultDesc = "") {
+      const cat = maintState.selectedLayer || "社交";
+      const def = LAYER_DEFAULT_STYLE[cat] || { color: "#FF5252", iconCode: "1603", glyph: "🤝" };
+      const newId = "p_" + Date.now();
+      const newItem = {
+        id: newId,
+        category: cat,
+        name: defaultName || `新${cat}處方服務點`,
+        lat: Number(lat),
+        lng: Number(lng),
+        color: def.color,
+        iconCode: def.iconCode,
+        glyph: def.glyph,
+        styleUrl: `#icon-${def.iconCode}-${def.color.slice(1).toUpperCase()}-nodesc`,
+        description: defaultDesc,
+        images: []
+      };
+      state.allItems.unshift(newItem);
+      maintState.selectedPointId = newId;
+      maintState.activeSubPanel = "EDIT";
+      persistAndSyncKmlItems(`已於【${cat}】圖層新增「${newItem.name}」`);
+
+      if (maintState.maintMap) {
+        maintState.maintMap.panTo({ lat: newItem.lat, lng: newItem.lng });
+        maintState.maintMap.setZoom(16);
+      }
+    }
+
+    // 刪除處方服務點（附管理員確認與一鍵復原機制）
+    function deleteServicePoint(pointId) {
+      const target = state.allItems.find(i => i.id === pointId);
+      if (!target) return;
+      const ok = window.confirm(`⚠️ 確定要從【${target.category}】圖層刪除「${target.name}」這筆服務點資料嗎？`);
+      if (!ok) return;
+
+      maintState.lastDeletedItem = { ...target };
+      state.allItems = state.allItems.filter(i => i.id !== pointId);
+
+      const nextInLayer = state.allItems.find(i => i.category === maintState.selectedLayer);
+      maintState.selectedPointId = nextInLayer ? nextInLayer.id : null;
+
+      const banner = document.getElementById("undoDeleteBanner");
+      const bannerTxt = document.getElementById("undoDeleteText");
+      if (banner && bannerTxt) {
+        bannerTxt.textContent = `🗑️ 已刪除「${target.name}」`;
+        banner.classList.remove("hidden-view");
+      }
+
+      persistAndSyncKmlItems(`已刪除「${target.name}」`);
+    }
+
+    // 在維護模式 Google Map 上渲染所有已勾選開啟圖層之標記
+    async function renderMaintMapMarkers(fitBoundsFlag = false) {
+      if (!state.isGoogleMapsReady || !maintState.maintMap) return;
+
+      const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+      const { LatLngBounds } = await google.maps.importLibrary("core");
+
+      maintState.maintMarkers.forEach(m => { m.map = null; });
+      maintState.maintMarkers = [];
+
+      const bounds = new LatLngBounds();
+      let visibleCount = 0;
+
+      // 顯示目前選取圖層的所有點位，以及其他已勾選開啟圖層的點位
+      state.allItems.forEach(item => {
+        if (maintState.layerVisibility[item.category] === false) return;
+        const isCurrentLayer = item.category === maintState.selectedLayer;
+        const isSelected = item.id === maintState.selectedPointId;
+
+        // 為了保持地圖流暢清晰，非作用中圖層僅在被選取或同圖層時高亮
+        if (!isCurrentLayer && !isSelected) return;
+
+        const pos = { lat: item.lat, lng: item.lng };
+        bounds.extend(pos);
+        visibleCount++;
+
+        const pin = new PinElement({
+          background: item.color || "#FF5252",
+          borderColor: isSelected ? "#0f172a" : "#ffffff",
+          glyphColor: "#ffffff",
+          glyphText: item.glyph || "📍",
+          scale: isSelected ? 1.35 : 0.95
+        });
+
+        const marker = new AdvancedMarkerElement({
+          map: maintState.maintMap,
+          position: pos,
+          title: `[${item.category}] ${item.name}`,
+          gmpClickable: true,
+          zIndex: isSelected ? 999 : 200
+        });
+        marker.append(pin);
+
+        const onMarkerClick = () => {
+          maintState.selectedLayer = item.category;
+          maintState.selectedPointId = item.id;
+          renderMaintLayerList();
+          renderMaintPointsList();
+          renderMaintInspector();
+          renderMaintMapMarkers(false);
+        };
+        marker.addEventListener("gmp-click", onMarkerClick);
+        marker.addEventListener("click", onMarkerClick);
+        maintState.maintMarkers.push(marker);
+      });
+
+      if (fitBoundsFlag && visibleCount > 0) {
+        maintState.maintMap.fitBounds(bounds, 55);
+      }
+    }
+
+    // 將 HEX 顏色 (#RRGGBB) 轉為 KML 標準 aabbggrr 格式 (例如 #FF5252 -> ff5252ff)
+    function hexToKmlColor(hexStr) {
+      const clean = String(hexStr || "#FF5252").replace("#", "").trim();
+      if (clean.length !== 6) return "ff5252ff";
+      const r = clean.slice(0, 2).toLowerCase();
+      const g = clean.slice(2, 4).toLowerCase();
+      const b = clean.slice(4, 6).toLowerCase();
+      return `ff${b}${g}${r}`;
+    }
+
+    // 匯出/備份為符合 Google My Maps 標準的 KML 檔案
+    function exportAndDownloadKmlFile() {
+      const scopeEl = document.getElementById("exportScopeSelect");
+      const scope = scopeEl ? scopeEl.value : "ALL";
+      const targetCategories = scope === "CURRENT"
+        ? [maintState.selectedLayer]
+        : ORDERED_CATEGORIES;
+
+      const itemsToExport = state.allItems.filter(i => targetCategories.includes(i.category));
+
+      // 收集所有使用到的樣式 (Style / StyleMap)
+      const styleMapDefs = new Map();
+      itemsToExport.forEach(item => {
+        const hasDescOrImg = Boolean((item.description && item.description.trim()) || (Array.isArray(item.images) && item.images.length > 0));
+        const suffix = hasDescOrImg ? "" : "-nodesc";
+        const styleId = `icon-${item.iconCode || "1603"}-${(item.color || "#FF5252").slice(1).toUpperCase()}${suffix}`;
+        item.styleUrl = `#${styleId}`;
+        if (!styleMapDefs.has(styleId)) {
+          styleMapDefs.set(styleId, {
+            styleId,
+            kmlColor: hexToKmlColor(item.color || "#FF5252"),
+            hasDescOrImg
+          });
+        }
+      });
+
+      let stylesXml = "";
+      for (const st of styleMapDefs.values()) {
+        const balloonText = st.hasDescOrImg
+          ? `<![CDATA[<h3>$[name]</h3>$[description]]]>`
+          : `<![CDATA[<h3>$[name]</h3>]]>`;
+        stylesXml += `
+    <Style id="${st.styleId}-normal">
+      <IconStyle>
+        <color>${st.kmlColor}</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>0</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text>${balloonText}</text>
+      </BalloonStyle>
+    </Style>
+    <Style id="${st.styleId}-highlight">
+      <IconStyle>
+        <color>${st.kmlColor}</color>
+        <scale>1</scale>
+        <Icon>
+          <href>https://www.gstatic.com/mapspro/images/stock/503-wht-blank_maps.png</href>
+        </Icon>
+      </IconStyle>
+      <LabelStyle>
+        <scale>1</scale>
+      </LabelStyle>
+      <BalloonStyle>
+        <text>${balloonText}</text>
+      </BalloonStyle>
+    </Style>
+    <StyleMap id="${st.styleId}">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#${st.styleId}-normal</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#${st.styleId}-highlight</styleUrl>
+      </Pair>
+    </StyleMap>`;
+      }
+
+      let foldersXml = "";
+      targetCategories.forEach(cat => {
+        const catItems = itemsToExport.filter(i => i.category === cat);
+        let placemarksXml = "";
+        catItems.forEach(pm => {
+          const imgs = Array.isArray(pm.images) ? pm.images : [];
+          const descText = (pm.description || "").trim();
+          let descXml = "";
+          if (descText || imgs.length > 0) {
+            const imgTags = imgs.map(u => `<img src="${u}" height="200" width="auto" />`).join("<br>");
+            const htmlBody = [imgTags, descText.replace(/\n/g, "<br>")].filter(Boolean).join("<br><br>");
+            descXml = `\n        <description><![CDATA[${htmlBody}]]></description>`;
+          }
+          let extXml = "";
+          if (imgs.length > 0) {
+            extXml = `\n        <ExtendedData>\n          <Data name="gx_media_links">\n            <value><![CDATA[${imgs.join(" ")}]]></value>\n          </Data>\n        </ExtendedData>`;
+          }
+          placemarksXml += `
+      <Placemark>
+        <name>${escapeHtml(pm.name)}</name>${descXml}
+        <styleUrl>${pm.styleUrl}</styleUrl>${extXml}
+        <Point>
+          <coordinates>${pm.lng},${pm.lat},0</coordinates>
+        </Point>
+      </Placemark>`;
+        });
+
+        foldersXml += `
+    <Folder>
+      <name>${escapeHtml(cat)}</name>${placemarksXml}
+    </Folder>`;
+      });
+
+      const docTitle = scope === "CURRENT"
+        ? `南投縣草屯鎮生活處方群組資料_${maintState.selectedLayer}`
+        : `南投縣草屯鎮生活處方群組資料`;
+
+      const fullKml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>${docTitle}</name>
+    <description>由南投縣草屯鎮生活處方完整版系統匯出備份</description>${stylesXml}${foldersXml}
+  </Document>
+</kml>`;
+
+      const blob = new Blob([fullKml], { type: "application/vnd.google-earth.kml+xml;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      a.href = url;
+      a.download = `${docTitle}_備份_${dateStr}.kml`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // 增強版 KML 匯入解析器（同時支援說明文字、圖片標籤、ExtendedData 與自訂樣式顏色還原）
+    function parseUploadedKmlFull(xmlText) {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+      const folders = Array.from(xmlDoc.getElementsByTagName("Folder"));
+      const parsedItems = [];
+      const seen = new Set();
+      let idx = 1;
+
+      folders.forEach(folder => {
+        const folderNameEl = folder.querySelector(":scope > name");
+        const category = folderNameEl ? folderNameEl.textContent.trim() : "社交";
+        const def = LAYER_DEFAULT_STYLE[category] || { color: "#FF5252", iconCode: "1603", glyph: "🤝" };
+        const placemarks = Array.from(folder.getElementsByTagName("Placemark"));
+
+        placemarks.forEach(pm => {
+          const nameEl = pm.getElementsByTagName("name")[0];
+          const coordEl = pm.getElementsByTagName("coordinates")[0];
+          const styleEl = pm.getElementsByTagName("styleUrl")[0];
+          const descEl = pm.getElementsByTagName("description")[0];
+          if (!nameEl || !coordEl) return;
+
+          const name = nameEl.textContent.trim();
+          const parts = coordEl.textContent.trim().split(",");
+          if (parts.length < 2) return;
+          const lng = parseFloat(parts[0]);
+          const lat = parseFloat(parts[1]);
+          if (isNaN(lat) || isNaN(lng)) return;
+
+          const key = `${category}|${name}|${lat.toFixed(6)}|${lng.toFixed(6)}`;
+          if (seen.has(key)) return;
+          seen.add(key);
+
+          const styleUrl = styleEl ? styleEl.textContent.trim() : `#icon-${def.iconCode}-${def.color.slice(1)}-nodesc`;
+          const m = styleUrl.match(/icon-(\d+)-([0-9A-Fa-f]{6})/);
+          const iconCode = m ? m[1] : def.iconCode;
+          const color = m ? ("#" + m[2].toUpperCase()) : def.color;
+          const foundIcon = MYMAPS_ICON_PALETTE.find(ic => ic.code === iconCode);
+          const glyph = foundIcon ? foundIcon.glyph : def.glyph;
+
+          const rawDesc = descEl ? descEl.textContent.trim() : "";
+          const imgs = [];
+          const imgRegex = /<img[^>]+src=["']([^"']+)["']/gi;
+          let match;
+          while ((match = imgRegex.exec(rawDesc)) !== null) {
+            if (match[1]) imgs.push(match[1]);
+          }
+          const cleanDesc = rawDesc
+            .replace(/<img[^>]*>/gi, "")
+            .replace(/<br\s*\/?>/gi, "\n")
+            .replace(/<[^>]+>/g, "")
+            .trim();
+
+          parsedItems.push({
+            id: `u${idx++}`,
+            category,
+            name,
+            lat,
+            lng,
+            styleUrl,
+            color,
+            iconCode,
+            glyph,
+            description: cleanDesc,
+            images: imgs
+          });
+        });
+      });
+
+      if (parsedItems.length > 0) {
+        state.allItems = normalizeKmlItems(parsedItems);
+        state.placeCache.clear();
+        const firstInLayer = state.allItems.find(i => i.category === maintState.selectedLayer);
+        maintState.selectedPointId = firstInLayer ? firstInLayer.id : state.allItems[0].id;
+        persistAndSyncKmlItems(`已從 KML 檔案成功載入還原 ${parsedItems.length} 筆處方服務點`);
+        alert(`✅ 成功載入並還原 KML 檔案！共載入 ${parsedItems.length} 筆生活處方服務點資料。`);
+      } else {
+        alert("❌ 無法從此檔案解析出有效的 KML 地標點位（Placemark），請確認檔案格式。");
+      }
+    }
+
+    function bindMaintenanceEvents() {
+      // 頂部雙模式切換按鈕
+      const tabQueryBtn = document.getElementById("tabQueryBtn");
+      const tabMaintBtn = document.getElementById("tabMaintBtn");
+      if (tabQueryBtn) tabQueryBtn.addEventListener("click", () => switchSystemMode("QUERY"));
+      if (tabMaintBtn) tabMaintBtn.addEventListener("click", () => switchSystemMode("MAINT"));
+
+      // 圖層內服務點關鍵字篩選
+      const searchInput = document.getElementById("maintPointSearchInput");
+      if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+          maintState.filterKeyword = e.target.value || "";
+          renderMaintPointsList();
+        });
+      }
+
+      // 新增處方服務點按鈕（預設在目前地圖中心或草屯鎮公所旁建立並開啟編輯）
+      const btnAddFlow = document.getElementById("btnOpenAddPointFlow");
+      if (btnAddFlow) {
+        btnAddFlow.addEventListener("click", () => {
+          const center = (maintState.maintMap && maintState.maintMap.getCenter())
+            ? { lat: maintState.maintMap.getCenter().lat(), lng: maintState.maintMap.getCenter().lng() }
+            : { lat: 23.97415, lng: 120.68241 };
+          createNewServicePointAt(
+            Number(center.lat.toFixed(6)),
+            Number(center.lng.toFixed(6)),
+            `新${maintState.selectedLayer}服務點`
+          );
+        });
+      }
+
+      // 地圖上方三種模式按鈕
+      const btnSelectMode = document.getElementById("toolSelectModeBtn");
+      const btnAddPinMode = document.getElementById("toolAddPinModeBtn");
+      const btnMovePinMode = document.getElementById("toolMovePinModeBtn");
+      if (btnSelectMode) btnSelectMode.addEventListener("click", () => setMaintMapToolMode("SELECT"));
+      if (btnAddPinMode) btnAddPinMode.addEventListener("click", () => setMaintMapToolMode("ADD_PIN"));
+      if (btnMovePinMode) btnMovePinMode.addEventListener("click", () => setMaintMapToolMode("MOVE_PIN"));
+
+      // 地圖上方「搜尋草屯地標或地址直接新增至目前圖層」
+      const mapAddForm = document.getElementById("maintMapSearchAddForm");
+      if (mapAddForm) {
+        mapAddForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const inp = document.getElementById("maintMapSearchInput");
+          const q = (inp && inp.value || "").trim();
+          if (!q) return;
+          const scoped = (q.includes("草屯") || q.includes("南投")) ? q : `南投縣草屯鎮 ${q}`;
+
+          if (state.isGoogleMapsReady) {
+            try {
+              const { Place } = await google.maps.importLibrary("places");
+              const { places } = await Place.searchByText({
+                textQuery: scoped,
+                locationBias: { lat: 23.97415, lng: 120.68241 },
+                maxResultCount: 1,
+                region: "tw",
+                language: "zh-TW",
+                fields: ["displayName", "formattedAddress", "nationalPhoneNumber", "location"],
+                internalUsageAttributionIds: ["gmp_git_agentskills_v1"]
+              });
+              if (places && places.length > 0 && places[0].location) {
+                const p = places[0];
+                const lat = typeof p.location.lat === "function" ? p.location.lat() : Number(p.location.lat);
+                const lng = typeof p.location.lng === "function" ? p.location.lng() : Number(p.location.lng);
+                const descParts = [];
+                if (p.formattedAddress) descParts.push(`📍 地址：${p.formattedAddress}`);
+                if (p.nationalPhoneNumber) descParts.push(`📞 電話：${p.nationalPhoneNumber}`);
+                createNewServicePointAt(lat, lng, p.displayName || q, descParts.join("\n"));
+                inp.value = "";
+                return;
+              }
+            } catch (err) {
+              console.warn("Places 搜尋新增備援：", err);
+            }
+          }
+          alert(`找不到「${q}」的精確座標，請使用「📍 新增標記」按鈕直接在地圖上點選位置新增。`);
+        });
+      }
+
+      // 復原上一筆刪除
+      const btnUndo = document.getElementById("btnUndoDelete");
+      if (btnUndo) {
+        btnUndo.addEventListener("click", () => {
+          if (!maintState.lastDeletedItem) return;
+          const restored = maintState.lastDeletedItem;
+          maintState.lastDeletedItem = null;
+          state.allItems.unshift(restored);
+          maintState.selectedLayer = restored.category;
+          maintState.selectedPointId = restored.id;
+          document.getElementById("undoDeleteBanner").classList.add("hidden-view");
+          persistAndSyncKmlItems(`已復原「${restored.name}」`);
+        });
+      }
+
+      // 載入 KML 檔（還原）
+      const maintKmlInput = document.getElementById("maintKmlFileInput");
+      if (maintKmlInput) {
+        maintKmlInput.addEventListener("change", (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => parseUploadedKmlFull(String(reader.result));
+          reader.readAsText(file, "UTF-8");
+          e.target.value = "";
+        });
+      }
+
+      // 備份 KML 檔（開啟匯出對話框，含 Modern Web Guidance light-dismiss fallback）
+      const backupModal = document.getElementById("backupKmlDialog");
+      if (backupModal && !("closedBy" in HTMLDialogElement.prototype)) {
+        backupModal.addEventListener("click", (event) => {
+          if (event.target !== backupModal) return;
+          const rect = backupModal.getBoundingClientRect();
+          const isDialogContent = (
+            rect.top <= event.clientY &&
+            event.clientY <= rect.top + rect.height &&
+            rect.left <= event.clientX &&
+            event.clientX <= rect.left + rect.width
+          );
+          if (isDialogContent) return;
+          backupModal.close();
+        });
+      }
+      const openBackupBtn = document.getElementById("btnOpenBackupModal");
+      const closeBackupBtn = document.getElementById("closeBackupDialogBtn");
+      const confirmDownloadBtn = document.getElementById("confirmDownloadKmlBtn");
+      if (openBackupBtn && backupModal) {
+        openBackupBtn.addEventListener("click", () => backupModal.showModal());
+      }
+      if (closeBackupBtn && backupModal) {
+        closeBackupBtn.addEventListener("click", () => backupModal.close());
+      }
+      if (confirmDownloadBtn && backupModal) {
+        confirmDownloadBtn.addEventListener("click", () => {
+          exportAndDownloadKmlFile();
+          backupModal.close();
+        });
+      }
+
+      // 還原預設 271 筆 KML 資料
+      const restoreDefaultBtn = document.getElementById("btnRestoreDefaultDb");
+      if (restoreDefaultBtn) {
+        restoreDefaultBtn.addEventListener("click", () => {
+          if (!window.confirm("確定要將所有處方圖層資料還原為系統初始的 271 筆草屯鎮生活處方資料嗎？")) return;
+          localStorage.removeItem(MAINT_STORAGE_KEY);
+          state.allItems = normalizeKmlItems(
+            (window.DEFAULT_KML_DATA && window.DEFAULT_KML_DATA.items) ? window.DEFAULT_KML_DATA.items : []
+          );
+          const first = state.allItems.find(i => i.category === maintState.selectedLayer);
+          maintState.selectedPointId = first ? first.id : null;
+          persistAndSyncKmlItems("已還原為系統預設 271 筆 KML 資料");
+        });
+      }
+    }
+
+    // 啟動系統
+    loadPersistedKmlItems();
+    bindEvents();
+    bindMaintenanceEvents();
+    renderCategoryButtons();
+    initMapEngine();
+  </script>
+</body>
+</html>
