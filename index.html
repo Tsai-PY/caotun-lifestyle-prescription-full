@@ -3814,19 +3814,14 @@
       { hex: "#0F766E", name: "青玉綠" }
     ];
 
+    // 選擇點位圖示 (Icon) 僅保留與六大生活處方圖層名稱一致的 6 項圖示（顏色與樣式完全保留對應）
     const MYMAPS_ICON_PALETTE = [
-      { code: "1603", glyph: "🤝", label: "社交據點" },
-      { code: "1891", glyph: "🌿", label: "紓壓心靈" },
-      { code: "1577", glyph: "🍎", label: "健康營養" },
-      { code: "1899", glyph: "🥗", label: "蔬果餐飲" },
-      { code: "1893", glyph: "🏃", label: "運動健身" },
-      { code: "1602", glyph: "😴", label: "睡眠門診" },
-      { code: "1684", glyph: "💊", label: "藥物安全" },
-      { code: "1535", glyph: "☕", label: "咖啡茶飲" },
-      { code: "1624", glyph: "🏥", label: "醫療診所" },
-      { code: "1720", glyph: "🌳", label: "公園步道" },
-      { code: "1739", glyph: "🏀", label: "球類場館" },
-      { code: "1502", glyph: "⭐", label: "重點地標" }
+      { code: "1603", cat: "社交", label: "社交", defaultColor: "#FF5252" },
+      { code: "1891", cat: "紓壓", label: "紓壓", defaultColor: "#097138" },
+      { code: "1577", cat: "營養", label: "營養", defaultColor: "#F57C00" },
+      { code: "1893", cat: "運動", label: "運動", defaultColor: "#1A237E" },
+      { code: "1602", cat: "睡眠", label: "睡眠", defaultColor: "#795548" },
+      { code: "1684", cat: "藥物安全", label: "藥物安全", defaultColor: "#9C27B0" }
     ];
 
     const LAYER_DEFAULT_STYLE = {
@@ -4323,17 +4318,21 @@
         ></button>
       `).join("");
 
-      iconGrid.innerHTML = MYMAPS_ICON_PALETTE.map(ic => `
-        <button
-          type="button"
-          class="icon-choice-btn ${maintState.pendingCustomPin.iconCode === ic.code ? "selected" : ""}"
-          data-new-code="${ic.code}"
-          data-new-glyph="${ic.glyph}"
-        >
-          <span>${ic.glyph}</span>
-          <span>${ic.label}</span>
-        </button>
-      `).join("");
+      iconGrid.innerHTML = MYMAPS_ICON_PALETTE.map(ic => {
+        const isSelected = maintState.pendingCustomPin.iconCode === ic.code;
+        return `
+          <button
+            type="button"
+            class="icon-choice-btn ${isSelected ? "selected" : ""}"
+            data-new-code="${ic.code}"
+            data-new-cat="${ic.cat}"
+            title="${ic.label}"
+          >
+            ${getMyMapsCategoryIcon(ic.cat, 22)}
+            <span style="font-size:0.75rem; font-weight:700; margin-top:2px;">${ic.label}</span>
+          </button>
+        `;
+      }).join("");
 
       colorGrid.querySelectorAll("[data-new-color]").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -4345,7 +4344,11 @@
       iconGrid.querySelectorAll("[data-new-code]").forEach(btn => {
         btn.addEventListener("click", () => {
           maintState.pendingCustomPin.iconCode = btn.getAttribute("data-new-code");
-          maintState.pendingCustomPin.glyph = btn.getAttribute("data-new-glyph");
+          const icCat = btn.getAttribute("data-new-cat");
+          const def = LAYER_DEFAULT_STYLE[icCat];
+          if (def) {
+            maintState.pendingCustomPin.color = def.color;
+          }
           renderPendingCustomPinStyleSelectors();
         });
       });
@@ -4533,19 +4536,23 @@
                 ></button>
               `).join("")}
             </div>
-            <div style="font-size:0.68rem; color:#475569;">2. 選擇點位圖示（Icon）：</div>
-            <div class="icon-palette-grid">
-              ${MYMAPS_ICON_PALETTE.map(ic => `
-                <button
-                  type="button"
-                  class="icon-choice-btn ${item.iconCode === ic.code ? "selected" : ""}"
-                  data-icon-code="${ic.code}"
-                  data-icon-glyph="${ic.glyph}"
-                >
-                  <span>${ic.glyph}</span>
-                  <span>${ic.label}</span>
-                </button>
-              `).join("")}
+            <div style="font-size:0.68rem; color:#475569;">2. 選擇點位圖示（六大生活處方圖層專屬圖示）：</div>
+            <div class="icon-palette-grid" style="grid-template-columns: repeat(6, 1fr);">
+              ${MYMAPS_ICON_PALETTE.map(ic => {
+                const isSelected = item.iconCode === ic.code;
+                return `
+                  <button
+                    type="button"
+                    class="icon-choice-btn ${isSelected ? "selected" : ""}"
+                    data-icon-code="${ic.code}"
+                    data-icon-cat="${ic.cat}"
+                    title="${ic.label}"
+                  >
+                    ${getMyMapsCategoryIcon(ic.cat, 22)}
+                    <span style="font-size:0.75rem; font-weight:700; margin-top:2px;">${ic.label}</span>
+                  </button>
+                `;
+              }).join("")}
             </div>
           </div>
         `;
@@ -4707,8 +4714,12 @@
         container.querySelectorAll(".icon-choice-btn").forEach(btn => {
           btn.addEventListener("click", () => {
             item.iconCode = btn.getAttribute("data-icon-code");
-            item.glyph = btn.getAttribute("data-icon-glyph");
-            persistAndSyncKmlItems(`已更新「${item.name}」的圖示樣式為 ${item.glyph}`);
+            const icCat = btn.getAttribute("data-icon-cat");
+            const def = LAYER_DEFAULT_STYLE[icCat];
+            if (def && (!item.color || item.color === "#FF5252")) {
+              item.color = def.color;
+            }
+            persistAndSyncKmlItems(`已更新「${item.name}」的點位圖示為【${icCat}】`);
           });
         });
       } else if (activeSub === "IMAGE") {
