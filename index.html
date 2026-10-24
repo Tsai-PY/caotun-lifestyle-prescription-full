@@ -1962,6 +1962,19 @@
             ↩️ 回復上一步
           </button>
         </div>
+        <!-- 新增生活處方服務點說明文字欄 -->
+        <div style="background:#ffffff; border:1.5px solid #86efac; border-radius:8px; padding:7px 10px; margin-bottom:8px;">
+          <div style="font-size:0.86rem; font-weight:800; color:#15803d; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+            <span>➕ 新增生活處方服務點</span>
+            <span style="font-size:0.68rem; font-weight:700; background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:999px; border:1px solid #bbf7d0;">
+              加入至【<span id="currentAddLayerBadge">社交</span>】處方圖層
+            </span>
+          </div>
+          <div style="font-size:0.71rem; color:#166534; margin-top:3px; line-height:1.4;">
+            請由下方點選新增方式，可點選 Google 地圖上已有的店家地標，或在任意座標點建立新服務點加入此處方圖層：
+          </div>
+        </div>
+
         <div class="add-marker-two-options">
           <button type="button" class="add-option-card active" id="optAddFromGooglePoiBtn" style="border-color:#bbf7d0;">
             <span class="add-option-title">🏪 選項 1：選擇 Google Map 已有名稱標記</span>
@@ -4252,81 +4265,212 @@
             return;
           }
 
-          // 2. 若目前為「移動所選標記位置模式 (MOVE_PIN)」
-          if (maintState.mapToolMode === "MOVE_PIN") {
+          // 2. 若目前為「選項 1：點選 Google Map 上已有標示點加入 (GOOGLE_POI)」
+          // 無論是點擊帶有 placeId 之店家圖示，或是直接點擊地圖上的地標與位置，皆觸發店家擷取與地圖新增視窗
+          if (maintState.mapToolMode === "GOOGLE_POI") {
             if (typeof ev.stop === "function") ev.stop();
-            const current = getSelectedMaintPoint();
-            if (current) {
-              current.lat = lat;
-              current.lng = lng;
-              persistAndSyncKmlItems(`已移動「${current.name}」座標至 (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
-              setMaintMapToolMode("GOOGLE_POI");
-            }
+            await handleGoogleMapExistingPoiClick(ev.placeId || null, lat, lng);
             return;
-          }
-
-          // 3. 若目前為「選項 1：選擇 Google Map 上面已經有名稱標記 (GOOGLE_POI)」且使用者點擊了地圖上的現有地標 (ev.placeId)
-          if (ev.placeId) {
-            if (typeof ev.stop === "function") ev.stop();
-            await handleGoogleMapExistingPoiClick(ev.placeId, lat, lng);
           }
         });
       }
     }
 
-    // 選項 1：當使用者點擊 Google Map 上已有名稱標記 (ev.placeId) 時，擷取該地標資訊並顯示「➕ 新增至地圖」預覽卡
+    let currentPoiInfoWindow = null;
+
+    // 選項 1：點選 Google Map 上已有標示點加入
     async function handleGoogleMapExistingPoiClick(placeId, fallbackLat, fallbackLng) {
       const box = document.getElementById("googlePoiCandidateBox");
-      if (!box) return;
-      box.classList.remove("hidden-view");
-      box.innerHTML = `<div style="color:#0f766e; font-weight:700;">⏳ 正在讀取您於 Google Map 點選的已有名稱標記資訊...</div>`;
+      const currentLayer = maintState.selectedLayer || "社交";
 
-      let poiName = "Google 地圖地標";
+      if (box) {
+        box.classList.remove("hidden-view");
+        box.innerHTML = `<div style="color:#0f766e; font-weight:700; padding:6px;">⏳ 正在擷取 Google 地圖地標詳細資訊，請稍候...</div>`;
+        box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      let poiName = "";
       let poiAddress = "";
       let poiPhone = "";
       let poiHours = [];
       let lat = fallbackLat;
       let lng = fallbackLng;
 
-      try {
-        const { Place } = await google.maps.importLibrary("places");
-        const place = new Place({ id: placeId });
-        await place.fetchFields({
-          fields: ["displayName", "formattedAddress", "nationalPhoneNumber", "regularOpeningHours", "location"]
-        });
-        if (place.displayName) poiName = place.displayName;
-        if (place.formattedAddress) poiAddress = place.formattedAddress;
-        if (place.nationalPhoneNumber) poiPhone = place.nationalPhoneNumber;
-        if (place.regularOpeningHours && Array.isArray(place.regularOpeningHours.weekdayDescriptions)) {
-          poiHours = place.regularOpeningHours.weekdayDescriptions;
-        }
-        if (place.location) {
-          lat = typeof place.location.lat === "function" ? place.location.lat() : Number(place.location.lat);
-          lng = typeof place.location.lng === "function" ? place.location.lng() : Number(place.location.lng);
-        }
-      } catch (err) {
-        console.warn("讀取 Google POI 詳細資訊備援至 Geocoder：", err);
+      // 1. 若有 placeId，優先透過 Places API 讀取店家詳細名稱與門牌
+      if (placeId) {
         try {
-          const { Geocoder } = await google.maps.importLibrary("geocoding");
-          const geocoder = new Geocoder();
-          const res = await geocoder.geocode({ placeId });
-          if (res && res.results && res.results[0]) {
-            poiAddress = res.results[0].formatted_address || "";
-            poiName = poiAddress.split(/[號,，]/)[0] || "Google 地圖地標";
+          const { Place } = await google.maps.importLibrary("places");
+          const place = new Place({ id: placeId });
+          await place.fetchFields({
+            fields: ["displayName", "formattedAddress", "nationalPhoneNumber", "regularOpeningHours", "location"],
+            internalUsageAttributionIds: ["gmp_git_agentskills_v1"]
+          });
+          if (place.displayName) poiName = place.displayName;
+          if (place.formattedAddress) poiAddress = place.formattedAddress;
+          if (place.nationalPhoneNumber) poiPhone = place.nationalPhoneNumber;
+          if (place.regularOpeningHours && Array.isArray(place.regularOpeningHours.weekdayDescriptions)) {
+            poiHours = place.regularOpeningHours.weekdayDescriptions;
           }
-        } catch (e2) {
-          // 忽略備援錯誤
+          if (place.location) {
+            lat = typeof place.location.lat === "function" ? place.location.lat() : Number(place.location.lat);
+            lng = typeof place.location.lng === "function" ? place.location.lng() : Number(place.location.lng);
+          }
+        } catch (err) {
+          console.warn("Places API (New) 讀取提醒，執行 PlacesService 備援：", err);
+          try {
+            const placesLib = await google.maps.importLibrary("places");
+            if (placesLib.PlacesService && maintState.maintMap) {
+              const svc = new placesLib.PlacesService(maintState.maintMap);
+              const pRes = await new Promise((resolve) => {
+                svc.getDetails({ placeId, fields: ["name", "formatted_address", "formatted_phone_number", "opening_hours", "geometry"] }, (p, status) => {
+                  if (status === google.maps.places.PlacesServiceStatus.OK && p) resolve(p);
+                  else resolve(null);
+                });
+              });
+              if (pRes) {
+                if (pRes.name) poiName = pRes.name;
+                if (pRes.formatted_address) poiAddress = pRes.formatted_address;
+                if (pRes.formatted_phone_number) poiPhone = pRes.formatted_phone_number;
+                if (pRes.opening_hours && pRes.opening_hours.weekday_text) poiHours = pRes.opening_hours.weekday_text;
+                if (pRes.geometry && pRes.geometry.location) {
+                  lat = pRes.geometry.location.lat();
+                  lng = pRes.geometry.location.lng();
+                }
+              }
+            }
+          } catch (e2) {
+            console.warn("PlacesService 備援提醒：", e2);
+          }
         }
       }
 
-      renderGooglePoiCandidatePreview({
+      // 2. 若仍未取得店家名稱（或直接點擊地圖無 placeId），透過 Geocoding API 依座標反向解析
+      if (!poiName || poiName === "Google 地圖地標") {
+        try {
+          const { Geocoder } = await google.maps.importLibrary("geocoding");
+          const geocoder = new Geocoder();
+          const geoRes = placeId 
+            ? await geocoder.geocode({ placeId })
+            : await geocoder.geocode({ location: { lat, lng } });
+
+          if (geoRes && geoRes.results && geoRes.results.length > 0) {
+            const r0 = geoRes.results[0];
+            poiAddress = r0.formatted_address || poiAddress;
+
+            // 尋找具有店家/地標性質的 address_component
+            const estResult = geoRes.results.find(r => r.types && (r.types.includes("point_of_interest") || r.types.includes("establishment") || r.types.includes("premise")));
+            if (estResult && estResult.address_components && estResult.address_components[0]) {
+              poiName = estResult.address_components[0].long_name;
+            } else {
+              const cleanedAddr = (r0.formatted_address || "")
+                .replace(/^台灣/g, "")
+                .replace(/^南投縣/g, "")
+                .replace(/^草屯鎮/g, "")
+                .trim();
+              poiName = cleanedAddr.split(/[號,，]/)[0] ? cleanedAddr.split(/[號,，]/)[0] + "號" : cleanedAddr;
+            }
+          }
+        } catch (e3) {
+          console.warn("Geocoder 解析提醒：", e3);
+        }
+      }
+
+      if (!poiName) {
+        poiName = `草屯服務點 (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+      }
+
+      const candidatePoi = {
         name: poiName,
         address: poiAddress,
         phone: poiPhone,
         hours: poiHours,
         lat,
         lng
+      };
+
+      // 1. 同步更新左側選單的候選卡片
+      renderGooglePoiCandidatePreview(candidatePoi);
+
+      // 2. 在地圖該點位直接彈出原生 InfoWindow 視窗（提供一鍵新增按鈕）
+      openMapPoiCandidateInfoWindow(candidatePoi);
+    }
+
+    // 在地圖上直接彈出店家資訊與「➕ 新增至開啟圖層」視窗
+    function openMapPoiCandidateInfoWindow(poi) {
+      if (!maintState.maintMap) return;
+      if (currentPoiInfoWindow) {
+        currentPoiInfoWindow.close();
+        currentPoiInfoWindow = null;
+      }
+
+      const currentLayer = maintState.selectedLayer || "社交";
+      const existingItem = findExistingPointInLayer(poi.name, poi.lat, poi.lng, currentLayer);
+
+      const contentDiv = document.createElement("div");
+      contentDiv.style.cssText = "font-family:inherit; min-width:240px; max-width:320px; padding:4px;";
+      contentDiv.innerHTML = `
+        <div style="font-size:0.7rem; color:#15803d; font-weight:800; margin-bottom:2px;">
+          🏪 Google Map 已有名稱標記
+        </div>
+        <div style="font-size:0.95rem; font-weight:800; color:#0f172a; margin-bottom:4px; line-height:1.3;">
+          ${escapeHtml(poi.name)}
+        </div>
+        ${poi.address ? `<div style="font-size:0.72rem; color:#475569; margin-bottom:2px;">📍 ${escapeHtml(poi.address)}</div>` : ""}
+        ${poi.phone ? `<div style="font-size:0.72rem; color:#475569; margin-bottom:2px;">📞 ${escapeHtml(poi.phone)}</div>` : ""}
+        <div style="margin-top:8px; padding-top:6px; border-top:1px solid #e2e8f0;">
+          ${existingItem ? `
+            <div style="color:#b91c1c; font-size:0.74rem; font-weight:700; line-height:1.35; padding:4px 6px; background:#fef2f2; border:1px solid #fecaca; border-radius:6px;">
+              🚫 此地標已經在【${escapeHtml(currentLayer)}】圖層中，不可重複新增！
+            </div>
+            <button type="button" id="infoWindowFocusBtn" style="margin-top:6px; width:100%; padding:5px 8px; font-size:0.72rem; font-weight:700; border-radius:6px; border:1px solid #99f6e4; background:#f0fdfa; color:#0f766e; cursor:pointer;">
+              👁️ 改為檢視圖層中的「${escapeHtml(existingItem.name)}」
+            </button>
+          ` : `
+            <button type="button" id="infoWindowAddBtn" style="width:100%; padding:7px 12px; font-size:0.8rem; font-weight:800; border-radius:6px; border:none; background:#16a34a; color:#ffffff; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px; box-shadow:0 2px 6px rgba(22,163,74,0.3);">
+              ➕ 新增至【${escapeHtml(currentLayer)}】生活處方圖層
+            </button>
+          `}
+        </div>
+      `;
+
+      currentPoiInfoWindow = new google.maps.InfoWindow({
+        content: contentDiv,
+        position: { lat: poi.lat, lng: poi.lng }
       });
+      currentPoiInfoWindow.open(maintState.maintMap);
+
+      setTimeout(() => {
+        const addBtn = contentDiv.querySelector("#infoWindowAddBtn");
+        if (addBtn) {
+          addBtn.addEventListener("click", () => {
+            const descParts = [];
+            if (poi.address) descParts.push(`📍 地址：${poi.address}`);
+            if (poi.phone) descParts.push(`📞 電話：${poi.phone}`);
+            if (poi.hours && poi.hours.length > 0) {
+              descParts.push(`🕒 營業時間：\n${poi.hours.join("\n")}`);
+            }
+            const combinedDesc = descParts.join("\n");
+            const ok = createNewServicePointAt(poi.lat, poi.lng, poi.name, combinedDesc);
+            if (ok) {
+              if (currentPoiInfoWindow) currentPoiInfoWindow.close();
+              const box = document.getElementById("googlePoiCandidateBox");
+              if (box) box.classList.add("hidden-view");
+              alert(`✅ 已成功將「${poi.name}」加入【${currentLayer}】生活處方圖層！`);
+            }
+          });
+        }
+        const focusBtn = contentDiv.querySelector("#infoWindowFocusBtn");
+        if (focusBtn && existingItem) {
+          focusBtn.addEventListener("click", () => {
+            if (currentPoiInfoWindow) currentPoiInfoWindow.close();
+            maintState.selectedPointId = existingItem.id;
+            maintState.activeSubPanel = "EDIT";
+            renderMaintPointsList();
+            renderMaintInspector();
+            renderMaintMapMarkers(false);
+          });
+        }
+      }, 50);
     }
 
     // 正規化地標名稱以比對是否已在圖層中（去除空白、括號、標點符號與宣傳副標題）
@@ -4647,6 +4791,8 @@
 
       const badge = document.getElementById("maintTotalBadge");
       if (badge) badge.textContent = `共 ${state.allItems.length} 筆`;
+      const addLayerBadge = document.getElementById("currentAddLayerBadge");
+      if (addLayerBadge) addLayerBadge.textContent = maintState.selectedLayer || "社交";
 
       ORDERED_CATEGORIES.forEach(cat => {
         const def = LAYER_DEFAULT_STYLE[cat] || { color: "#0f766e", glyph: "📍" };
