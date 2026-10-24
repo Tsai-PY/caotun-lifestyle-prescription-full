@@ -953,7 +953,7 @@
       margin: 0 auto;
       padding: 10px 14px 20px;
       display: grid;
-      grid-template-columns: 400px 1fr;
+      grid-template-columns: 410px 1fr;
       gap: 12px;
       align-items: start;
     }
@@ -974,29 +974,29 @@
       background: #ffffff;
       border-radius: 10px;
       border: 1px solid #cbd5e1;
-      padding: 10px 12px;
+      padding: 9px 11px;
       box-shadow: var(--shadow-sm);
     }
 
     .kml-file-bar {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 6px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
     }
 
     .btn-kml-action {
       border: 1px solid #cbd5e1;
       background: #f8fafc;
       color: #0f172a;
-      font-size: 0.75rem;
+      font-size: 0.73rem;
       font-weight: 700;
-      padding: 6px 8px;
+      padding: 6px 7px;
       border-radius: 7px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
+      gap: 4px;
       transition: all 0.15s ease;
     }
 
@@ -1024,7 +1024,7 @@
       background: #115e59;
     }
 
-    /* Google My Maps 圖層選擇器（左側藍色線框塗層） */
+    /* Google My Maps 圖層選擇器（單一圖層開啟模式 + 左側藍色線框塗層） */
     .mymaps-layer-list {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -1038,6 +1038,7 @@
       border-radius: 6px;
       padding: 5px 7px;
       background: #f8fafc;
+      opacity: 0.68;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -1047,15 +1048,17 @@
     }
 
     .mymaps-layer-item:hover {
+      opacity: 0.92;
       background: #f1f5f9;
     }
 
-    /* 選取圖層後左邊會有「藍色線框」的塗層 */
+    /* 選取圖層後左邊會有「藍色線框」的塗層，且僅開啟此單一圖層 */
     .mymaps-layer-item.active-layer {
-      border-color: #bfdbfe;
+      opacity: 1;
+      border-color: #93c5fd;
       border-left: 5px solid #1a73e8;
       background: #eff6ff;
-      box-shadow: 0 1px 5px rgba(26, 115, 232, 0.15);
+      box-shadow: 0 2px 6px rgba(26, 115, 232, 0.16);
     }
 
     .layer-item-left {
@@ -1065,12 +1068,24 @@
       min-width: 0;
     }
 
-    .layer-vis-check {
-      width: 14px;
-      height: 14px;
-      cursor: pointer;
-      accent-color: #1a73e8;
-      margin: 0;
+    .layer-status-pill {
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .layer-status-pill.open {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
+    }
+
+    .layer-status-pill.closed {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
     }
 
     .layer-color-dot {
@@ -1093,7 +1108,7 @@
     }
 
     .layer-item-count {
-      font-size: 0.65rem;
+      font-size: 0.64rem;
       font-weight: 700;
       color: #475569;
       background: rgba(15, 23, 42, 0.06);
@@ -1101,18 +1116,75 @@
       border-radius: 999px;
     }
 
+    /* 新增標記二選一專屬面板 */
+    .add-marker-two-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .add-option-card {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 7px 8px;
+      background: #f8fafc;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: all 0.15s ease;
+    }
+
+    .add-option-card:hover {
+      border-color: #1a73e8;
+      background: #f0f9ff;
+    }
+
+    .add-option-card.active {
+      border-color: #1a73e8;
+      background: #eff6ff;
+      box-shadow: 0 2px 8px rgba(26, 115, 232, 0.18);
+    }
+
+    .add-option-title {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .add-option-desc {
+      font-size: 0.66rem;
+      color: #475569;
+      line-height: 1.3;
+    }
+
+    /* Google Map 現有地標候選預覽框 */
+    .google-poi-candidate-box {
+      margin-top: 6px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1.5px solid #0f766e;
+      background: #f0fdfa;
+      font-size: 0.74rem;
+    }
+
     /* 圖層內服務點清單 */
     .maint-search-input {
       width: 100%;
       padding: 5px 9px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
       margin-bottom: 6px;
     }
 
     .maint-points-scroll {
-      max-height: 195px;
+      max-height: 165px;
       overflow-y: auto;
       border: 1px solid #e2e8f0;
       border-radius: 7px;
@@ -1128,12 +1200,12 @@
       align-items: center;
       justify-content: space-between;
       gap: 6px;
-      padding: 5px 7px;
+      padding: 4px 7px;
       border-radius: 6px;
       background: #ffffff;
       border: 1px solid #e2e8f0;
       cursor: pointer;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       transition: all 0.12s ease;
     }
 
@@ -1180,7 +1252,7 @@
     }
 
     .mymaps-inspector-banner {
-      padding: 10px 12px;
+      padding: 9px 11px;
       color: #ffffff;
       display: flex;
       align-items: flex-start;
@@ -1190,15 +1262,15 @@
 
     .mymaps-inspector-title {
       margin: 2px 0 0;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       font-weight: 800;
       line-height: 1.25;
       word-break: break-word;
     }
 
     .mymaps-inspector-body {
-      padding: 10px 12px;
-      font-size: 0.76rem;
+      padding: 9px 11px;
+      font-size: 0.75rem;
       color: #334155;
     }
 
@@ -1208,8 +1280,8 @@
       align-items: center;
       justify-content: flex-end;
       gap: 5px;
-      padding-top: 8px;
-      margin-top: 8px;
+      padding-top: 7px;
+      margin-top: 7px;
       border-top: 1px solid #e2e8f0;
       flex-wrap: wrap;
     }
@@ -1263,8 +1335,8 @@
     }
 
     .color-swatch-btn {
-      width: 24px;
-      height: 24px;
+      width: 23px;
+      height: 23px;
       border-radius: 50%;
       border: 2px solid #ffffff;
       box-shadow: 0 0 0 1px #94a3b8;
@@ -1294,7 +1366,7 @@
       background: #ffffff;
       border-radius: 6px;
       padding: 4px;
-      font-size: 0.7rem;
+      font-size: 0.69rem;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -1335,7 +1407,7 @@
     }
 
     .maint-field textarea {
-      min-height: 62px;
+      min-height: 58px;
       resize: vertical;
     }
 
@@ -1356,7 +1428,7 @@
 
     .photo-card img {
       width: 100%;
-      height: 86px;
+      height: 82px;
       object-fit: cover;
       display: block;
     }
@@ -1401,7 +1473,7 @@
       color: #334155;
       border-radius: 6px;
       padding: 4px 10px;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 700;
       cursor: pointer;
       display: inline-flex;
@@ -1613,30 +1685,27 @@
   <!-- 第二部分：生活處方資料維護（Google My Maps 風格 KML 圖層維護介面）           -->
   <!-- ========================================================================= -->
   <section class="maint-layout hidden-view" id="maintModuleView" aria-label="生活處方資料維護">
-    <!-- 左欄：My Maps 圖層選擇器 + 五大維護功能操作面板 -->
+    <!-- 左欄：My Maps 單一圖層開啟選擇器 + 新增標記雙選項 + 服務點五合一維護面板 -->
     <div class="maint-left-col">
-      <!-- 1. KML 檔案載入、備份與新增服務點工具列 -->
+      <!-- 1. KML 檔案載入（還原）與備份（匯出）工具列 -->
       <div class="mymaps-card">
-        <div class="step-header" style="margin-bottom:6px;">
+        <div class="step-header" style="margin-bottom:5px;">
           <div class="step-title-group">
-            <span class="step-badge" style="background:#1a73e8;">KML 維護</span>
-            <h2 class="step-title">生活處方 KML 檔案與資料點維護</h2>
+            <span class="step-badge" style="background:#1a73e8;">KML 檔案管理</span>
+            <h2 class="step-title">載入 KML 檔（還原）與備份 KML 檔（匯出）</h2>
           </div>
           <span style="font-size:0.68rem; color:#64748b;" id="maintTotalBadge">共 271 筆</span>
         </div>
         <div class="kml-file-bar">
-          <button type="button" class="btn-kml-action primary" id="btnOpenAddPointFlow">
-            ➕ 新增處方服務點
-          </button>
-          <button type="button" class="btn-kml-action success" id="btnOpenBackupModal">
-            💾 備份 KML 檔 (匯出)
-          </button>
           <label class="btn-kml-action" for="maintKmlFileInput" style="cursor:pointer;">
-            📂 載入 KML 檔 (還原)
+            📂 載入 KML 檔
             <input type="file" id="maintKmlFileInput" accept=".kml,.xml" style="display:none;" />
           </label>
+          <button type="button" class="btn-kml-action success" id="btnOpenBackupModal">
+            💾 備份 KML 檔
+          </button>
           <button type="button" class="btn-kml-action" id="btnRestoreDefaultDb" title="將所有圖層還原為初始 KML 資料">
-            🔄 還原預設資料
+            🔄 還原預設值
           </button>
         </div>
         <div id="undoDeleteBanner" class="undo-banner hidden-view" style="margin-top:6px;">
@@ -1645,32 +1714,54 @@
         </div>
       </div>
 
-      <!-- 2. 先選擇六種生活處方圖層的其中一個（Google My Maps 左側藍色線框塗層） -->
+      <!-- 2. 步驟 1：先選擇六種生活處方圖層的其中一個（單一圖層開啟限制：同時只能開啟一種圖層） -->
       <div class="mymaps-card">
-        <div class="step-header" style="margin-bottom:6px;">
+        <div class="step-header" style="margin-bottom:5px;">
           <div class="step-title-group">
             <span class="step-badge" style="background:#0f766e;">步驟 1</span>
-            <h2 class="step-title">先選擇要維護的生活處方圖層（左側藍框為作用中圖層）</h2>
+            <h2 class="step-title">先選擇要維護的生活處方圖層（一次僅開啟一種圖層）</h2>
           </div>
         </div>
-        <div class="mymaps-layer-list" id="maintLayerList">
-          <!-- 由 JS 動態渲染六大處方圖層（社交、紓壓、營養、運動、睡眠、藥物安全） -->
+        <div class="mymaps-layer-list" id="maintLayerList" role="radiogroup" aria-label="選擇單一生活處方維護圖層">
+          <!-- 由 JS 動態渲染六大處方圖層（同時只能開啟 1 種圖層，左方顯示藍色線框塗層） -->
         </div>
         <input
           type="text"
           id="maintPointSearchInput"
           class="maint-search-input"
-          placeholder="🔍 篩選此圖層內的服務點名稱或說明..."
+          placeholder="🔍 篩選此開啟圖層內的服務點名稱或說明..."
         />
         <div class="maint-points-scroll" id="maintPointsList">
-          <!-- 由 JS 渲染所選圖層內的服務點清單 -->
+          <!-- 由 JS 渲染目前開啟圖層內的服務點清單 -->
         </div>
       </div>
 
-      <!-- 3. Google My Maps 風格服務點檢視與編輯器（含右下角五個圖示：樣式、編輯、圖片、路徑、刪除） -->
+      <!-- 3. 步驟 2：新增標記（提供兩種方式：1.選擇 Google Map 已有名稱標記 2.在 Google Map 任意選擇座標點再加入名稱標記） -->
+      <div class="mymaps-card">
+        <div class="step-header" style="margin-bottom:4px;">
+          <div class="step-title-group">
+            <span class="step-badge" style="background:#0284c7;">新增標記</span>
+            <h2 class="step-title">新增服務點至目前開啟圖層（2 種新增方式）</h2>
+          </div>
+        </div>
+        <div class="add-marker-two-options">
+          <button type="button" class="add-option-card active" id="optAddFromGooglePoiBtn">
+            <span class="add-option-title">🏪 選項 1：選擇 Google Map 已有名稱標記</span>
+            <span class="add-option-desc">直接點選地圖上已有的店家/地標圖示（或上方搜尋地標），再按「➕ 新增至地圖」</span>
+          </button>
+          <button type="button" class="add-option-card" id="optAddCustomCoordBtn">
+            <span class="add-option-title">📍 選項 2：任意選擇座標點再加入名稱標記</span>
+            <span class="add-option-desc">如同 My Maps 新增標記，在地圖任意位置點一下，跳出視窗輸入名稱、說明、樣式與圖片</span>
+          </button>
+        </div>
+        <!-- 當使用者在選項 1 點選了 Google Map 上已有的名稱標記時，顯示此預覽與「➕ 新增至地圖」按鈕 -->
+        <div id="googlePoiCandidateBox" class="google-poi-candidate-box hidden-view"></div>
+      </div>
+
+      <!-- 4. Google My Maps 風格服務點檢視與編輯器（含右下角五個圖示：樣式、編輯、圖片、路徑、刪除） -->
       <div class="mymaps-inspector" id="maintInspectorCard">
         <div id="maintInspectorContent">
-          <!-- 由 JS 動態渲染目前選取或新增中之服務點 My Maps 面板 -->
+          <!-- 由 JS 動態渲染目前選取服務點之 My Maps 面板 -->
         </div>
       </div>
     </div>
@@ -1679,32 +1770,32 @@
     <div class="right-column">
       <div class="map-card">
         <div class="maint-map-top-controls">
-          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-            <button type="button" class="mymaps-tool-pill active" id="toolSelectModeBtn">
-              🖐️ 選取與編輯標記
+          <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+            <button type="button" class="mymaps-tool-pill active" id="toolSelectModeBtn" title="點擊地圖上已有的 Google 地標名稱標記或現有處方標記">
+              🏪 選項 1：點選 Google Map 已有名稱標記
             </button>
-            <button type="button" class="mymaps-tool-pill" id="toolAddPinModeBtn">
-              📍 新增標記（點擊地圖新增至目前圖層）
+            <button type="button" class="mymaps-tool-pill" id="toolAddPinModeBtn" title="在地圖上任意位置點擊座標點，再輸入名稱標記與說明">
+              📍 選項 2：任意選擇座標點新增標記
             </button>
-            <button type="button" class="mymaps-tool-pill" id="toolMovePinModeBtn">
-              🎯 點擊地圖移動目前標記位置
+            <button type="button" class="mymaps-tool-pill" id="toolMovePinModeBtn" title="點擊地圖更新目前選取服務點的座標">
+              🎯 移動目前標記位置
             </button>
           </div>
-          <form id="maintMapSearchAddForm" style="display:flex; gap:5px; align-items:center; flex:1; min-width:240px; max-width:440px;">
+          <form id="maintMapSearchAddForm" style="display:flex; gap:5px; align-items:center; flex:1; min-width:230px; max-width:420px;">
             <input
               type="text"
               id="maintMapSearchInput"
-              placeholder="🔍 搜尋草屯地標或地址直接新增至目前圖層..."
-              style="flex:1; padding:4px 8px; font-size:0.78rem; border:1px solid #cbd5e1; border-radius:6px;"
+              placeholder="🔍 搜尋 Google Map 已有名稱地標..."
+              style="flex:1; padding:4px 8px; font-size:0.76rem; border:1px solid #cbd5e1; border-radius:6px;"
             />
-            <button type="submit" class="btn-kml-action primary" style="white-space:nowrap; padding:4px 10px;">
-              ➕ 搜尋新增
+            <button type="submit" class="btn-kml-action primary" style="white-space:nowrap; padding:4px 9px;">
+              🔍 尋找地標
             </button>
           </form>
         </div>
         <div class="map-toolbar" style="padding:6px 12px;">
           <span id="maintMapHint" style="font-weight:600; color:#0f172a;">
-            💡 My Maps 維護模式：點選左側圖層或地圖標記後，可使用右下角「🪣 樣式、✏️ 編輯說明、📷 加入圖片、🗑️ 刪除」進行維護
+            💡 目前開啟圖層：【社交】處方圖層｜您可直接點擊地圖上已有的 Google 名稱標記加入，或切換「📍 選項 2：任意選擇座標點新增標記」
           </span>
           <span style="font-weight:700;">Google Maps</span>
         </div>
@@ -1712,6 +1803,50 @@
       </div>
     </div>
   </section>
+
+  <!-- 選項 2：在 Google Map 上任意選擇座標點後跳出的「My Maps 新增標記註記視窗」 -->
+  <dialog id="addCustomCoordDialog" closedby="any" aria-labelledby="addCustomCoordTitle">
+    <div class="dialog-inner">
+      <h2 class="dialog-title" id="addCustomCoordTitle">📍 新增自訂座標點標記（My Maps 新增標記）</h2>
+      <p class="dialog-desc" id="addCustomCoordSubtitle" style="margin-bottom:10px;">
+        您已在 Google Map 上選擇座標點，請輸入此處方服務點的名稱標記、說明、設定樣式與圖片：
+      </p>
+      <form id="addCustomCoordForm" method="dialog">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+          <div class="maint-field" style="margin-bottom:0;">
+            <label for="newCustomPinLat">所選緯度 (Lat)：</label>
+            <input type="number" step="0.0000001" id="newCustomPinLat" required />
+          </div>
+          <div class="maint-field" style="margin-bottom:0;">
+            <label for="newCustomPinLng">所選經度 (Lng)：</label>
+            <input type="number" step="0.0000001" id="newCustomPinLng" required />
+          </div>
+        </div>
+        <div class="maint-field">
+          <label for="newCustomPinName">🏷️ 地點名稱標記（必填）：</label>
+          <input type="text" id="newCustomPinName" placeholder="請輸入新服務點名稱（例如：草屯鎮社區關懷中心）" required />
+        </div>
+        <div class="maint-field">
+          <label for="newCustomPinDesc">📝 資料點說明（地址、電話、營業時間或服務內容）：</label>
+          <textarea id="newCustomPinDesc" placeholder="請輸入此服務點的補充說明..."></textarea>
+        </div>
+        <div class="maint-field">
+          <label>🪣 設定點位樣式（顏色與圖示）：</label>
+          <div class="color-palette-grid" id="newCustomPinColorGrid"></div>
+          <div class="icon-palette-grid" id="newCustomPinIconGrid"></div>
+        </div>
+        <div class="maint-field">
+          <label for="newCustomPinPhotoInput">📷 加入圖片（可上傳多張照片）：</label>
+          <input type="file" id="newCustomPinPhotoInput" accept="image/*" multiple />
+          <div class="photo-gallery-grid" id="newCustomPinPhotoPreview"></div>
+        </div>
+        <div class="dialog-actions" style="margin-top:12px;">
+          <button type="button" class="btn-secondary" id="cancelCustomPinDialogBtn">取消</button>
+          <button type="submit" class="btn-primary" style="background:#1a73e8;">💾 儲存並加入名稱標記</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
 
   <!-- 備份/匯出 KML 檔案對話框（模擬 Google My Maps 匯出成 KML/KMZ 視窗） -->
   <dialog id="backupKmlDialog" closedby="any" aria-labelledby="backupDialogTitle">
@@ -1724,7 +1859,7 @@
         <label for="exportScopeSelect">選擇要匯出的圖層範圍：</label>
         <select id="exportScopeSelect" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.9rem;">
           <option value="ALL">整個地圖（全部 6 個生活處方圖層：社交、紓壓、營養、運動、睡眠、藥物安全）</option>
-          <option value="CURRENT">僅目前選取的處方圖層</option>
+          <option value="CURRENT">僅目前開啟的處方圖層</option>
         </select>
       </div>
       <div class="dialog-steps">
@@ -3509,8 +3644,13 @@
 
     // ============================================================================
     // 第二部分：生活處方資料維護（Google My Maps 風格 KML 圖層維護引擎）
-    // 支援：1.編輯(更改樣式、編輯資料點說明、加入圖片) 2.新增(設定樣式、編輯說明、加入圖片)
-    //       3.刪除資料(含復原) 4.載入KML檔(還原) 5.備份KML檔(匯出標準KML)
+    // 規範重點：
+    // 1. 啟用維護圖層功能時，六種資料圖層同時只能開啟一種圖層（單一圖層開啟模式）
+    // 2. 新增標記提供兩個選項：
+    //    - 選項 1：選擇 Google Map 上面已經有名稱標記（直接點擊地圖上的 Google 地標 POI 或搜尋地標）
+    //    - 選項 2：在 Google Map 上任意選擇座標點再加入名稱標記（跟 My Maps 中的新增標記一樣）
+    // 3. 支援五種維護功能：編輯(更改樣式、編輯說明、加入圖片)、新增(設定樣式、編輯說明、加入圖片)、
+    //    刪除資料、載入 KML 檔、備份 KML 檔
     // ============================================================================
     const MYMAPS_COLOR_PALETTE = [
       { hex: "#FF5252", name: "社交紅 (預設)" },
@@ -3561,22 +3701,23 @@
 
     const maintState = {
       activeTab: "QUERY", // "QUERY" | "MAINT"
-      selectedLayer: "社交",
-      layerVisibility: {
-        "社交": true,
-        "紓壓": true,
-        "營養": true,
-        "運動": true,
-        "睡眠": true,
-        "藥物安全": true
-      },
+      selectedLayer: "社交", // 維護模式下唯一開啟的圖層（六種圖層同時只能開啟一種）
       filterKeyword: "",
       selectedPointId: null,
       activeSubPanel: "EDIT", // "STYLE" | "EDIT" | "IMAGE"
-      mapToolMode: "SELECT", // "SELECT" | "ADD_PIN" | "MOVE_PIN"
+      mapToolMode: "GOOGLE_POI", // "GOOGLE_POI" (選項1) | "ADD_CUSTOM_PIN" (選項2) | "MOVE_PIN"
       maintMap: null,
       maintMarkers: [],
-      lastDeletedItem: null
+      tempPreviewMarker: null,
+      lastDeletedItem: null,
+      pendingCustomPin: {
+        lat: 23.97415,
+        lng: 120.68241,
+        color: "#FF5252",
+        iconCode: "1603",
+        glyph: "🤝",
+        images: []
+      }
     };
 
     // 正規化每筆資料點的 My Maps 樣式、說明與圖片欄位
@@ -3631,7 +3772,7 @@
       try {
         localStorage.setItem(MAINT_STORAGE_KEY, JSON.stringify(state.allItems));
       } catch (e) {
-        console.warn("儲存至 localStorage 提醒（可能圖片較大，改由 IndexedDB 儲存）：", e);
+        console.warn("儲存至 localStorage 提醒（改由 IndexedDB 儲存）：", e);
       }
       try {
         if ("indexedDB" in window) {
@@ -3662,7 +3803,6 @@
         syncEl.textContent = `📦 資料庫狀態：共 ${state.allItems.length} 筆處方服務點｜${statusMsg || "已同步更新"} (${timeStr})`;
       }
 
-      // 同步更新第一部分查詢介面與第二部分維護介面
       renderCategoryButtons();
       updateNearestFive();
       renderMaintLayerList();
@@ -3690,9 +3830,10 @@
         await ensureMaintMapInitialized();
         renderMaintLayerList();
         renderMaintPointsList();
-        if (!maintState.selectedPointId) {
+        const currentPt = getSelectedMaintPoint();
+        if (!currentPt || currentPt.category !== maintState.selectedLayer) {
           const firstInLayer = state.allItems.find(i => i.category === maintState.selectedLayer);
-          if (firstInLayer) maintState.selectedPointId = firstInLayer.id;
+          maintState.selectedPointId = firstInLayer ? firstInLayer.id : null;
         }
         renderMaintInspector();
         renderMaintMapMarkers(true);
@@ -3708,7 +3849,7 @@
       }
     }
 
-    // 初始化第二部分 My Maps 維護專用 Google Map
+    // 初始化第二部分 My Maps 維護專用 Google Map（支援雙新增標記模式）
     async function ensureMaintMapInitialized() {
       if (maintState.maintMap) return;
       const mapEl = document.getElementById("maintMap");
@@ -3718,52 +3859,259 @@
         const { Map } = await google.maps.importLibrary("maps");
         maintState.maintMap = new Map(mapEl, {
           center: { lat: 23.97415, lng: 120.68241 },
-          zoom: 14,
+          zoom: 15,
           mapId: "DEMO_MAP_ID",
           renderingType: "VECTOR",
           mapTypeControl: true,
           streetViewControl: true,
+           clickableIcons: true,
           internalUsageAttributionIds: ["gmp_git_agentskills_v1"]
         });
 
-        maintState.maintMap.addListener("click", (ev) => {
+        maintState.maintMap.addListener("click", async (ev) => {
           if (!ev.latLng) return;
           const lat = Number(ev.latLng.lat().toFixed(7));
           const lng = Number(ev.latLng.lng().toFixed(7));
 
-          if (maintState.mapToolMode === "ADD_PIN") {
-            createNewServicePointAt(lat, lng, `新${maintState.selectedLayer}服務點`);
-            setMaintMapToolMode("SELECT");
-          } else if (maintState.mapToolMode === "MOVE_PIN") {
+          // 1. 若目前為「選項 2：在 Google Map 上任意選擇座標點再加入名稱標記 (ADD_CUSTOM_PIN)」
+          if (maintState.mapToolMode === "ADD_CUSTOM_PIN") {
+            if (typeof ev.stop === "function") ev.stop();
+            openCustomCoordMarkerModal(lat, lng);
+            return;
+          }
+
+          // 2. 若目前為「移動所選標記位置模式 (MOVE_PIN)」
+          if (maintState.mapToolMode === "MOVE_PIN") {
+            if (typeof ev.stop === "function") ev.stop();
             const current = getSelectedMaintPoint();
             if (current) {
               current.lat = lat;
               current.lng = lng;
               persistAndSyncKmlItems(`已移動「${current.name}」座標至 (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
-              setMaintMapToolMode("SELECT");
+              setMaintMapToolMode("GOOGLE_POI");
             }
+            return;
+          }
+
+          // 3. 若目前為「選項 1：選擇 Google Map 上面已經有名稱標記 (GOOGLE_POI)」且使用者點擊了地圖上的現有地標 (ev.placeId)
+          if (ev.placeId) {
+            if (typeof ev.stop === "function") ev.stop();
+            await handleGoogleMapExistingPoiClick(ev.placeId, lat, lng);
           }
         });
       }
     }
 
+    // 選項 1：當使用者點擊 Google Map 上已有名稱標記 (ev.placeId) 時，擷取該地標資訊並顯示「➕ 新增至地圖」預覽卡
+    async function handleGoogleMapExistingPoiClick(placeId, fallbackLat, fallbackLng) {
+      const box = document.getElementById("googlePoiCandidateBox");
+      if (!box) return;
+      box.classList.remove("hidden-view");
+      box.innerHTML = `<div style="color:#0f766e; font-weight:700;">⏳ 正在讀取您於 Google Map 點選的已有名稱標記資訊...</div>`;
+
+      let poiName = "Google 地圖地標";
+      let poiAddress = "";
+      let poiPhone = "";
+      let poiHours = [];
+      let lat = fallbackLat;
+      let lng = fallbackLng;
+
+      try {
+        const { Place } = await google.maps.importLibrary("places");
+        const place = new Place({ id: placeId });
+        await place.fetchFields({
+          fields: ["displayName", "formattedAddress", "nationalPhoneNumber", "regularOpeningHours", "location"]
+        });
+        if (place.displayName) poiName = place.displayName;
+        if (place.formattedAddress) poiAddress = place.formattedAddress;
+        if (place.nationalPhoneNumber) poiPhone = place.nationalPhoneNumber;
+        if (place.regularOpeningHours && Array.isArray(place.regularOpeningHours.weekdayDescriptions)) {
+          poiHours = place.regularOpeningHours.weekdayDescriptions;
+        }
+        if (place.location) {
+          lat = typeof place.location.lat === "function" ? place.location.lat() : Number(place.location.lat);
+          lng = typeof place.location.lng === "function" ? place.location.lng() : Number(place.location.lng);
+        }
+      } catch (err) {
+        console.warn("讀取 Google POI 詳細資訊備援至 Geocoder：", err);
+        try {
+          const { Geocoder } = await google.maps.importLibrary("geocoding");
+          const geocoder = new Geocoder();
+          const res = await geocoder.geocode({ placeId });
+          if (res && res.results && res.results[0]) {
+            poiAddress = res.results[0].formatted_address || "";
+            poiName = poiAddress.split(/[號,，]/)[0] || "Google 地圖地標";
+          }
+        } catch (e2) {
+          // 忽略備援錯誤
+        }
+      }
+
+      renderGooglePoiCandidatePreview({
+        name: poiName,
+        address: poiAddress,
+        phone: poiPhone,
+        hours: poiHours,
+        lat,
+        lng
+      });
+    }
+
+    // 顯示選項 1「已選擇 Google Map 現有名稱標記」預覽框與「➕ 新增至地圖」按鈕
+    function renderGooglePoiCandidatePreview(poi) {
+      const box = document.getElementById("googlePoiCandidateBox");
+      if (!box) return;
+      box.classList.remove("hidden-view");
+
+      const descParts = [];
+      if (poi.address) descParts.push(`📍 地址：${poi.address}`);
+      if (poi.phone) descParts.push(`📞 電話：${poi.phone}`);
+      if (poi.hours && poi.hours.length > 0) {
+        descParts.push(`🕒 營業時間：\n${poi.hours.join("\n")}`);
+      }
+      const combinedDesc = descParts.join("\n");
+
+      box.innerHTML = `
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:6px;">
+          <div>
+            <div style="font-size:0.68rem; color:#0f766e; font-weight:800;">🏪 已選取 Google Map 現有名稱標記：</div>
+            <div style="font-size:0.86rem; font-weight:800; color:#0f172a; margin-top:1px;">${escapeHtml(poi.name)}</div>
+          </div>
+          <button type="button" id="closePoiCandidateBtn" style="border:none; background:transparent; color:#64748b; cursor:pointer; font-size:0.8rem;">✕</button>
+        </div>
+        ${poi.address ? `<div style="font-size:0.71rem; color:#334155; margin-top:3px;">📍 ${escapeHtml(poi.address)}</div>` : ""}
+        ${poi.phone ? `<div style="font-size:0.71rem; color:#334155; margin-top:2px;">📞 ${escapeHtml(poi.phone)}</div>` : ""}
+        <div style="font-size:0.66rem; color:#64748b; margin-top:2px;">座標：${Number(poi.lat).toFixed(6)}, ${Number(poi.lng).toFixed(6)}</div>
+        <div style="margin-top:7px; display:flex; justify-content:flex-end; gap:6px;">
+          <button type="button" class="btn-kml-action primary" id="confirmAddGooglePoiToLayerBtn" style="width:100%; padding:6px 10px;">
+            ➕ 新增至【${escapeHtml(maintState.selectedLayer)}】處方圖層並繼續編輯
+          </button>
+        </div>
+      `;
+
+      document.getElementById("closePoiCandidateBtn").addEventListener("click", () => {
+        box.classList.add("hidden-view");
+      });
+
+      document.getElementById("confirmAddGooglePoiToLayerBtn").addEventListener("click", () => {
+        createNewServicePointAt(poi.lat, poi.lng, poi.name, combinedDesc);
+        box.classList.add("hidden-view");
+      });
+    }
+
+    // 選項 2：開啟「在 Google Map 上任意選擇座標點再加入名稱標記」對話框（跟 My Maps 新增標記一樣）
+    function openCustomCoordMarkerModal(lat, lng) {
+      const dialog = document.getElementById("addCustomCoordDialog");
+      if (!dialog) return;
+
+      const cat = maintState.selectedLayer || "社交";
+      const def = LAYER_DEFAULT_STYLE[cat] || { color: "#FF5252", iconCode: "1603", glyph: "🤝" };
+
+      maintState.pendingCustomPin = {
+        lat: Number(lat.toFixed(7)),
+        lng: Number(lng.toFixed(7)),
+        color: def.color,
+        iconCode: def.iconCode,
+        glyph: def.glyph,
+        images: []
+      };
+
+      document.getElementById("addCustomCoordSubtitle").innerHTML =
+        `準備新增標記至目前開啟的 <strong>【${escapeHtml(cat)}】處方圖層</strong>，請輸入名稱標記、說明與設定樣式：`;
+      document.getElementById("newCustomPinLat").value = maintState.pendingCustomPin.lat;
+      document.getElementById("newCustomPinLng").value = maintState.pendingCustomPin.lng;
+      document.getElementById("newCustomPinName").value = "";
+      document.getElementById("newCustomPinDesc").value = "";
+      document.getElementById("newCustomPinPhotoInput").value = "";
+      document.getElementById("newCustomPinPhotoPreview").innerHTML = "";
+
+      renderPendingCustomPinStyleSelectors();
+      dialog.showModal();
+      setTimeout(() => {
+        const nameInput = document.getElementById("newCustomPinName");
+        if (nameInput) nameInput.focus();
+      }, 60);
+    }
+
+    function renderPendingCustomPinStyleSelectors() {
+      const colorGrid = document.getElementById("newCustomPinColorGrid");
+      const iconGrid = document.getElementById("newCustomPinIconGrid");
+      if (!colorGrid || !iconGrid) return;
+
+      colorGrid.innerHTML = MYMAPS_COLOR_PALETTE.map(c => `
+        <button
+          type="button"
+          class="color-swatch-btn ${maintState.pendingCustomPin.color.toUpperCase() === c.hex.toUpperCase() ? "selected" : ""}"
+          style="background:${c.hex};"
+          data-new-color="${c.hex}"
+          title="${c.name}"
+        ></button>
+      `).join("");
+
+      iconGrid.innerHTML = MYMAPS_ICON_PALETTE.map(ic => `
+        <button
+          type="button"
+          class="icon-choice-btn ${maintState.pendingCustomPin.iconCode === ic.code ? "selected" : ""}"
+          data-new-code="${ic.code}"
+          data-new-glyph="${ic.glyph}"
+        >
+          <span>${ic.glyph}</span>
+          <span>${ic.label}</span>
+        </button>
+      `).join("");
+
+      colorGrid.querySelectorAll("[data-new-color]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          maintState.pendingCustomPin.color = btn.getAttribute("data-new-color");
+          renderPendingCustomPinStyleSelectors();
+        });
+      });
+
+      iconGrid.querySelectorAll("[data-new-code]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          maintState.pendingCustomPin.iconCode = btn.getAttribute("data-new-code");
+          maintState.pendingCustomPin.glyph = btn.getAttribute("data-new-glyph");
+          renderPendingCustomPinStyleSelectors();
+        });
+      });
+    }
+
+    // 切換地圖新增標記工具模式（選項 1 vs 選項 2 vs 移動座標）
     function setMaintMapToolMode(mode) {
       maintState.mapToolMode = mode;
       const btnSelect = document.getElementById("toolSelectModeBtn");
       const btnAdd = document.getElementById("toolAddPinModeBtn");
       const btnMove = document.getElementById("toolMovePinModeBtn");
+      const cardOpt1 = document.getElementById("optAddFromGooglePoiBtn");
+      const cardOpt2 = document.getElementById("optAddCustomCoordBtn");
       const hintEl = document.getElementById("maintMapHint");
 
       [btnSelect, btnAdd, btnMove].forEach(b => b && b.classList.remove("active"));
-      if (mode === "ADD_PIN") {
+      [cardOpt1, cardOpt2].forEach(c => c && c.classList.remove("active"));
+
+      if (maintState.maintMap) {
+        maintState.maintMap.setOptions({
+          draggableCursor: (mode === "ADD_CUSTOM_PIN" || mode === "MOVE_PIN") ? "crosshair" : null
+        });
+      }
+
+      if (mode === "ADD_CUSTOM_PIN") {
         if (btnAdd) btnAdd.classList.add("active");
-        if (hintEl) hintEl.textContent = `📍 新增標記模式：請直接點擊下方地圖任意位置，即可在【${maintState.selectedLayer}】圖層建立新服務點！`;
+        if (cardOpt2) cardOpt2.classList.add("active");
+        if (hintEl) {
+          hintEl.textContent = `📍 【選項 2：任意選擇座標點新增標記】滑鼠已切換為十字準星，請在下方 Google Map 任意位置點一下，即可跳出視窗輸入名稱標記與說明！`;
+        }
       } else if (mode === "MOVE_PIN") {
         if (btnMove) btnMove.classList.add("active");
-        if (hintEl) hintEl.textContent = `🎯 移動標記模式：請點擊下方地圖上的新位置，即可更新目前服務點的經緯度座標！`;
+        if (hintEl) {
+          hintEl.textContent = `🎯 【移動標記模式】請點擊下方地圖上的新位置，即可更新目前服務點的經緯度座標！`;
+        }
       } else {
         if (btnSelect) btnSelect.classList.add("active");
-        if (hintEl) hintEl.textContent = `💡 My Maps 維護模式：點選左側圖層或地圖標記後，可使用右下角「🪣 樣式、✏️ 編輯說明、📷 加入圖片、🗑️ 刪除」進行維護`;
+        if (cardOpt1) cardOpt1.classList.add("active");
+        if (hintEl) {
+          hintEl.textContent = `🏪 【選項 1：選擇 Google Map 已有名稱標記】目前開啟【${maintState.selectedLayer}】圖層｜請直接點選地圖上已有的店家/地標圖示（或上方搜尋地標）加入圖層！`;
+        }
       }
     }
 
@@ -3771,7 +4119,7 @@
       return state.allItems.find(i => i.id === maintState.selectedPointId) || null;
     }
 
-    // 渲染步驟 1：六大生活處方圖層選擇器（選取後圖層左邊有藍色線框塗層）
+    // 渲染步驟 1：六大生活處方圖層選擇器（單一圖層開啟模式：同時只能開啟一種圖層！）
     function renderMaintLayerList() {
       const container = document.getElementById("maintLayerList");
       if (!container) return;
@@ -3787,42 +4135,38 @@
 
       ORDERED_CATEGORIES.forEach(cat => {
         const def = LAYER_DEFAULT_STYLE[cat] || { color: "#0f766e", glyph: "📍" };
+        // 嚴格單一圖層開啟：只有 maintState.selectedLayer 為開啟狀態，其餘五種圖層自動關閉
         const isActive = maintState.selectedLayer === cat;
-        const isVisible = maintState.layerVisibility[cat] !== false;
         const div = document.createElement("div");
         div.className = "mymaps-layer-item" + (isActive ? " active-layer" : "");
+        div.setAttribute("role", "radio");
+        div.setAttribute("aria-checked", isActive ? "true" : "false");
         div.innerHTML = `
           <div class="layer-item-left">
-            <input type="checkbox" class="layer-vis-check" data-cat="${cat}" ${isVisible ? "checked" : ""} title="開啟或關閉【${cat}】圖層顯示" />
             <span class="layer-color-dot" style="background:${def.color};">${def.glyph}</span>
-            <span class="layer-item-name">${cat}處方</span>
+            <span class="layer-item-name">${cat}</span>
+            <span class="layer-status-pill ${isActive ? "open" : "closed"}">${isActive ? "🟢 已開啟" : "已關閉"}</span>
           </div>
           <span class="layer-item-count">${counts[cat] || 0}</span>
         `;
 
-        const checkbox = div.querySelector(".layer-vis-check");
-        checkbox.addEventListener("click", (e) => {
-          e.stopPropagation();
-          maintState.layerVisibility[cat] = e.target.checked;
-          renderMaintMapMarkers(false);
-        });
-
         div.addEventListener("click", () => {
+          // 切換開啟此單一圖層，自動關閉其他五種圖層
           maintState.selectedLayer = cat;
-          maintState.layerVisibility[cat] = true;
           const firstPt = state.allItems.find(i => i.category === cat);
           maintState.selectedPointId = firstPt ? firstPt.id : null;
           renderMaintLayerList();
           renderMaintPointsList();
           renderMaintInspector();
           renderMaintMapMarkers(true);
+          setMaintMapToolMode(maintState.mapToolMode);
         });
 
         container.appendChild(div);
       });
     }
 
-    // 渲染目前選取圖層內的服務點列表
+    // 渲染目前唯一開啟圖層內的服務點列表
     function renderMaintPointsList() {
       const listEl = document.getElementById("maintPointsList");
       if (!listEl) return;
@@ -3836,7 +4180,7 @@
       });
 
       if (layerItems.length === 0) {
-        listEl.innerHTML = `<div class="empty-hint" style="padding:12px;">此圖層尚無符合條件的服務點，可點擊上方「➕ 新增處方服務點」建立。</div>`;
+        listEl.innerHTML = `<div class="empty-hint" style="padding:12px;">此圖層尚無符合條件的服務點，可使用下方 2 種新增標記方式建立。</div>`;
         return;
       }
 
@@ -3882,7 +4226,7 @@
       if (!item) {
         container.innerHTML = `
           <div style="padding:14px; text-align:center; color:#64748b; font-size:0.78rem;">
-            👆 請從上方清單或右側地圖點選任一處方服務點，或點擊「➕ 新增處方服務點」進行維護。
+            👆 請從上方清單或右側地圖點選任一處方服務點，或使用「新增標記（選項 1／選項 2）」進行維護。
           </div>
         `;
         return;
@@ -3995,7 +4339,7 @@
                 <input type="number" step="0.000001" id="editPointLng" value="${item.lng}" />
               </div>
               <button type="button" class="btn-kml-action" id="btnPickCoordOnMap" title="點擊地圖重設座標" style="height:29px;">
-                🎯 地圖選點
+                🎯 地圖移點
               </button>
             </div>
             <div style="margin-top:8px; display:flex; justify-content:flex-end; gap:6px;">
@@ -4207,10 +4551,15 @@
       });
     }
 
-    // 新增處方服務點
-    function createNewServicePointAt(lat, lng, defaultName, defaultDesc = "") {
+    // 新增處方服務點（支援帶入自訂樣式與照片）
+    function createNewServicePointAt(lat, lng, defaultName, defaultDesc = "", customOpts = null) {
       const cat = maintState.selectedLayer || "社交";
       const def = LAYER_DEFAULT_STYLE[cat] || { color: "#FF5252", iconCode: "1603", glyph: "🤝" };
+      const color = (customOpts && customOpts.color) ? customOpts.color : def.color;
+      const iconCode = (customOpts && customOpts.iconCode) ? customOpts.iconCode : def.iconCode;
+      const glyph = (customOpts && customOpts.glyph) ? customOpts.glyph : def.glyph;
+      const images = (customOpts && Array.isArray(customOpts.images)) ? customOpts.images.slice() : [];
+
       const newId = "p_" + Date.now();
       const newItem = {
         id: newId,
@@ -4218,12 +4567,12 @@
         name: defaultName || `新${cat}處方服務點`,
         lat: Number(lat),
         lng: Number(lng),
-        color: def.color,
-        iconCode: def.iconCode,
-        glyph: def.glyph,
-        styleUrl: `#icon-${def.iconCode}-${def.color.slice(1).toUpperCase()}-nodesc`,
+        color,
+        iconCode,
+        glyph,
+        styleUrl: `#icon-${iconCode}-${color.slice(1).toUpperCase()}-nodesc`,
         description: defaultDesc,
-        images: []
+        images
       };
       state.allItems.unshift(newItem);
       maintState.selectedPointId = newId;
@@ -4259,7 +4608,7 @@
       persistAndSyncKmlItems(`已刪除「${target.name}」`);
     }
 
-    // 在維護模式 Google Map 上渲染所有已勾選開啟圖層之標記
+    // 在維護模式 Google Map 上渲染「唯一開啟圖層」之標記（六種資料圖層同時只能開啟一種圖層）
     async function renderMaintMapMarkers(fitBoundsFlag = false) {
       if (!state.isGoogleMapsReady || !maintState.maintMap) return;
 
@@ -4272,14 +4621,10 @@
       const bounds = new LatLngBounds();
       let visibleCount = 0;
 
-      // 顯示目前選取圖層的所有點位，以及其他已勾選開啟圖層的點位
+      // 嚴格單一圖層顯示：僅繪製目前開啟圖層 (maintState.selectedLayer) 的處方服務點
       state.allItems.forEach(item => {
-        if (maintState.layerVisibility[item.category] === false) return;
-        const isCurrentLayer = item.category === maintState.selectedLayer;
+        if (item.category !== maintState.selectedLayer) return;
         const isSelected = item.id === maintState.selectedPointId;
-
-        // 為了保持地圖流暢清晰，非作用中圖層僅在被選取或同圖層時高亮
-        if (!isCurrentLayer && !isSelected) return;
 
         const pos = { lat: item.lat, lng: item.lng };
         bounds.extend(pos);
@@ -4290,7 +4635,7 @@
           borderColor: isSelected ? "#0f172a" : "#ffffff",
           glyphColor: "#ffffff",
           glyphText: item.glyph || "📍",
-          scale: isSelected ? 1.35 : 0.95
+          scale: isSelected ? 1.35 : 1.0
         });
 
         const marker = new AdvancedMarkerElement({
@@ -4303,9 +4648,7 @@
         marker.append(pin);
 
         const onMarkerClick = () => {
-          maintState.selectedLayer = item.category;
           maintState.selectedPointId = item.id;
-          renderMaintLayerList();
           renderMaintPointsList();
           renderMaintInspector();
           renderMaintMapMarkers(false);
@@ -4340,7 +4683,6 @@
 
       const itemsToExport = state.allItems.filter(i => targetCategories.includes(i.category));
 
-      // 收集所有使用到的樣式 (Style / StyleMap)
       const styleMapDefs = new Map();
       itemsToExport.forEach(item => {
         const hasDescOrImg = Boolean((item.description && item.description.trim()) || (Array.isArray(item.images) && item.images.length > 0));
@@ -4542,6 +4884,23 @@
       }
     }
 
+    function setupDialogLightDismiss(dialogEl) {
+      if (dialogEl && !("closedBy" in HTMLDialogElement.prototype)) {
+        dialogEl.addEventListener("click", (event) => {
+          if (event.target !== dialogEl) return;
+          const rect = dialogEl.getBoundingClientRect();
+          const isDialogContent = (
+            rect.top <= event.clientY &&
+            event.clientY <= rect.top + rect.height &&
+            rect.left <= event.clientX &&
+            event.clientX <= rect.left + rect.width
+          );
+          if (isDialogContent) return;
+          dialogEl.close();
+        });
+      }
+    }
+
     function bindMaintenanceEvents() {
       // 頂部雙模式切換按鈕
       const tabQueryBtn = document.getElementById("tabQueryBtn");
@@ -4558,30 +4917,81 @@
         });
       }
 
-      // 新增處方服務點按鈕（預設在目前地圖中心或草屯鎮公所旁建立並開啟編輯）
-      const btnAddFlow = document.getElementById("btnOpenAddPointFlow");
-      if (btnAddFlow) {
-        btnAddFlow.addEventListener("click", () => {
-          const center = (maintState.maintMap && maintState.maintMap.getCenter())
-            ? { lat: maintState.maintMap.getCenter().lat(), lng: maintState.maintMap.getCenter().lng() }
-            : { lat: 23.97415, lng: 120.68241 };
-          createNewServicePointAt(
-            Number(center.lat.toFixed(6)),
-            Number(center.lng.toFixed(6)),
-            `新${maintState.selectedLayer}服務點`
-          );
-        });
-      }
-
-      // 地圖上方三種模式按鈕
+      // 新增標記雙選項卡片與地圖上方工具列連動
+      const opt1Card = document.getElementById("optAddFromGooglePoiBtn");
+      const opt2Card = document.getElementById("optAddCustomCoordBtn");
       const btnSelectMode = document.getElementById("toolSelectModeBtn");
       const btnAddPinMode = document.getElementById("toolAddPinModeBtn");
       const btnMovePinMode = document.getElementById("toolMovePinModeBtn");
-      if (btnSelectMode) btnSelectMode.addEventListener("click", () => setMaintMapToolMode("SELECT"));
-      if (btnAddPinMode) btnAddPinMode.addEventListener("click", () => setMaintMapToolMode("ADD_PIN"));
+
+      if (opt1Card) {
+        opt1Card.addEventListener("click", () => {
+          setMaintMapToolMode("GOOGLE_POI");
+          const searchInp = document.getElementById("maintMapSearchInput");
+          if (searchInp) searchInp.focus();
+        });
+      }
+      if (opt2Card) {
+        opt2Card.addEventListener("click", () => {
+          setMaintMapToolMode("ADD_CUSTOM_PIN");
+        });
+      }
+      if (btnSelectMode) btnSelectMode.addEventListener("click", () => setMaintMapToolMode("GOOGLE_POI"));
+      if (btnAddPinMode) btnAddPinMode.addEventListener("click", () => setMaintMapToolMode("ADD_CUSTOM_PIN"));
       if (btnMovePinMode) btnMovePinMode.addEventListener("click", () => setMaintMapToolMode("MOVE_PIN"));
 
-      // 地圖上方「搜尋草屯地標或地址直接新增至目前圖層」
+      // 選項 2：自訂座標點新增標記 Dialog 事件綁定
+      const customPinDialog = document.getElementById("addCustomCoordDialog");
+      setupDialogLightDismiss(customPinDialog);
+
+      const cancelCustomPinBtn = document.getElementById("cancelCustomPinDialogBtn");
+      if (cancelCustomPinBtn && customPinDialog) {
+        cancelCustomPinBtn.addEventListener("click", () => {
+          customPinDialog.close();
+          setMaintMapToolMode("GOOGLE_POI");
+        });
+      }
+
+      const customPinPhotoInput = document.getElementById("newCustomPinPhotoInput");
+      if (customPinPhotoInput) {
+        customPinPhotoInput.addEventListener("change", async (e) => {
+          const files = Array.from(e.target.files || []);
+          for (const f of files) {
+            const dataUrl = await compressImageFileToDataUrl(f, 720, 0.78);
+            if (dataUrl) maintState.pendingCustomPin.images.push(dataUrl);
+          }
+          const previewEl = document.getElementById("newCustomPinPhotoPreview");
+          if (previewEl) {
+            previewEl.innerHTML = maintState.pendingCustomPin.images.map((src, i) => `
+              <div class="photo-card"><img src="${escapeAttr(src)}" alt="預覽圖片 ${i + 1}" /></div>
+            `).join("");
+          }
+        });
+      }
+
+      const customPinForm = document.getElementById("addCustomCoordForm");
+      if (customPinForm && customPinDialog) {
+        customPinForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const lat = parseFloat(document.getElementById("newCustomPinLat").value);
+          const lng = parseFloat(document.getElementById("newCustomPinLng").value);
+          const name = document.getElementById("newCustomPinName").value.trim();
+          const desc = document.getElementById("newCustomPinDesc").value.trim();
+          if (!name || isNaN(lat) || isNaN(lng)) return;
+
+          createNewServicePointAt(lat, lng, name, desc, {
+            color: maintState.pendingCustomPin.color,
+            iconCode: maintState.pendingCustomPin.iconCode,
+            glyph: maintState.pendingCustomPin.glyph,
+            images: maintState.pendingCustomPin.images
+          });
+
+          customPinDialog.close();
+          setMaintMapToolMode("GOOGLE_POI");
+        });
+      }
+
+      // 選項 1 輔助：地圖上方「搜尋 Google Map 已有名稱地標」
       const mapAddForm = document.getElementById("maintMapSearchAddForm");
       if (mapAddForm) {
         mapAddForm.addEventListener("submit", async (e) => {
@@ -4600,25 +5010,38 @@
                 maxResultCount: 1,
                 region: "tw",
                 language: "zh-TW",
-                fields: ["displayName", "formattedAddress", "nationalPhoneNumber", "location"],
+                fields: ["displayName", "formattedAddress", "nationalPhoneNumber", "regularOpeningHours", "location"],
                 internalUsageAttributionIds: ["gmp_git_agentskills_v1"]
               });
               if (places && places.length > 0 && places[0].location) {
                 const p = places[0];
                 const lat = typeof p.location.lat === "function" ? p.location.lat() : Number(p.location.lat);
                 const lng = typeof p.location.lng === "function" ? p.location.lng() : Number(p.location.lng);
-                const descParts = [];
-                if (p.formattedAddress) descParts.push(`📍 地址：${p.formattedAddress}`);
-                if (p.nationalPhoneNumber) descParts.push(`📞 電話：${p.nationalPhoneNumber}`);
-                createNewServicePointAt(lat, lng, p.displayName || q, descParts.join("\n"));
+                const hours = (p.regularOpeningHours && Array.isArray(p.regularOpeningHours.weekdayDescriptions))
+                  ? p.regularOpeningHours.weekdayDescriptions
+                  : [];
+
+                if (maintState.maintMap) {
+                  maintState.maintMap.panTo({ lat, lng });
+                  maintState.maintMap.setZoom(17);
+                }
+
+                renderGooglePoiCandidatePreview({
+                  name: p.displayName || q,
+                  address: p.formattedAddress || "",
+                  phone: p.nationalPhoneNumber || "",
+                  hours,
+                  lat,
+                  lng
+                });
                 inp.value = "";
                 return;
               }
             } catch (err) {
-              console.warn("Places 搜尋新增備援：", err);
+              console.warn("Places 搜尋地標備援：", err);
             }
           }
-          alert(`找不到「${q}」的精確座標，請使用「📍 新增標記」按鈕直接在地圖上點選位置新增。`);
+          alert(`在 Google Map 上找不到「${q}」的地標標記，您可使用「📍 選項 2：任意選擇座標點新增標記」直接在地圖上點選位置新增。`);
         });
       }
 
@@ -4652,20 +5075,8 @@
 
       // 備份 KML 檔（開啟匯出對話框，含 Modern Web Guidance light-dismiss fallback）
       const backupModal = document.getElementById("backupKmlDialog");
-      if (backupModal && !("closedBy" in HTMLDialogElement.prototype)) {
-        backupModal.addEventListener("click", (event) => {
-          if (event.target !== backupModal) return;
-          const rect = backupModal.getBoundingClientRect();
-          const isDialogContent = (
-            rect.top <= event.clientY &&
-            event.clientY <= rect.top + rect.height &&
-            rect.left <= event.clientX &&
-            event.clientX <= rect.left + rect.width
-          );
-          if (isDialogContent) return;
-          backupModal.close();
-        });
-      }
+      setupDialogLightDismiss(backupModal);
+
       const openBackupBtn = document.getElementById("btnOpenBackupModal");
       const closeBackupBtn = document.getElementById("closeBackupDialogBtn");
       const confirmDownloadBtn = document.getElementById("confirmDownloadKmlBtn");
