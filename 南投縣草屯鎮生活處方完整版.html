@@ -4407,39 +4407,43 @@
       if (!iconGrid || !maintState.pendingCustomPin) return;
 
       const curLayer = maintState.selectedLayer || "社交";
-      const layerStyles = MYMAPS_ICON_PALETTE.filter(ic => ic.cat === curLayer);
-      const displayStyles = layerStyles.length > 0 ? layerStyles : [
-        MYMAPS_ICON_PALETTE.find(ic => ic.cat === curLayer) || MYMAPS_ICON_PALETTE[0]
-      ];
+      const curDef = LAYER_DEFAULT_STYLE[curLayer] || { color: "#FF5252", iconCode: "1603", glyph: "🤝" };
+      const curIcon = MYMAPS_ICON_PALETTE.find(ic => ic.cat === curLayer) || {
+        code: curDef.iconCode,
+        cat: curLayer,
+        label: curLayer,
+        defaultColor: curDef.color,
+        colorName: "專屬色",
+        desc: "專屬圖示"
+      };
 
-      // 依使用者指示：使用哪個圖層時只需保留該圖層樣式，其餘樣式不須顯示
+      // 預設強制為該圖層原本的顏色與樣式
+      maintState.pendingCustomPin.iconCode = curIcon.code;
+      maintState.pendingCustomPin.color = curIcon.defaultColor;
+      maintState.pendingCustomPin.styleUrl = `#icon-${curIcon.code}-${curIcon.defaultColor.replace("#", "")}-nodesc`;
+
       iconGrid.innerHTML = `
-        <div class="maint-style-options-grid" style="grid-template-columns: 1fr; gap:6px; margin-top:4px; margin-bottom:4px;">
-          ${displayStyles.map(ic => {
-            const isSelected = maintState.pendingCustomPin.iconCode === ic.code;
-            return `
-              <button
-                type="button"
-                class="maint-style-card ${isSelected ? "selected" : ""}"
-                data-style-code="${ic.code}"
-                data-style-cat="${ic.cat}"
-                data-style-color="${ic.defaultColor}"
-                style="padding:8px 10px;"
-                title="套用「${ic.label}」處方標準樣式（${ic.colorName} ${ic.defaultColor}）"
-              >
-                <div class="maint-style-card-left" style="gap:9px;">
-                  ${getMyMapsCategoryIcon(ic.cat, 28)}
-                  <div class="maint-style-card-text">
-                    <div class="maint-style-card-title" style="font-size:0.84rem;">${ic.label} 處方專屬標準樣式</div>
-                    <div class="maint-style-card-sub" style="font-size:0.68rem;">${ic.colorName} (${ic.defaultColor}) · ${ic.desc}</div>
-                  </div>
-                </div>
-                <div class="maint-style-card-badge" style="font-size:0.68rem; padding:3px 8px;">
-                  ${isSelected ? "✓ 本圖層樣式（已選用）" : "選取"}
-                </div>
-              </button>
-            `;
-          }).join("")}
+        <div class="maint-style-options-grid" style="grid-template-columns: 1fr; margin-top:4px; margin-bottom:4px;">
+          <button
+            type="button"
+            class="maint-style-card selected"
+            data-style-code="${curIcon.code}"
+            data-style-cat="${curIcon.cat}"
+            data-style-color="${curIcon.defaultColor}"
+            style="border-color:${curIcon.defaultColor}; background:#f8fafc; padding:8px 10px;"
+            title="本圖層唯一指定原本樣式"
+          >
+            <div class="maint-style-card-left" style="gap:9px;">
+              ${getMyMapsCategoryIcon(curLayer, 30)}
+              <div class="maint-style-card-text">
+                <div class="maint-style-card-title" style="font-size:0.86rem; color:#0f172a;">${curLayer} 處方原本標準樣式</div>
+                <div class="maint-style-card-sub" style="font-size:0.68rem; color:#475569;">原本顏色：${curIcon.colorName} (${curIcon.defaultColor}) · 原本圖示：${curIcon.desc}</div>
+              </div>
+            </div>
+            <div class="maint-style-card-badge" style="background:${curIcon.defaultColor}; color:#ffffff; font-size:0.68rem; padding:3px 8px;">
+              ✓ 本圖層唯一指定樣式
+            </div>
+          </button>
         </div>
       `;
 
@@ -4447,17 +4451,6 @@
         colorGrid.innerHTML = "";
         colorGrid.style.display = "none";
       }
-
-      iconGrid.querySelectorAll(".maint-style-card").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const code = btn.getAttribute("data-style-code");
-          const color = btn.getAttribute("data-style-color");
-          maintState.pendingCustomPin.iconCode = code;
-          maintState.pendingCustomPin.color = color;
-          maintState.pendingCustomPin.styleUrl = `#icon-${code}-${color.replace("#", "")}`;
-          renderPendingCustomPinStyleSelectors();
-        });
-      });
     }
 
     // 切換地圖新增標記工具模式（選項 1 vs 選項 2 vs 移動座標）
@@ -4626,10 +4619,18 @@
       let subPanelHtml = "";
       if (activeSub === "STYLE") {
         const curLayer = item.category || maintState.selectedLayer || "社交";
-        const layerStyles = MYMAPS_ICON_PALETTE.filter(ic => ic.cat === curLayer);
-        const displayStyles = layerStyles.length > 0 ? layerStyles : [
-          MYMAPS_ICON_PALETTE.find(ic => ic.cat === curLayer) || MYMAPS_ICON_PALETTE[0]
-        ];
+        const curDef = LAYER_DEFAULT_STYLE[curLayer] || { color: "#FF5252", iconCode: "1603", glyph: "🤝" };
+        const curIcon = MYMAPS_ICON_PALETTE.find(ic => ic.cat === curLayer) || {
+          code: curDef.iconCode,
+          cat: curLayer,
+          label: curLayer,
+          defaultColor: curDef.color,
+          colorName: "專屬色",
+          desc: "專屬圖示"
+        };
+
+        const isCurrentlyDefault = (item.iconCode === curIcon.code) && 
+          (item.color.toUpperCase() === curIcon.defaultColor.toUpperCase());
 
         subPanelHtml = `
           <div class="mymaps-subpanel">
@@ -4637,36 +4638,37 @@
               <span>🪣 更改點位樣式（目前圖層：【${escapeHtml(curLayer)}處方】）</span>
               <span style="font-size:0.68rem; color:#64748b;">樣式代碼：<code>${escapeHtml(item.styleUrl || "自訂")}</code></span>
             </div>
-            <div style="font-size:0.7rem; color:#475569; margin-bottom:8px;">
-              目前使用<strong>【${escapeHtml(curLayer)}】</strong>圖層，依圖層規範僅保留本圖層專屬樣式（其餘圖層樣式已隱藏）：
+            <div style="font-size:0.71rem; color:#334155; margin-bottom:8px; line-height:1.45; background:#f1f5f9; padding:6px 9px; border-radius:6px; border-left:3px solid ${curIcon.defaultColor};">
+              📌 <strong>圖層色彩與樣式限制規範：</strong><br/>
+              使用<strong>【${escapeHtml(curLayer)}】</strong>圖層時，系統只保留該圖層原本的顏色（<strong>${curIcon.colorName} ${curIcon.defaultColor}</strong>）與原本樣式（<strong>${curIcon.desc}</strong>）供選擇，其他圖層顏色與樣式皆不開放選用，以確保資料圖層標準性。
             </div>
 
-            <!-- 依使用者指示：僅保留與目前圖層一致的專屬樣式選項，其餘樣式不顯示 -->
-            <div class="maint-style-options-grid" style="grid-template-columns: 1fr;">
-              ${displayStyles.map(ic => {
-                const isSelected = (item.iconCode === ic.code && item.color.toUpperCase() === ic.defaultColor.toUpperCase()) || (!item.iconCode && item.category === ic.cat);
-                return `
-                  <button
-                    type="button"
-                    class="maint-style-card ${isSelected ? "selected" : ""}"
-                    data-style-code="${ic.code}"
-                    data-style-cat="${ic.cat}"
-                    data-style-color="${ic.defaultColor}"
-                    title="套用「${ic.label}」處方標準樣式（${ic.colorName} ${ic.defaultColor}）"
-                  >
-                    <div class="maint-style-card-left">
-                      ${getMyMapsCategoryIcon(ic.cat, 32)}
-                      <div class="maint-style-card-text">
-                        <div class="maint-style-card-title">${ic.label} 處方專屬標準樣式</div>
-                        <div class="maint-style-card-sub">${ic.colorName} (${ic.defaultColor}) · ${ic.desc}</div>
-                      </div>
+            <!-- 只保留原本的顏色和樣式可選，其餘皆不顯示 -->
+            <div class="maint-style-options-grid" style="grid-template-columns: 1fr; margin-top:6px;">
+              <button
+                type="button"
+                class="maint-style-card selected"
+                data-style-code="${curIcon.code}"
+                data-style-cat="${curIcon.cat}"
+                data-style-color="${curIcon.defaultColor}"
+                style="border-color:${curIcon.defaultColor}; background:#f8fafc; padding:10px 12px;"
+                title="點擊確認套用【${curLayer}】原本的顏色與樣式"
+              >
+                <div class="maint-style-card-left" style="gap:10px;">
+                  ${getMyMapsCategoryIcon(curLayer, 36)}
+                  <div class="maint-style-card-text">
+                    <div class="maint-style-card-title" style="font-size:0.92rem; color:#0f172a;">
+                      ${curLayer} 處方原本標準樣式
                     </div>
-                    <div class="maint-style-card-badge">
-                      ${isSelected ? "✓ 本圖層樣式（已套用）" : "點擊套用本圖層樣式"}
+                    <div class="maint-style-card-sub" style="font-size:0.72rem; color:#475569; margin-top:3px;">
+                      原本顏色：<strong>${curIcon.colorName} (${curIcon.defaultColor})</strong> · 原本圖示：<strong>${curIcon.desc}</strong>
                     </div>
-                  </button>
-                `;
-              }).join("")}
+                  </div>
+                </div>
+                <div class="maint-style-card-badge" style="background:${curIcon.defaultColor}; color:#ffffff; font-size:0.72rem; padding:4px 10px;">
+                  ${isCurrentlyDefault ? "✓ 原本樣式（已套用）" : "點擊恢復原本樣式"}
+                </div>
+              </button>
             </div>
           </div>
         `;
@@ -4819,21 +4821,15 @@
 
       // 綁定子面板內部互動事件
       if (activeSub === "STYLE") {
-        container.querySelectorAll(".color-swatch-btn").forEach(btn => {
+        container.querySelectorAll(".maint-style-card").forEach(btn => {
           btn.addEventListener("click", () => {
-            item.color = btn.getAttribute("data-color");
-            persistAndSyncKmlItems(`已更新「${item.name}」的樣式顏色為 ${item.color}`);
-          });
-        });
-        container.querySelectorAll(".icon-choice-btn").forEach(btn => {
-          btn.addEventListener("click", () => {
-            item.iconCode = btn.getAttribute("data-icon-code");
-            const icCat = btn.getAttribute("data-icon-cat");
-            const def = LAYER_DEFAULT_STYLE[icCat];
-            if (def && (!item.color || item.color === "#FF5252")) {
-              item.color = def.color;
-            }
-            persistAndSyncKmlItems(`已更新「${item.name}」的點位圖示為【${icCat}】`);
+            const code = btn.getAttribute("data-style-code");
+            const cat = btn.getAttribute("data-style-cat");
+            const color = btn.getAttribute("data-style-color");
+            item.iconCode = code;
+            item.color = color;
+            item.styleUrl = `#icon-${code}-${color.replace("#", "")}-nodesc`;
+            persistAndSyncKmlItems(`已確認套用「${item.name}」為【${cat}處方】原本顏色與樣式`);
           });
         });
       } else if (activeSub === "IMAGE") {
