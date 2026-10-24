@@ -1826,6 +1826,7 @@
           <label for="newCustomPinName">🏷️ 地點名稱標記（必填）：</label>
           <input type="text" id="newCustomPinName" placeholder="請輸入新服務點名稱（例如：草屯鎮社區關懷中心）" required />
         </div>
+        <div id="customPinDuplicateAlert" class="hidden-view" style="margin-bottom:8px; padding:7px 9px; border-radius:7px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; font-size:0.75rem; font-weight:700; line-height:1.35;"></div>
         <div class="maint-field">
           <label for="newCustomPinDesc">📝 資料點說明（地址、電話、營業時間或服務內容）：</label>
           <textarea id="newCustomPinDesc" placeholder="請輸入此服務點的補充說明..."></textarea>
@@ -1842,7 +1843,7 @@
         </div>
         <div class="dialog-actions" style="margin-top:12px;">
           <button type="button" class="btn-secondary" id="cancelCustomPinDialogBtn">取消</button>
-          <button type="submit" class="btn-primary" style="background:#1a73e8;">💾 儲存並加入名稱標記</button>
+          <button type="submit" class="btn-primary" id="saveCustomPinSubmitBtn" style="background:#1a73e8;">💾 儲存並加入名稱標記</button>
         </div>
       </form>
     </div>
@@ -3957,11 +3958,71 @@
       });
     }
 
-    // 顯示選項 1「已選擇 Google Map 現有名稱標記」預覽框與「➕ 新增至地圖」按鈕
+    // 正規化地標名稱以比對是否已在圖層中（去除空白、括號、標點符號與宣傳副標題）
+    function normalizePlaceNameForMatch(rawName) {
+      const str = String(rawName || "").trim().toLowerCase();
+      if (!str) return { full: "", core: "" };
+      const primaryPart = str.split(/[｜|•]/)[0].trim();
+      const clean = (s) => s
+        .replace(/[\s\u3000\-—–_・•,，.。!！?？:：;；/／\\()（）[\]【】「」『』<>《》"']/g, "")
+        .replace(/^(社團法人|財團法人)?(南投縣)?(草屯鎮|草屯)?/g, "");
+      const fullClean = clean(str);
+      const coreClean = clean(primaryPart) || fullClean;
+      return { full: fullClean, core: coreClean };
+    }
+
+    // 檢查欲新增或修改的服務點是否「已經在圖層中」（防止重複新增）
+    function findExistingPointInLayer(candidateName, candidateLat, candidateLng, targetLayer = null, excludeId = null) {
+      const layer = targetLayer || maintState.selectedLayer || "社交";
+      const candNorm = normalizePlaceNameForMatch(candidateName);
+      const hasValidCoords = typeof candidateLat === "number" && typeof candidateLng === "number" && !isNaN(candidateLat) && !isNaN(candidateLng);
+
+      for (const item of state.allItems) {
+        if (item.category !== layer) continue;
+        if (excludeId && item.id === excludeId) continue;
+
+        const itemNorm = normalizePlaceNameForMatch(item.name);
+
+        // 1. 名稱完全一致或核心名稱一致（例如「瑪度咖啡 草屯」與「瑪度咖啡(草屯)」或「品皇咖啡--草屯中興店｜...」）
+        if (candNorm.full && itemNorm.full) {
+          if (candNorm.full === itemNorm.full) return item;
+          if (candNorm.core.length >= 2 && itemNorm.core.length >= 2 && candNorm.core === itemNorm.core) {
+            return item;
+          }
+        }
+
+        // 2. 結合座標距離與名稱相似度檢查
+        if (hasValidCoords) {
+          const distMeters = computeHaversineMeters(item.lat, item.lng, candidateLat, candidateLng);
+
+          // 若座標完全重疊（<= 12 公尺），視為圖層中已存在該地點座標資料
+          if (distMeters <= 12) {
+            if (!candNorm.core) return item;
+            if (candNorm.core.includes(itemNorm.core) || itemNorm.core.includes(candNorm.core)) {
+              return item;
+            }
+          }
+
+          // 若座標在 65 公尺內（同一建築或街廓），且其中一方包含另一方核心名稱（>= 2 字）
+          if (distMeters <= 65 && candNorm.core.length >= 2 && itemNorm.core.length >= 2) {
+            if (candNorm.core.includes(itemNorm.core) || itemNorm.core.includes(candNorm.core)) {
+              return item;
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    // 顯示選項 1「已選擇 Google Map 現有名稱標記」預覽框與「➕ 新增至地圖」按鈕（若已在圖層中則禁止新增）
     function renderGooglePoiCandidatePreview(poi) {
       const box = document.getElementById("googlePoiCandidateBox");
       if (!box) return;
+      maintState.lastPoiCandidate = poi;
       box.classList.remove("hidden-view");
+
+      const currentLayer = maintState.selectedLayer || "社交";
+      const existingItem = findExistingPointInLayer(poi.name, poi.lat, poi.lng, currentLayer);
 
       const descParts = [];
       if (poi.address) descParts.push(`📍 地址：${poi.address}`);
@@ -3970,6 +4031,28 @@
         descParts.push(`🕒 營業時間：\n${poi.hours.join("\n")}`);
       }
       const combinedDesc = descParts.join("\n");
+
+      const actionAreaHtml = existingItem
+        ? `
+          <div style="margin-top:6px; padding:6px 8px; border-radius:6px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; font-size:0.72rem; font-weight:700; line-height:1.35;">
+            🚫 此資料已經在【${escapeHtml(currentLayer)}】圖層中（圖層現有資料：「${escapeHtml(existingItem.name)}」），已經在圖層中的資料不能被新增！
+          </div>
+          <div style="margin-top:6px; display:flex; flex-direction:column; gap:5px;">
+            <button type="button" class="btn-kml-action" disabled style="width:100%; padding:6px 10px; background:#e2e8f0; color:#64748b; border-color:#cbd5e1; cursor:not-allowed; opacity:0.8;">
+              🚫 已經在【${escapeHtml(currentLayer)}】圖層中，不可新增
+            </button>
+            <button type="button" class="btn-kml-action" id="focusExistingLayerItemBtn" style="width:100%; padding:5px 10px; color:#0f766e; border-color:#99f6e4; background:#f0fdfa;">
+              👁️ 改為檢視／編輯圖層中現有的「${escapeHtml(existingItem.name)}」
+            </button>
+          </div>
+        `
+        : `
+          <div style="margin-top:7px; display:flex; justify-content:flex-end; gap:6px;">
+            <button type="button" class="btn-kml-action primary" id="confirmAddGooglePoiToLayerBtn" style="width:100%; padding:6px 10px;">
+              ➕ 新增至【${escapeHtml(currentLayer)}】處方圖層並繼續編輯
+            </button>
+          </div>
+        `;
 
       box.innerHTML = `
         <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:6px;">
@@ -3982,21 +4065,72 @@
         ${poi.address ? `<div style="font-size:0.71rem; color:#334155; margin-top:3px;">📍 ${escapeHtml(poi.address)}</div>` : ""}
         ${poi.phone ? `<div style="font-size:0.71rem; color:#334155; margin-top:2px;">📞 ${escapeHtml(poi.phone)}</div>` : ""}
         <div style="font-size:0.66rem; color:#64748b; margin-top:2px;">座標：${Number(poi.lat).toFixed(6)}, ${Number(poi.lng).toFixed(6)}</div>
-        <div style="margin-top:7px; display:flex; justify-content:flex-end; gap:6px;">
-          <button type="button" class="btn-kml-action primary" id="confirmAddGooglePoiToLayerBtn" style="width:100%; padding:6px 10px;">
-            ➕ 新增至【${escapeHtml(maintState.selectedLayer)}】處方圖層並繼續編輯
-          </button>
-        </div>
+        ${actionAreaHtml}
       `;
 
       document.getElementById("closePoiCandidateBtn").addEventListener("click", () => {
+        maintState.lastPoiCandidate = null;
         box.classList.add("hidden-view");
       });
 
-      document.getElementById("confirmAddGooglePoiToLayerBtn").addEventListener("click", () => {
-        createNewServicePointAt(poi.lat, poi.lng, poi.name, combinedDesc);
-        box.classList.add("hidden-view");
-      });
+      const focusExistingBtn = document.getElementById("focusExistingLayerItemBtn");
+      if (focusExistingBtn && existingItem) {
+        focusExistingBtn.addEventListener("click", () => {
+          maintState.selectedPointId = existingItem.id;
+          maintState.activeSubPanel = "EDIT";
+          renderMaintPointsList();
+          renderMaintInspector();
+          renderMaintMapMarkers(false);
+          if (maintState.maintMap) {
+            maintState.maintMap.panTo({ lat: existingItem.lat, lng: existingItem.lng });
+            maintState.maintMap.setZoom(17);
+          }
+          box.classList.add("hidden-view");
+        });
+      }
+
+      const confirmBtn = document.getElementById("confirmAddGooglePoiToLayerBtn");
+      if (confirmBtn && !existingItem) {
+        confirmBtn.addEventListener("click", () => {
+          const added = createNewServicePointAt(poi.lat, poi.lng, poi.name, combinedDesc);
+          if (added) {
+            maintState.lastPoiCandidate = null;
+            box.classList.add("hidden-view");
+          }
+        });
+      }
+    }
+
+    // 即時驗證選項 2（自訂座標點新增標記視窗）是否與圖層現有資料重複
+    function validateCustomCoordDialogDuplicate() {
+      const alertEl = document.getElementById("customPinDuplicateAlert");
+      const submitBtn = document.getElementById("saveCustomPinSubmitBtn");
+      const latInput = document.getElementById("newCustomPinLat");
+      const lngInput = document.getElementById("newCustomPinLng");
+      const nameInput = document.getElementById("newCustomPinName");
+      if (!alertEl || !submitBtn || !latInput || !lngInput || !nameInput) return null;
+
+      const lat = parseFloat(latInput.value);
+      const lng = parseFloat(lngInput.value);
+      const name = nameInput.value.trim();
+      const cat = maintState.selectedLayer || "社交";
+
+      const dup = findExistingPointInLayer(name, lat, lng, cat);
+      if (dup) {
+        alertEl.classList.remove("hidden-view");
+        alertEl.textContent = `🚫 無法新增：「${dup.name}」已經在【${cat}】圖層中，已經在圖層中的資料不能被新增！`;
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.5";
+        submitBtn.style.cursor = "not-allowed";
+        return dup;
+      } else {
+        alertEl.classList.add("hidden-view");
+        alertEl.textContent = "";
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = "1";
+        submitBtn.style.cursor = "pointer";
+        return null;
+      }
     }
 
     // 選項 2：開啟「在 Google Map 上任意選擇座標點再加入名稱標記」對話框（跟 My Maps 新增標記一樣）
@@ -4026,6 +4160,7 @@
       document.getElementById("newCustomPinPhotoPreview").innerHTML = "";
 
       renderPendingCustomPinStyleSelectors();
+      validateCustomCoordDialogDuplicate();
       dialog.showModal();
       setTimeout(() => {
         const nameInput = document.getElementById("newCustomPinName");
@@ -4160,6 +4295,9 @@
           renderMaintInspector();
           renderMaintMapMarkers(true);
           setMaintMapToolMode(maintState.mapToolMode);
+          if (maintState.lastPoiCandidate) {
+            renderGooglePoiCandidatePreview(maintState.lastPoiCandidate);
+          }
         });
 
         container.appendChild(div);
@@ -4479,6 +4617,14 @@
             const newLat = parseFloat(document.getElementById("editPointLat").value);
             const newLng = parseFloat(document.getElementById("editPointLng").value);
 
+            const checkLat = !isNaN(newLat) ? newLat : item.lat;
+            const checkLng = !isNaN(newLng) ? newLng : item.lng;
+            const dup = findExistingPointInLayer(newName, checkLat, checkLng, newCat, item.id);
+            if (dup) {
+              alert(`🚫 無法儲存變更：「${dup.name}」已經在【${newCat}】圖層中，已經在圖層中的資料不能重複！`);
+              return;
+            }
+
             item.name = newName;
             if (newCat !== item.category) {
               item.category = newCat;
@@ -4551,9 +4697,29 @@
       });
     }
 
-    // 新增處方服務點（支援帶入自訂樣式與照片）
+    // 新增處方服務點（支援帶入自訂樣式與照片，並強制檢查已經在圖層中的資料不能被新增）
     function createNewServicePointAt(lat, lng, defaultName, defaultDesc = "", customOpts = null) {
       const cat = maintState.selectedLayer || "社交";
+      const candidateName = (defaultName || "").trim() || `新${cat}處方服務點`;
+      const numLat = Number(lat);
+      const numLng = Number(lng);
+
+      // 強制防呆：已經在圖層中的資料不能被新增
+      const existingDup = findExistingPointInLayer(candidateName, numLat, numLng, cat);
+      if (existingDup) {
+        alert(`🚫 無法新增：「${existingDup.name}」已經在【${cat}】圖層中，已經在圖層中的資料不能被新增！`);
+        maintState.selectedPointId = existingDup.id;
+        maintState.activeSubPanel = "EDIT";
+        renderMaintPointsList();
+        renderMaintInspector();
+        renderMaintMapMarkers(false);
+        if (maintState.maintMap) {
+          maintState.maintMap.panTo({ lat: existingDup.lat, lng: existingDup.lng });
+          maintState.maintMap.setZoom(16);
+        }
+        return false;
+      }
+
       const def = LAYER_DEFAULT_STYLE[cat] || { color: "#FF5252", iconCode: "1603", glyph: "🤝" };
       const color = (customOpts && customOpts.color) ? customOpts.color : def.color;
       const iconCode = (customOpts && customOpts.iconCode) ? customOpts.iconCode : def.iconCode;
@@ -4564,9 +4730,9 @@
       const newItem = {
         id: newId,
         category: cat,
-        name: defaultName || `新${cat}處方服務點`,
-        lat: Number(lat),
-        lng: Number(lng),
+        name: candidateName,
+        lat: numLat,
+        lng: numLng,
         color,
         iconCode,
         glyph,
@@ -4583,6 +4749,7 @@
         maintState.maintMap.panTo({ lat: newItem.lat, lng: newItem.lng });
         maintState.maintMap.setZoom(16);
       }
+      return true;
     }
 
     // 刪除處方服務點（附管理員確認與一鍵復原機制）
@@ -4652,6 +4819,20 @@
           renderMaintPointsList();
           renderMaintInspector();
           renderMaintMapMarkers(false);
+          if (maintState.mapToolMode === "ADD_CUSTOM_PIN") {
+            alert(`🚫 「${item.name}」已經在【${item.category}】圖層中，已經在圖層中的資料不能被新增！（已為您選取該筆現有資料）`);
+            setMaintMapToolMode("GOOGLE_POI");
+            return;
+          }
+          // 若於選項 1 點選到地圖上已在圖層中的標記，同步於左側新增標記區塊顯示「已在圖層中不可新增」提示
+          renderGooglePoiCandidatePreview({
+            name: item.name,
+            address: "",
+            phone: "",
+            hours: [],
+            lat: item.lat,
+            lng: item.lng
+          });
         };
         marker.addEventListener("gmp-click", onMarkerClick);
         marker.addEventListener("click", onMarkerClick);
@@ -4970,6 +5151,14 @@
       }
 
       const customPinForm = document.getElementById("addCustomCoordForm");
+      ["newCustomPinName", "newCustomPinLat", "newCustomPinLng"].forEach(inputId => {
+        const el = document.getElementById(inputId);
+        if (el) {
+          el.addEventListener("input", () => validateCustomCoordDialogDuplicate());
+          el.addEventListener("change", () => validateCustomCoordDialogDuplicate());
+        }
+      });
+
       if (customPinForm && customPinDialog) {
         customPinForm.addEventListener("submit", (e) => {
           e.preventDefault();
@@ -4979,15 +5168,23 @@
           const desc = document.getElementById("newCustomPinDesc").value.trim();
           if (!name || isNaN(lat) || isNaN(lng)) return;
 
-          createNewServicePointAt(lat, lng, name, desc, {
+          const dup = validateCustomCoordDialogDuplicate();
+          if (dup) {
+            alert(`🚫 無法新增：「${dup.name}」已經在【${maintState.selectedLayer}】圖層中，已經在圖層中的資料不能被新增！`);
+            return;
+          }
+
+          const added = createNewServicePointAt(lat, lng, name, desc, {
             color: maintState.pendingCustomPin.color,
             iconCode: maintState.pendingCustomPin.iconCode,
             glyph: maintState.pendingCustomPin.glyph,
             images: maintState.pendingCustomPin.images
           });
 
-          customPinDialog.close();
-          setMaintMapToolMode("GOOGLE_POI");
+          if (added) {
+            customPinDialog.close();
+            setMaintMapToolMode("GOOGLE_POI");
+          }
         });
       }
 
