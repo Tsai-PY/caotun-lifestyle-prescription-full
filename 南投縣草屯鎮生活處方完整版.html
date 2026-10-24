@@ -1551,7 +1551,105 @@
       justify-content: space-between;
     }
 
+
+    /* === 點位樣式選項卡片（對應生活處方圖層六大專屬圖示與色彩） === */
+    .maint-style-options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px;
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+
+    @media (max-width: 480px) {
+      .maint-style-options-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .maint-style-card {
+      border: 2px solid #e2e8f0;
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+      text-align: left;
+      position: relative;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .maint-style-card:hover {
+      border-color: #94a3b8;
+      background: #f8fafc;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.08);
+    }
+
+    .maint-style-card.selected {
+      border-color: #0284c7;
+      background: #f0f9ff;
+      box-shadow: 0 0 0 1.5px #0284c7, 0 3px 10px rgba(2, 132, 199, 0.15);
+    }
+
+    .maint-style-card-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .maint-style-card-text {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .maint-style-card-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+    }
+
+    .maint-style-card.selected .maint-style-card-title {
+      color: #0369a1;
+    }
+
+    .maint-style-card-sub {
+      font-size: 0.67rem;
+      color: #64748b;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .maint-style-card-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .maint-style-card.selected .maint-style-card-badge {
+      background: #0284c7;
+      color: #ffffff;
+    }
+
+    .maint-style-card:not(.selected) .maint-style-card-badge {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
+    }
   </style>
+
 </head>
 <body>
   <!-- 頂部標題與工具列 -->
@@ -3816,12 +3914,12 @@
 
     // 選擇點位圖示 (Icon) 僅保留與六大生活處方圖層名稱一致的 6 項圖示（顏色與樣式完全保留對應）
     const MYMAPS_ICON_PALETTE = [
-      { code: "1603", cat: "社交", label: "社交", defaultColor: "#FF5252" },
-      { code: "1891", cat: "紓壓", label: "紓壓", defaultColor: "#097138" },
-      { code: "1577", cat: "營養", label: "營養", defaultColor: "#F57C00" },
-      { code: "1893", cat: "運動", label: "運動", defaultColor: "#1A237E" },
-      { code: "1602", cat: "睡眠", label: "睡眠", defaultColor: "#795548" },
-      { code: "1684", cat: "藥物安全", label: "藥物安全", defaultColor: "#9C27B0" }
+      { code: "1603", cat: "社交", label: "社交", defaultColor: "#FF5252", colorName: "紅色", desc: "房屋圖示" },
+      { code: "1891", cat: "紓壓", label: "紓壓", defaultColor: "#097138", colorName: "綠色", desc: "紓壓人物" },
+      { code: "1577", cat: "營養", label: "營養", defaultColor: "#F57C00", colorName: "橘色", desc: "刀叉圖示" },
+      { code: "1893", cat: "運動", label: "運動", defaultColor: "#1A237E", colorName: "深藍色", desc: "啞鈴圖示" },
+      { code: "1602", cat: "睡眠", label: "睡眠", defaultColor: "#795548", colorName: "棕色", desc: "床鋪圖示" },
+      { code: "1684", cat: "藥物安全", label: "藥物安全", defaultColor: "#9C27B0", colorName: "紫色", desc: "藥局十字" }
     ];
 
     const LAYER_DEFAULT_STYLE = {
@@ -4306,7 +4404,38 @@
     function renderPendingCustomPinStyleSelectors() {
       const colorGrid = document.getElementById("newCustomPinColorGrid");
       const iconGrid = document.getElementById("newCustomPinIconGrid");
-      if (!colorGrid || !iconGrid) return;
+      if (!colorGrid || !iconGrid || !maintState.pendingCustomPin) return;
+
+      // 六大生活處方圖層專屬樣式選項卡片（對應圖片中的六個選項）
+      iconGrid.innerHTML = `
+        <div class="maint-style-options-grid" style="grid-template-columns: repeat(2, 1fr); gap:6px; margin-top:4px; margin-bottom:4px;">
+          ${MYMAPS_ICON_PALETTE.map(ic => {
+            const isSelected = maintState.pendingCustomPin.iconCode === ic.code;
+            return `
+              <button
+                type="button"
+                class="maint-style-card ${isSelected ? "selected" : ""}"
+                data-style-code="${ic.code}"
+                data-style-cat="${ic.cat}"
+                data-style-color="${ic.defaultColor}"
+                style="padding:6px 8px;"
+                title="套用「${ic.label}」處方樣式（${ic.colorName} ${ic.defaultColor}）"
+              >
+                <div class="maint-style-card-left" style="gap:7px;">
+                  ${getMyMapsCategoryIcon(ic.cat, 26)}
+                  <div class="maint-style-card-text">
+                    <div class="maint-style-card-title" style="font-size:0.8rem;">${ic.label}</div>
+                    <div class="maint-style-card-sub" style="font-size:0.64rem;">${ic.colorName} · ${ic.desc}</div>
+                  </div>
+                </div>
+                <div class="maint-style-card-badge" style="font-size:0.64rem; padding:2px 6px;">
+                  ${isSelected ? "✓ 目前" : "選取"}
+                </div>
+              </button>
+            `;
+          }).join("")}
+        </div>
+      `;
 
       colorGrid.innerHTML = MYMAPS_COLOR_PALETTE.map(c => `
         <button
@@ -4314,41 +4443,26 @@
           class="color-swatch-btn ${maintState.pendingCustomPin.color.toUpperCase() === c.hex.toUpperCase() ? "selected" : ""}"
           style="background:${c.hex};"
           data-new-color="${c.hex}"
-          title="${c.name}"
+          title="${c.name} (${c.hex})"
         ></button>
       `).join("");
 
-      iconGrid.innerHTML = MYMAPS_ICON_PALETTE.map(ic => {
-        const isSelected = maintState.pendingCustomPin.iconCode === ic.code;
-        return `
-          <button
-            type="button"
-            class="icon-choice-btn ${isSelected ? "selected" : ""}"
-            data-new-code="${ic.code}"
-            data-new-cat="${ic.cat}"
-            title="${ic.label}"
-          >
-            ${getMyMapsCategoryIcon(ic.cat, 22)}
-            <span style="font-size:0.75rem; font-weight:700; margin-top:2px;">${ic.label}</span>
-          </button>
-        `;
-      }).join("");
-
-      colorGrid.querySelectorAll("[data-new-color]").forEach(btn => {
+      iconGrid.querySelectorAll(".maint-style-card").forEach(btn => {
         btn.addEventListener("click", () => {
-          maintState.pendingCustomPin.color = btn.getAttribute("data-new-color");
+          const code = btn.getAttribute("data-style-code");
+          const cat = btn.getAttribute("data-style-cat");
+          const color = btn.getAttribute("data-style-color");
+          maintState.pendingCustomPin.iconCode = code;
+          maintState.pendingCustomPin.color = color;
+          maintState.pendingCustomPin.styleUrl = `#icon-${code}-${color.replace("#", "")}`;
           renderPendingCustomPinStyleSelectors();
         });
       });
 
-      iconGrid.querySelectorAll("[data-new-code]").forEach(btn => {
+      colorGrid.querySelectorAll("[data-new-color]").forEach(btn => {
         btn.addEventListener("click", () => {
-          maintState.pendingCustomPin.iconCode = btn.getAttribute("data-new-code");
-          const icCat = btn.getAttribute("data-new-cat");
-          const def = LAYER_DEFAULT_STYLE[icCat];
-          if (def) {
-            maintState.pendingCustomPin.color = def.color;
-          }
+          maintState.pendingCustomPin.color = btn.getAttribute("data-new-color");
+          maintState.pendingCustomPin.styleUrl = `#icon-${maintState.pendingCustomPin.iconCode || "1603"}-${maintState.pendingCustomPin.color.replace("#", "")}`;
           renderPendingCustomPinStyleSelectors();
         });
       });
@@ -4521,39 +4635,62 @@
       if (activeSub === "STYLE") {
         subPanelHtml = `
           <div class="mymaps-subpanel">
-            <div style="font-size:0.74rem; font-weight:700; color:#0f172a; margin-bottom:4px;">
-              🪣 更改點位樣式（目前樣式代碼：<code>${escapeHtml(item.styleUrl)}</code>）
+            <div style="font-size:0.76rem; font-weight:800; color:#0f172a; margin-bottom:4px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+              <span>🪣 更改點位樣式（請點選下列六大生活處方圖示）</span>
+              <span style="font-size:0.68rem; color:#64748b;">目前樣式代碼：<code>${escapeHtml(item.styleUrl || "自訂")}</code></span>
             </div>
-            <div style="font-size:0.68rem; color:#475569;">1. 選擇點位顏色（建議同圖層維持一致或依特色標示）：</div>
-            <div class="color-palette-grid">
-              ${MYMAPS_COLOR_PALETTE.map(c => `
-                <button
-                  type="button"
-                  class="color-swatch-btn ${item.color.toUpperCase() === c.hex.toUpperCase() ? "selected" : ""}"
-                  style="background:${c.hex};"
-                  data-color="${c.hex}"
-                  title="${c.name} (${c.hex})"
-                ></button>
-              `).join("")}
+            <div style="font-size:0.7rem; color:#475569; margin-bottom:8px;">
+              點擊下列六個生活處方選項之一，即可變更此點位的顏色與圖示樣式：
             </div>
-            <div style="font-size:0.68rem; color:#475569;">2. 選擇點位圖示（六大生活處方圖層專屬圖示）：</div>
-            <div class="icon-palette-grid" style="grid-template-columns: repeat(6, 1fr);">
+
+            <!-- 圖片中六大生活處方專屬選項卡片 -->
+            <div class="maint-style-options-grid">
               ${MYMAPS_ICON_PALETTE.map(ic => {
-                const isSelected = item.iconCode === ic.code;
+                const isSelected = (item.iconCode === ic.code) || (!item.iconCode && item.category === ic.cat);
                 return `
                   <button
                     type="button"
-                    class="icon-choice-btn ${isSelected ? "selected" : ""}"
-                    data-icon-code="${ic.code}"
-                    data-icon-cat="${ic.cat}"
-                    title="${ic.label}"
+                    class="maint-style-card ${isSelected ? "selected" : ""}"
+                    data-style-code="${ic.code}"
+                    data-style-cat="${ic.cat}"
+                    data-style-color="${ic.defaultColor}"
+                    title="點擊套用「${ic.label}」處方樣式（${ic.colorName} ${ic.defaultColor}）"
                   >
-                    ${getMyMapsCategoryIcon(ic.cat, 22)}
-                    <span style="font-size:0.75rem; font-weight:700; margin-top:2px;">${ic.label}</span>
+                    <div class="maint-style-card-left">
+                      ${getMyMapsCategoryIcon(ic.cat, 28)}
+                      <div class="maint-style-card-text">
+                        <div class="maint-style-card-title">${ic.label}</div>
+                        <div class="maint-style-card-sub">${ic.colorName} · ${ic.desc}</div>
+                      </div>
+                    </div>
+                    <div class="maint-style-card-badge">
+                      ${isSelected ? "✓ 目前樣式" : "點擊套用"}
+                    </div>
                   </button>
                 `;
               }).join("")}
             </div>
+
+            <!-- 進階微調底色（選用） -->
+            <details style="margin-top:10px; padding:6px 9px; background:#ffffff; border:1px dashed #cbd5e1; border-radius:8px;">
+              <summary style="font-size:0.7rem; font-weight:700; color:#475569; cursor:pointer;">
+                🎨 進階微調：手動更換其他底色（選用）
+              </summary>
+              <div style="font-size:0.67rem; color:#64748b; margin-top:4px;">
+                目前底色：<span style="display:inline-block; width:11px; height:11px; border-radius:50%; background:${item.color}; vertical-align:middle; margin:0 4px; border:1px solid #cbd5e1;"></span><code>${item.color}</code>
+              </div>
+              <div class="color-palette-grid" style="margin-top:6px;">
+                ${MYMAPS_COLOR_PALETTE.map(c => `
+                  <button
+                    type="button"
+                    class="color-swatch-btn ${item.color.toUpperCase() === c.hex.toUpperCase() ? "selected" : ""}"
+                    style="background:${c.hex};"
+                    data-color="${c.hex}"
+                    title="${c.name} (${c.hex})"
+                  ></button>
+                `).join("")}
+              </div>
+            </details>
           </div>
         `;
       } else if (activeSub === "IMAGE") {
