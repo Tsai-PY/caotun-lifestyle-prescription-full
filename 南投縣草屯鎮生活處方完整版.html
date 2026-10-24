@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="build-version" content="20261024123340" />
+  <meta name="build-version" content="20261024125743" />
   <title>南投縣草屯鎮｜生活處方完整版（資料查詢＋資料維護）</title>
   <style>
     :root {
@@ -1954,8 +1954,8 @@
       <div class="mymaps-card mymaps-card-add">
         <div class="step-header" style="margin-bottom:4px; justify-content:space-between; align-items:center;">
           <div class="step-title-group">
-            <span class="step-badge" style="background:#16a34a; color:#ffffff;">新增標記</span>
-            <h2 class="step-title" style="color:#14532d;">新增服務點至目前開啟圖層（2 種新增方式）</h2>
+            <span class="step-badge" style="background:#16a34a; color:#ffffff;">新增服務點</span>
+            <h2 class="step-title" style="color:#14532d; font-size:1rem;">新增生活處方服務點（2 種新增方式）</h2>
           </div>
           <!-- 回復上一步動作按鈕 -->
           <button type="button" class="btn-undo-action" id="btnUndoGlobalAction" title="回復上一次對處方資料點所做的變更動作（新增、刪除或修改）" disabled>
@@ -2001,8 +2001,11 @@
     <div class="right-column">
       <div class="map-card">
         <div class="maint-map-top-controls">
-          <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
-            <button type="button" class="mymaps-tool-pill active" id="toolSelectModeBtn" title="點擊地圖上已有的 Google 地標名稱標記或現有處方標記">
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span style="font-size:0.78rem; font-weight:800; color:#15803d; background:#dcfce7; padding:4px 9px; border-radius:6px; border:1px solid #86efac; display:inline-flex; align-items:center; gap:4px;">
+              ➕ 新增生活處方服務點：
+            </span>
+            <button type="button" class="mymaps-tool-pill active" id="toolSelectModeBtn" title="點擊地圖上已有的 Google 地標名稱標記直接加入圖層">
               🏪 選項 1：點選 Google Map 已有名稱標記
             </button>
             <button type="button" class="mymaps-tool-pill" id="toolAddPinModeBtn" title="在地圖上任意位置點擊座標點，再輸入名稱標記與說明">
@@ -4241,7 +4244,8 @@
       if (!mapEl) return;
 
       if (state.isGoogleMapsReady) {
-        const { Map } = await google.maps.importLibrary("maps");
+        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+        window.GoogleMapsInfoWindow = InfoWindow;
         maintState.maintMap = new Map(mapEl, {
           center: { lat: 23.97415, lng: 120.68241 },
           zoom: 15,
@@ -4433,7 +4437,12 @@
         </div>
       `;
 
-      currentPoiInfoWindow = new google.maps.InfoWindow({
+      const InfoWindowCtor = window.GoogleMapsInfoWindow || google.maps.InfoWindow;
+      if (!InfoWindowCtor) {
+        console.error("InfoWindow constructor is not available.");
+        return;
+      }
+      currentPoiInfoWindow = new InfoWindowCtor({
         content: contentDiv,
         position: { lat: poi.lat, lng: poi.lng }
       });
