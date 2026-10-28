@@ -3290,8 +3290,8 @@
           const rankStr = allIdx >= 0 ? String(allIdx + 1) : "★";
 
           const selPin = new PinElement({
-            background: "#0f766e",
-            borderColor: "#ffffff",
+            background: meta.color, // 圖面各服務點顏色完全一致
+            borderColor: "#000000",
             glyphColor: "#ffffff",
             glyphText: rankStr,
             scale: 1.3
@@ -3362,7 +3362,7 @@
         }
 
         const r = isSelected ? 18 : 14;
-        const fill = isSelected ? "#0f766e" : meta.color;
+        const fill = meta.color; // 圖面各服務點顏色完全一致
         pointsSvg += `
           <g class="radar-point" data-id="${item.id}" style="cursor:pointer;">
             <circle cx="${px}" cy="${py}" r="${r + 4}" fill="${fill}" opacity="${isSelected ? 0.25 : 0}" />
