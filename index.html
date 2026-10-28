@@ -496,9 +496,10 @@
       background: #94a3b8;
     }
 
+    /* 同一種圖層標註顏色改為一致：所有序號徽章均使用該圖層代表色 */
     .rank-badge.rank-other {
-      background: #64748b !important;
-      opacity: 0.9;
+      background: var(--cat-color, var(--primary)) !important;
+      opacity: 1;
     }
 
     .more-candidates-divider {
@@ -3161,6 +3162,8 @@
         if (!keyword && index === 5) {
           const dividerLi = document.createElement("li");
           dividerLi.className = "more-candidates-divider";
+          dividerLi.style.borderColor = meta.color;
+          dividerLi.style.color = meta.color;
           dividerLi.innerHTML = `<span>⬇️ 更多【${escapeHtml(state.selectedCategory)}】服務點（共 ${allItems.length - 5} 處，下拉查看與點選）</span>`;
           listEl.appendChild(dividerLi);
         }
@@ -3170,13 +3173,10 @@
         li.className = "nearest-item" + (isSelected ? " selected" : "");
         li.style.setProperty("--cat-color", meta.color);
 
-        // 前 5 個項目使用特殊標記，第 6 個以後使用次要標記
-        const isTop5 = index < 5 && !keyword;
-        const rankClass = isTop5 ? "rank-badge" : "rank-badge rank-other";
-
+        // 同一種圖層標註顏色一致：全數套用該生活處方圖層代表色
         li.innerHTML = `
           <div class="nearest-left">
-            <span class="${rankClass}" title="${isTop5 ? `推薦第 ${index + 1} 近` : `第 ${index + 1} 處`}">${index + 1}</span>
+            <span class="rank-badge" style="background:${meta.color}; color:#ffffff;" title="第 ${index + 1} 處服務點">${index + 1}</span>
             <div class="nearest-info">
               <p class="nearest-name">${escapeHtml(item.name)}</p>
               <p class="nearest-meta">
@@ -3251,8 +3251,8 @@
           bounds.extend(pos);
           const isSelected = state.selectedItem && state.selectedItem.id === item.id;
           const pin = new PinElement({
-            background: isSelected ? "#0f766e" : meta.color,
-            borderColor: "#ffffff",
+            background: meta.color, // 同一圖層標註顏色一致
+            borderColor: isSelected ? "#000000" : "#ffffff",
             glyphColor: "#ffffff",
             glyphText: String(idx + 1),
             scale: isSelected ? 1.3 : 1.0
