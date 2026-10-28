@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="build-version" content="20261024125743" />
+  <meta name="build-version" content="20261028204120" />
   <title>南投縣草屯鎮｜生活處方完整版（資料查詢＋資料維護）</title>
   <style>
     :root {
@@ -173,6 +173,68 @@
       border-color: #99f6e4;
       box-shadow: var(--shadow-md);
     }
+
+    /* 步驟 1 ~ 步驟 4 專屬柔和背景色與邊框 */
+    #step1Card {
+      background: #fdf2f8 !important;
+      border: 1.5px solid #fbcfe8 !important;
+    }
+    #step1Card.active-step {
+      border-color: #f472b6 !important;
+      box-shadow: 0 4px 12px rgba(244, 114, 182, 0.15) !important;
+    }
+    #step1Card .step-header .step-badge {
+      background: #db2777 !important;
+      color: #ffffff !important;
+    }
+
+    #step2Card {
+      background: #f0fdf4 !important;
+      border: 1.5px solid #bbf7d0 !important;
+    }
+    #step2Card.active-step {
+      border-color: #4ade80 !important;
+      box-shadow: 0 4px 12px rgba(74, 222, 128, 0.15) !important;
+    }
+    #step2Card .step-header .step-badge {
+      background: #16a34a !important;
+      color: #ffffff !important;
+    }
+
+    #step3Card {
+      background: #fefce8 !important;
+      border: 1.5px solid #fef08a !important;
+    }
+    #step3Card.active-step {
+      border-color: #facc15 !important;
+      box-shadow: 0 4px 12px rgba(250, 204, 21, 0.15) !important;
+    }
+    #step3Card .step-header .step-badge {
+      background: #ca8a04 !important;
+      color: #ffffff !important;
+    }
+
+    #step4Card {
+      background: #eff6ff !important;
+      border: 1.5px solid #bfdbfe !important;
+    }
+    #step4Card.active-step {
+      border-color: #60a5fa !important;
+      box-shadow: 0 4px 12px rgba(96, 165, 250, 0.15) !important;
+    }
+    #step4Card .step-header .step-title-group .step-badge {
+      background: #2563eb !important;
+      color: #ffffff !important;
+    }
+    #step4Card .info-item {
+      background: #ffffff !important;
+      border: 1px solid #dbeafe !important;
+    }
+    #step4Card .empty-hint {
+      background: #ffffff !important;
+      border: 1px dashed #bfdbfe !important;
+    }
+
 
     .step-header {
       display: flex;
@@ -2402,12 +2464,12 @@
     };
 
     const CATEGORY_META = {
-      "社交": { iconCode: "1603", color: "#FF5252", bg: "#fff1f2", desc: "社區據點、咖啡館、圖書館、活動中心" },
-      "紓壓": { iconCode: "1891", color: "#097138", bg: "#f0fdf4", desc: "經穴按摩、SPA、宗教心靈、復健調理" },
-      "營養": { iconCode: "1577", color: "#F57C00", bg: "#fff7ed", desc: "傳統市場、有機蔬果、健康餐飲、素食" },
-      "運動": { iconCode: "1893", color: "#1A237E", bg: "#eef2ff", desc: "體育館、運動公園、步道、羽球/健身" },
-      "睡眠": { iconCode: "1602", color: "#795548", bg: "#fdf8f6", desc: "身心科、睡眠門診、家醫診所、中醫醫院" },
-      "藥物安全": { iconCode: "1684", color: "#9C27B0", bg: "#faf5ff", desc: "社區健保藥局、處方箋領藥、草屯衛生所" }
+      "社交": { icon: "👥", iconCode: "1603", color: "#FF5252", bg: "#fff1f2", desc: "社區據點、咖啡館、圖書館、活動中心" },
+      "紓壓": { icon: "💆", iconCode: "1891", color: "#097138", bg: "#f0fdf4", desc: "經穴按摩、SPA、宗教心靈、復健調理" },
+      "營養": { icon: "🥗", iconCode: "1577", color: "#F57C00", bg: "#fff7ed", desc: "傳統市場、有機蔬果、健康餐飲、素食" },
+      "運動": { icon: "🏃", iconCode: "1893", color: "#1A237E", bg: "#eef2ff", desc: "體育館、運動公園、步道、羽球/健身" },
+      "睡眠": { icon: "🛌", iconCode: "1602", color: "#795548", bg: "#fdf8f6", desc: "身心科、睡眠門診、家醫診所、中醫醫院" },
+      "藥物安全": { icon: "💊", iconCode: "1684", color: "#9C27B0", bg: "#faf5ff", desc: "社區健保藥局、處方箋領藥、草屯衛生所" }
     };
 
     // 產生 Google My Maps 經典純白圖形圓形徽章 HTML
@@ -3952,7 +4014,7 @@
       container.innerHTML = `
         <div class="detail-header">
           <div>
-            <span class="step-badge" style="background:${catMeta.color};">${catMeta.icon} 生活處方：${escapeHtml(item.category)}</span>
+            <span class="step-badge" style="background:${catMeta.color};">${catMeta.icon || "📍"} 生活處方：${escapeHtml(item.category)}</span>
             <h3 class="detail-place-name">${escapeHtml(placeInfo.displayName)}</h3>
           </div>
           <div class="detail-eta-box">
