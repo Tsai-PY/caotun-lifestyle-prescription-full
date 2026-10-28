@@ -468,17 +468,80 @@
     }
 
     /* 步驟 3：最近 5 個服務點清單（選項縮小一半） */
+    .nearest-top-one-container {
+      margin-bottom: 6px;
+    }
+
+    .nearest-top-one-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .nearest-dropdown-section {
+      margin-top: 3px;
+    }
+
+    .nearest-dropdown-toggle {
+      width: 100%;
+      padding: 7px 11px;
+      border-radius: 8px;
+      border: 1.5px solid #cbd5e1;
+      background: #f8fafc;
+      color: #1e293b;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .nearest-dropdown-toggle:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      color: #0f172a;
+    }
+
+    .nearest-dropdown-toggle.expanded {
+      background: #e0f2fe;
+      border-color: #0284c7;
+      color: #0369a1;
+    }
+
+    .dropdown-arrow-icon {
+      font-size: 0.85rem;
+      transition: transform 0.2s ease;
+    }
+
     .nearest-list {
       display: flex;
       flex-direction: column;
       gap: 5px;
-      margin: 0;
-      padding: 0;
+      margin: 5px 0 0 0;
+      padding: 0 4px 0 0;
       list-style: none;
-      max-height: 430px;
+      max-height: 380px;
       overflow-y: auto;
-      padding-right: 4px;
       scroll-behavior: smooth;
+      transition: max-height 0.25s ease, opacity 0.2s ease;
+    }
+
+    .nearest-dropdown-list.collapsed {
+      max-height: 0 !important;
+      overflow: hidden !important;
+      opacity: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      pointer-events: none;
+      border: none !important;
     }
 
     .nearest-list::-webkit-scrollbar {
@@ -1964,9 +2027,18 @@
           />
           <button type="button" id="step3ClearFilterBtn" class="step3-clear-btn" title="清除關鍵字" style="display:none;">✕</button>
         </div>
-        <ul class="nearest-list" id="nearestList">
-          <li class="empty-hint">請先於上方選擇「生活處方」與「交通方式」</li>
-        </ul>
+        <!-- 最近 1 點固定推薦區 -->
+        <div id="nearestTopOneContainer" class="nearest-top-one-container"></div>
+        <!-- 其餘服務點下拉展開區 -->
+        <div id="nearestDropdownSection" class="nearest-dropdown-section">
+          <button type="button" id="nearestDropdownToggleBtn" class="nearest-dropdown-toggle" style="display:none;">
+            <span id="nearestDropdownToggleText">▼ 下拉查看更多服務點（共 0 處）</span>
+            <span id="nearestDropdownToggleArrow" class="dropdown-arrow-icon">▾</span>
+          </button>
+          <ul class="nearest-list nearest-dropdown-list collapsed" id="nearestList">
+            <li class="empty-hint">請先於上方選擇「生活處方」與「交通方式」</li>
+          </ul>
+        </div>
       </section>
 
       <!-- 步驟 4：選擇服務點後列出詳細資訊與到達時間（移至步驟 3 正下方） -->
@@ -3062,6 +3134,7 @@
 
     // 步驟 3：計算並列出距離目前所在位置最近的 5 個服務點（依據實際道路路網計算路程與時間）
     function updateNearestFive() {
+      state.isNearestDropdownOpen = false;
       const cat = state.selectedCategory;
       const meta = CATEGORY_META[cat] || { icon: "📍", color: "#0f766e" };
       const modeKey = state.selectedTravelMode;
@@ -3113,16 +3186,23 @@
       }
     }
 
-    // 渲染步驟 3 的服務點列表（優先推薦最近 5 個，其餘可下拉查看與點選；支援關鍵字即時查詢）
+    // 渲染步驟 3 的服務點列表（最近 1 點優先顯示，其餘下拉時顯示，支援即時關鍵字查詢）
     function renderNearestList() {
+      const topOneContainer = document.getElementById("nearestTopOneContainer");
       const listEl = document.getElementById("nearestList");
+      const toggleBtn = document.getElementById("nearestDropdownToggleBtn");
+      const toggleText = document.getElementById("nearestDropdownToggleText");
+      const toggleArrow = document.getElementById("nearestDropdownToggleArrow");
       if (!listEl) return;
       listEl.innerHTML = "";
+      if (topOneContainer) topOneContainer.innerHTML = "";
+
       const meta = CATEGORY_META[state.selectedCategory] || { color: "#0f766e" };
       const modeMeta = TRAVEL_MODE_META[state.selectedTravelMode] || TRAVEL_MODE_META.DRIVING;
 
       const allItems = state.allSortedCandidates || state.nearestFive || [];
       if (allItems.length === 0) {
+        if (toggleBtn) toggleBtn.style.display = "none";
         listEl.innerHTML = `<li class="empty-hint">此分類目前沒有服務點資料</li>`;
         return;
       }
@@ -3145,38 +3225,22 @@
         : allItems;
 
       if (displayItems.length === 0) {
+        if (toggleBtn) toggleBtn.style.display = "none";
+        listEl.className = "nearest-list nearest-dropdown-list";
         listEl.innerHTML = `<li class="empty-hint">找不到符合「${escapeHtml(keyword)}」的服務點，請嘗試其他關鍵字</li>`;
         return;
       }
 
-      // 更新 Step 3 標題數量提示
-      const step3TitleCount = document.getElementById("step3TotalCountBadge");
-      if (step3TitleCount) {
-        step3TitleCount.textContent = keyword
-          ? `（符合搜尋共 ${displayItems.length} 處）`
-          : `（共 ${allItems.length} 處，優先顯示最近 5 處）`;
-      }
-
-      displayItems.forEach((item, index) => {
-        // 如果無關鍵字搜尋，在第 5 個項目後插入分隔提示
-        if (!keyword && index === 5) {
-          const dividerLi = document.createElement("li");
-          dividerLi.className = "more-candidates-divider";
-          dividerLi.style.borderColor = meta.color;
-          dividerLi.style.color = meta.color;
-          dividerLi.innerHTML = `<span>⬇️ 更多【${escapeHtml(state.selectedCategory)}】服務點（共 ${allItems.length - 5} 處，下拉查看與點選）</span>`;
-          listEl.appendChild(dividerLi);
-        }
-
+      // 建立服務點卡片元素輔助函式
+      function createItemLi(item, rankNum) {
         const li = document.createElement("li");
         const isSelected = state.selectedItem && state.selectedItem.id === item.id;
         li.className = "nearest-item" + (isSelected ? " selected" : "");
         li.style.setProperty("--cat-color", meta.color);
 
-        // 同一種圖層標註顏色一致：全數套用該生活處方圖層代表色
         li.innerHTML = `
           <div class="nearest-left">
-            <span class="rank-badge" style="background:${meta.color}; color:#ffffff;" title="第 ${index + 1} 處服務點">${index + 1}</span>
+            <span class="rank-badge" style="background:${meta.color}; color:#ffffff;" title="第 ${rankNum} 處服務點">${rankNum}</span>
             <div class="nearest-info">
               <p class="nearest-name">${escapeHtml(item.name)}</p>
               <p class="nearest-meta">
@@ -3201,12 +3265,72 @@
             step4El.scrollIntoView({ behavior: "smooth", block: "nearest" });
           }
         });
+        return li;
+      }
 
-        listEl.appendChild(li);
-      });
+      // 若有輸入關鍵字篩選：直接展開顯示所有搜尋到的項目
+      if (keyword) {
+        if (toggleBtn) toggleBtn.style.display = "none";
+        listEl.className = "nearest-list nearest-dropdown-list";
+        const step3TitleCount = document.getElementById("step3TotalCountBadge");
+        if (step3TitleCount) {
+          step3TitleCount.textContent = `（符合搜尋共 ${displayItems.length} 處）`;
+        }
+        displayItems.forEach((item, idx) => {
+          const allIdx = allItems.findIndex(c => c.id === item.id);
+          const rankNum = allIdx >= 0 ? (allIdx + 1) : (idx + 1);
+          listEl.appendChild(createItemLi(item, rankNum));
+        });
+        return;
+      }
+
+      // 預設模式：僅顯示最近的 1 點，其餘放入下拉選單
+      const topItem = allItems[0];
+      const step3TitleCount = document.getElementById("step3TotalCountBadge");
+      if (step3TitleCount) {
+        step3TitleCount.textContent = `（顯示最近 1 點，下拉查看其餘共 ${allItems.length - 1} 處）`;
+      }
+
+      // 渲染距離最近的第 1 處服務點
+      if (topOneContainer) {
+        const topBadgeDiv = document.createElement("div");
+        topBadgeDiv.innerHTML = `<span class="nearest-top-one-badge" style="background:${meta.color};">📍 距離目前位置最近服務點（第 1 處）</span>`;
+        topOneContainer.appendChild(topBadgeDiv);
+        topOneContainer.appendChild(createItemLi(topItem, 1));
+      }
+
+      // 其餘服務點下拉展開區
+      const restItems = allItems.slice(1);
+      if (restItems.length > 0 && toggleBtn) {
+        toggleBtn.style.display = "flex";
+        const isOpen = Boolean(state.isNearestDropdownOpen);
+
+        // 如果目前選取的點在下拉列表中（第 2 點以後），於按鈕上標示已選資訊
+        const selectedInRest = state.selectedItem && state.selectedItem.id !== topItem.id;
+        const allSelIdx = selectedInRest ? allItems.findIndex(c => c.id === state.selectedItem.id) : -1;
+        const selLabel = allSelIdx >= 0 ? `（已選：第 ${allSelIdx + 1} 處 ${state.selectedItem.name}）` : `（共 ${restItems.length} 處）`;
+
+        if (isOpen) {
+          toggleBtn.classList.add("expanded");
+          if (toggleText) toggleText.textContent = `▲ 收合其他服務點選單 ${selLabel}`;
+          if (toggleArrow) toggleArrow.textContent = "▴";
+          listEl.className = "nearest-list nearest-dropdown-list";
+        } else {
+          toggleBtn.classList.remove("expanded");
+          if (toggleText) toggleText.textContent = `▼ 下拉查看更多服務點 ${selLabel}`;
+          if (toggleArrow) toggleArrow.textContent = "▾";
+          listEl.className = "nearest-list nearest-dropdown-list collapsed";
+        }
+
+        restItems.forEach((item, idx) => {
+          listEl.appendChild(createItemLi(item, idx + 2));
+        });
+      } else if (toggleBtn) {
+        toggleBtn.style.display = "none";
+      }
     }
 
-    // 在地圖上繪製目前位置與最近的 5 個服務點 (Google Maps 使用 AdvancedMarkerElement + PinElement + marker.append)
+    // 在地圖上繪製標記：畫面上一次只要顯示一個我選的處方資源點（與起點「我」）
     async function renderMapMarkers(fitAllBounds = false) {
       const meta = CATEGORY_META[state.selectedCategory] || { color: "#0f766e" };
 
@@ -3241,79 +3365,50 @@
         userMarker.append(userPin);
         state.googleUserMarker = userMarker;
 
-        // 最近 5 個服務點標記
-        let isSelectedItemInTopFive = false;
-        state.nearestFive.forEach((item, idx) => {
-          if (state.selectedItem && state.selectedItem.id === item.id) {
-            isSelectedItemInTopFive = true;
-          }
-          const pos = { lat: item.lat, lng: item.lng };
+        // 地圖顯示畫面上一次只要顯示一個所選的處方資源點！
+        if (state.selectedItem) {
+          const selItem = state.selectedItem;
+          const pos = { lat: Number(selItem.lat), lng: Number(selItem.lng) };
           bounds.extend(pos);
-          const isSelected = state.selectedItem && state.selectedItem.id === item.id;
-          const pin = new PinElement({
-            background: meta.color, // 同一圖層標註顏色一致
-            borderColor: isSelected ? "#000000" : "#ffffff",
+
+          // 找出他在全部排序中的順位（第 1 近、第 2 近...）
+          const allIdx = (state.allSortedCandidates || []).findIndex(c => c.id === selItem.id);
+          const rankStr = allIdx >= 0 ? String(allIdx + 1) : "1";
+
+          const selPin = new PinElement({
+            background: meta.color, // 同一圖層標註顏色完全一致
+            borderColor: "#000000",
             glyphColor: "#ffffff",
-            glyphText: String(idx + 1),
-            scale: isSelected ? 1.3 : 1.0
+            glyphText: rankStr,
+            scale: 1.35
           });
           const marker = new AdvancedMarkerElement({
             map: state.googleMap,
             position: pos,
-            title: `第 ${idx + 1} 近：${item.name}`,
+            title: `所選處方服務點（第 ${rankStr} 處）：${selItem.name}`,
             gmpClickable: true,
-            zIndex: isSelected ? 990 : 500 - idx
+            zIndex: 995
           });
-          marker.append(pin);
+          marker.append(selPin);
 
           let handledClick = false;
           const onSelectMarker = () => {
             if (handledClick) return;
             handledClick = true;
             setTimeout(() => { handledClick = false; }, 150);
-            state.selectedItem = item;
-            renderNearestList();
-            renderMapMarkers(false);
-            selectServicePoint(item);
+            selectServicePoint(selItem);
           };
           marker.addEventListener("gmp-click", onSelectMarker);
           marker.addEventListener("click", onSelectMarker);
           state.googleMarkers.push(marker);
-        });
-
-        // 若使用者在下拉選單中選取了第 5 名以後的服務點，地圖上也同步繪製該所選點的醒目標記
-        if (state.selectedItem && !isSelectedItemInTopFive) {
-          const selItem = state.selectedItem;
-          const pos = { lat: selItem.lat, lng: selItem.lng };
-          bounds.extend(pos);
-          const allIdx = (state.allSortedCandidates || []).findIndex(c => c.id === selItem.id);
-          const rankStr = allIdx >= 0 ? String(allIdx + 1) : "★";
-
-          const selPin = new PinElement({
-            background: meta.color, // 圖面各服務點顏色完全一致
-            borderColor: "#000000",
-            glyphColor: "#ffffff",
-            glyphText: rankStr,
-            scale: 1.3
-          });
-          const selMarker = new AdvancedMarkerElement({
-            map: state.googleMap,
-            position: pos,
-            title: `所選服務點（第 ${rankStr} 處）：${selItem.name}`,
-            gmpClickable: true,
-            zIndex: 995
-          });
-          selMarker.append(selPin);
-          state.googleMarkers.push(selMarker);
         }
 
-        if (fitAllBounds || !state.selectedItem) {
-          state.googleMap.fitBounds(bounds, 60);
-        }
+        // 自動縮放以同時呈現起點「我」與目前所選處方資源點
+        state.googleMap.fitBounds(bounds, 80);
         return;
       }
 
-      // 未設定 Google Maps API Key 時：繪製原生互動式 SVG 相對方位雷達圖（避免與非 Google 圖資混用）
+      // 未設定 Google Maps API Key 時：繪製原生互動式 SVG 相對方位雷達圖（僅顯示所選點）
       renderFallbackRadarCanvas();
     }
 
@@ -4068,6 +4163,15 @@
           searchAndSetUserLocation(place);
         });
       });
+
+      // 步驟 3：下拉展開／收合切換按鈕事件
+      const dropdownToggleBtn = document.getElementById("nearestDropdownToggleBtn");
+      if (dropdownToggleBtn) {
+        dropdownToggleBtn.addEventListener("click", () => {
+          state.isNearestDropdownOpen = !state.isNearestDropdownOpen;
+          renderNearestList();
+        });
+      }
 
       // 步驟 3：服務點即時關鍵字查詢事件
       const step3FilterInp = document.getElementById("step3PlaceFilterInput");
