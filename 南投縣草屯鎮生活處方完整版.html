@@ -471,10 +471,102 @@
     .nearest-list {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
       margin: 0;
       padding: 0;
       list-style: none;
+      max-height: 430px;
+      overflow-y: auto;
+      padding-right: 4px;
+      scroll-behavior: smooth;
+    }
+
+    .nearest-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .nearest-list::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 999px;
+    }
+    .nearest-list::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 999px;
+    }
+    .nearest-list::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .rank-badge.rank-other {
+      background: #64748b !important;
+      opacity: 0.9;
+    }
+
+    .more-candidates-divider {
+      margin: 8px 0 4px 0;
+      padding: 5px 10px;
+      background: #f8fafc;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #475569;
+      text-align: center;
+      list-style: none;
+      border: 1px dashed #cbd5e1;
+    }
+
+    .step3-search-wrapper {
+      margin-bottom: 7px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .step3-filter-input {
+      width: 100%;
+      padding: 6px 30px 6px 10px;
+      font-size: 0.8rem;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 7px;
+      background: #ffffff;
+      color: #1e293b;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .step3-filter-input:focus {
+      border-color: #0284c7;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+
+    .step3-clear-btn {
+      position: absolute;
+      right: 7px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.88rem;
+      cursor: pointer;
+      padding: 2px 4px;
+    }
+    .step3-clear-btn:hover {
+      color: #ef4444;
+    }
+
+    .loc-chip-btn {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .loc-chip-btn:hover {
+      background: #e0f2fe;
+      border-color: #0284c7;
+      color: #0369a1;
+      transform: translateY(-1px);
     }
 
     .nearest-item {
@@ -1757,33 +1849,33 @@
   <main class="main-layout" id="queryModuleView">
     <!-- 左欄：定位 + 步驟 1 ~ 步驟 4 垂直操作流程 -->
     <div class="control-column">
-      <!-- 目前所在位置設定 -->
-      <section class="step-card" aria-label="目前所在位置設定">
+      <!-- 目前所在位置／查詢地點設定 -->
+      <section class="step-card" aria-label="查詢地點設定">
         <div class="step-header">
           <div class="step-title-group">
-            <span class="step-badge" style="background:#0369a1;">定位</span>
-            <h2 class="step-title">目前所在位置（GPS 或輸入地標／地址定位）</h2>
+            <span class="step-badge" style="background:#0369a1;">查詢起點</span>
+            <h2 class="step-title">📍 查詢地點設定（輸入地標／地址查詢，或以 GPS 定位）</h2>
           </div>
         </div>
         <div class="location-bar">
           <div class="location-current">
             <div class="location-coords" id="userLocationLabel">
-              📍 目前位置：草屯鎮公所周邊 (23.9742, 120.6824)
+              📍 目前查詢地點：草屯鎮公所周邊 (23.9742, 120.6824)
             </div>
             <button type="button" class="btn-locate" id="gpsLocateBtn">
               📡 取得目前 GPS 位置
             </button>
           </div>
-          <!-- 輸入地標或地址定位一欄 (符合 Modern Web Guidance `forms` 規範) -->
+          <!-- 輸入查詢地點（地標或地址）定位一欄 -->
           <form id="customLocationForm" class="location-search-form" action="#" method="GET">
-            <label for="customLocationInput" class="location-search-label">🔍 輸入地標或地址定位：</label>
+            <label for="customLocationInput" class="location-search-label">🔍 輸入查詢地點（地標或地址）：</label>
             <div class="location-search-row">
               <input
                 type="text"
                 id="customLocationInput"
                 name="locationQuery"
                 class="input-location-search"
-                placeholder="請輸入草屯地標或地址（例：草屯鎮農會、中正路600號、敦和宮）"
+                placeholder="請輸入查詢地點（例：草屯國小、碧山路、草屯鎮農會、敦和宮）"
                 autocomplete="street-address"
                 autocorrect="off"
                 autocapitalize="off"
@@ -1793,8 +1885,16 @@
                 required
               />
               <button type="submit" class="btn-search-locate" id="customLocationSubmitBtn">
-                📍 搜尋定位
+                📍 搜尋查詢地點
               </button>
+            </div>
+            <div class="quick-location-chips" style="display:flex; gap:4px; flex-wrap:wrap; margin-top:5px; font-size:0.72rem;">
+              <span style="color:#64748b; font-weight:700; align-self:center;">常見查詢地點：</span>
+              <button type="button" class="loc-chip-btn" data-place="草屯鎮公所">🏛️ 草屯鎮公所</button>
+              <button type="button" class="loc-chip-btn" data-place="草屯國小">🏫 草屯國小</button>
+              <button type="button" class="loc-chip-btn" data-place="草屯國中">🎒 草屯國中</button>
+              <button type="button" class="loc-chip-btn" data-place="草屯鎮農會">🌾 草屯鎮農會</button>
+              <button type="button" class="loc-chip-btn" data-place="敦和宮">⛩️ 敦和宮</button>
             </div>
             <div id="locationSearchFeedback" class="location-search-feedback" aria-live="polite"></div>
           </form>
@@ -1843,14 +1943,25 @@
         </div>
       </section>
 
-      <!-- 步驟 3：列出距離目前位置最近的五個服務點 -->
+      <!-- 步驟 3：列出服務點列表（優先推薦最近 5 個，其餘下拉瀏覽與點選，支援即時關鍵字查詢） -->
       <section class="step-card" id="step3Card">
         <div class="step-header">
           <div class="step-title-group">
             <span class="step-badge">步驟 3</span>
-            <h2 class="step-title">距離目前位置最近的 5 個服務點</h2>
+            <h2 class="step-title">距離目前位置最近的服務點 <span id="step3TotalCountBadge" style="font-size:0.75rem; font-weight:normal; color:#64748b;">（優先顯示最近 5 處，下拉可查看全部）</span></h2>
           </div>
           <span style="font-size:0.78rem; color:var(--primary); font-weight:700;" id="step3CategoryTag">請點選任一服務點</span>
+        </div>
+        <!-- 查詢地點／服務點輸入關鍵字即時篩選欄 -->
+        <div class="step3-search-wrapper">
+          <input
+            type="text"
+            id="step3PlaceFilterInput"
+            class="step3-filter-input"
+            placeholder="🔍 輸入查詢地點名稱或關鍵字（例：學校、公園、店名、地址...）"
+            aria-label="輸入查詢地點名稱或關鍵字"
+          />
+          <button type="button" id="step3ClearFilterBtn" class="step3-clear-btn" title="清除關鍵字" style="display:none;">✕</button>
         </div>
         <ul class="nearest-list" id="nearestList">
           <li class="empty-hint">請先於上方選擇「生活處方」與「交通方式」</li>
@@ -2955,27 +3066,21 @@
       document.getElementById("step3CategoryTag").textContent =
         `【${cat}】生活處方 × ${modeMeta.icon} ${modeMeta.label}`;
 
-      // 先取直線距離前 10 近候選點，再以草屯現有道路路網計算精確道路距離並取最近 5 點
-      const preCandidates = state.allItems
+      // 計算該處方分類下所有服務點的距離與路程（優先推薦最近 5 點，其餘保留於下拉列表中供瀏覽與選擇）
+      const allItemsInCategory = state.allItems
         .filter(item => item.category === cat)
-        .map(item => ({
-          ...item,
-          straightMeters: computeHaversineMeters(
+        .map(item => {
+          const straightMeters = computeHaversineMeters(
             state.userLocation.lat,
             state.userLocation.lng,
             item.lat,
             item.lng
-          )
-        }))
-        .sort((a, b) => a.straightMeters - b.straightMeters)
-        .slice(0, 8);
-
-      const candidates = preCandidates
-        .map(item => {
+          );
           const localRoad = computeLocalRoadRoute(state.userLocation, item, modeKey);
-          const fallbackRoute = localRoad || estimateFallbackRoute(item.straightMeters, modeKey);
+          const fallbackRoute = localRoad || estimateFallbackRoute(straightMeters, modeKey);
           return {
             ...item,
+            straightMeters,
             routeDistanceMeters: fallbackRoute.distanceMeters,
             durationSeconds: fallbackRoute.durationSeconds,
             durationText: fallbackRoute.durationText,
@@ -2983,15 +3088,15 @@
             isExactRoute: Boolean(localRoad)
           };
         })
-        .sort((a, b) => a.routeDistanceMeters - b.routeDistanceMeters)
-        .slice(0, 5);
+        .sort((a, b) => a.routeDistanceMeters - b.routeDistanceMeters);
 
-      state.nearestFive = candidates;
+      state.allSortedCandidates = allItemsInCategory;
+      state.nearestFive = allItemsInCategory.slice(0, 5);
 
-      // 預設自動選取第 1 近的服務點
-      if (candidates.length > 0) {
-        const stillInList = state.selectedItem && candidates.find(c => c.id === state.selectedItem.id);
-        state.selectedItem = stillInList || candidates[0];
+      // 預設自動選取第 1 近的服務點（或保留當前選中的點）
+      if (allItemsInCategory.length > 0) {
+        const stillInList = state.selectedItem && allItemsInCategory.find(c => c.id === state.selectedItem.id);
+        state.selectedItem = stillInList || allItemsInCategory[0];
       } else {
         state.selectedItem = null;
       }
@@ -3004,27 +3109,71 @@
       }
     }
 
-    // 渲染步驟 3 的 Top 5 列表
+    // 渲染步驟 3 的服務點列表（優先推薦最近 5 個，其餘可下拉查看與點選；支援關鍵字即時查詢）
     function renderNearestList() {
       const listEl = document.getElementById("nearestList");
+      if (!listEl) return;
       listEl.innerHTML = "";
       const meta = CATEGORY_META[state.selectedCategory] || { color: "#0f766e" };
       const modeMeta = TRAVEL_MODE_META[state.selectedTravelMode] || TRAVEL_MODE_META.DRIVING;
 
-      if (state.nearestFive.length === 0) {
+      const allItems = state.allSortedCandidates || state.nearestFive || [];
+      if (allItems.length === 0) {
         listEl.innerHTML = `<li class="empty-hint">此分類目前沒有服務點資料</li>`;
         return;
       }
 
-      state.nearestFive.forEach((item, index) => {
+      // 取得 Step 3 搜尋輸入關鍵字
+      const filterInput = document.getElementById("step3PlaceFilterInput");
+      const keyword = (filterInput && filterInput.value || "").trim().toLowerCase();
+      const clearBtn = document.getElementById("step3ClearFilterBtn");
+      if (clearBtn) {
+        clearBtn.style.display = keyword ? "block" : "none";
+      }
+
+      const displayItems = keyword
+        ? allItems.filter(item => {
+            const name = (item.name || "").toLowerCase();
+            const desc = (item.description || "").toLowerCase();
+            const addr = (item.address || "").toLowerCase();
+            return name.includes(keyword) || desc.includes(keyword) || addr.includes(keyword);
+          })
+        : allItems;
+
+      if (displayItems.length === 0) {
+        listEl.innerHTML = `<li class="empty-hint">找不到符合「${escapeHtml(keyword)}」的服務點，請嘗試其他關鍵字</li>`;
+        return;
+      }
+
+      // 更新 Step 3 標題數量提示
+      const step3TitleCount = document.getElementById("step3TotalCountBadge");
+      if (step3TitleCount) {
+        step3TitleCount.textContent = keyword
+          ? `（符合搜尋共 ${displayItems.length} 處）`
+          : `（共 ${allItems.length} 處，優先顯示最近 5 處）`;
+      }
+
+      displayItems.forEach((item, index) => {
+        // 如果無關鍵字搜尋，在第 5 個項目後插入分隔提示
+        if (!keyword && index === 5) {
+          const dividerLi = document.createElement("li");
+          dividerLi.className = "more-candidates-divider";
+          dividerLi.innerHTML = `<span>⬇️ 更多【${escapeHtml(state.selectedCategory)}】服務點（共 ${allItems.length - 5} 處，下拉查看與點選）</span>`;
+          listEl.appendChild(dividerLi);
+        }
+
         const li = document.createElement("li");
         const isSelected = state.selectedItem && state.selectedItem.id === item.id;
         li.className = "nearest-item" + (isSelected ? " selected" : "");
         li.style.setProperty("--cat-color", meta.color);
 
+        // 前 5 個項目使用特殊標記，第 6 個以後使用次要標記
+        const isTop5 = index < 5 && !keyword;
+        const rankClass = isTop5 ? "rank-badge" : "rank-badge rank-other";
+
         li.innerHTML = `
           <div class="nearest-left">
-            <span class="rank-badge">${index + 1}</span>
+            <span class="${rankClass}" title="${isTop5 ? `推薦第 ${index + 1} 近` : `第 ${index + 1} 處`}">${index + 1}</span>
             <div class="nearest-info">
               <p class="nearest-name">${escapeHtml(item.name)}</p>
               <p class="nearest-meta">
@@ -3090,7 +3239,11 @@
         state.googleUserMarker = userMarker;
 
         // 最近 5 個服務點標記
+        let isSelectedItemInTopFive = false;
         state.nearestFive.forEach((item, idx) => {
+          if (state.selectedItem && state.selectedItem.id === item.id) {
+            isSelectedItemInTopFive = true;
+          }
           const pos = { lat: item.lat, lng: item.lng };
           bounds.extend(pos);
           const isSelected = state.selectedItem && state.selectedItem.id === item.id;
@@ -3124,6 +3277,32 @@
           marker.addEventListener("click", onSelectMarker);
           state.googleMarkers.push(marker);
         });
+
+        // 若使用者在下拉選單中選取了第 5 名以後的服務點，地圖上也同步繪製該所選點的醒目標記
+        if (state.selectedItem && !isSelectedItemInTopFive) {
+          const selItem = state.selectedItem;
+          const pos = { lat: selItem.lat, lng: selItem.lng };
+          bounds.extend(pos);
+          const allIdx = (state.allSortedCandidates || []).findIndex(c => c.id === selItem.id);
+          const rankStr = allIdx >= 0 ? String(allIdx + 1) : "★";
+
+          const selPin = new PinElement({
+            background: "#0f766e",
+            borderColor: "#ffffff",
+            glyphColor: "#ffffff",
+            glyphText: rankStr,
+            scale: 1.3
+          });
+          const selMarker = new AdvancedMarkerElement({
+            map: state.googleMap,
+            position: pos,
+            title: `所選服務點（第 ${rankStr} 處）：${selItem.name}`,
+            gmpClickable: true,
+            zIndex: 995
+          });
+          selMarker.append(selPin);
+          state.googleMarkers.push(selMarker);
+        }
 
         if (fitAllBounds || !state.selectedItem) {
           state.googleMap.fitBounds(bounds, 60);
@@ -3875,6 +4054,33 @@
         customLocForm.addEventListener("submit", (e) => {
           e.preventDefault();
           searchAndSetUserLocation(customLocInput ? customLocInput.value : "");
+        });
+      }
+
+      // 常見查詢地點快捷按鈕事件
+      document.querySelectorAll(".loc-chip-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const place = btn.getAttribute("data-place");
+          if (customLocInput) customLocInput.value = place;
+          searchAndSetUserLocation(place);
+        });
+      });
+
+      // 步驟 3：服務點即時關鍵字查詢事件
+      const step3FilterInp = document.getElementById("step3PlaceFilterInput");
+      const step3ClearBtn = document.getElementById("step3ClearFilterBtn");
+      if (step3FilterInp) {
+        step3FilterInp.addEventListener("input", () => {
+          renderNearestList();
+        });
+      }
+      if (step3ClearBtn) {
+        step3ClearBtn.addEventListener("click", () => {
+          if (step3FilterInp) {
+            step3FilterInp.value = "";
+            renderNearestList();
+            step3FilterInp.focus();
+          }
         });
       }
 
