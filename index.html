@@ -2108,6 +2108,9 @@
             <button type="button" class="mymaps-tool-pill" id="toolAddPinModeBtn" title="在地圖上任意位置點擊座標點，再輸入名稱標記與說明">
               📍 選項 2：任意選座標點新增標記
             </button>
+            <button type="button" class="mymaps-tool-pill" id="toolGpsModeBtn" title="取得目前手機或電腦 GPS 位置，直接新增標記至目前開啟的生活處方圖層">
+              📡 選項 3：取得目前 GPS 位置
+            </button>
             <button type="button" class="btn-undo-action" id="btnUndoTopAction" title="回復上一步動作" disabled style="padding:4px 10px;">
               ↩️ 回復上一步
             </button>
@@ -4850,7 +4853,7 @@
     }
 
     // 選項 2：開啟「在 Google Map 上任意選擇座標點再加入名稱標記」對話框（跟 My Maps 新增標記一樣）
-    function openCustomCoordMarkerModal(lat, lng) {
+    function openCustomCoordMarkerModal(lat, lng, defaultName = "", defaultDesc = "") {
       const dialog = document.getElementById("addCustomCoordDialog");
       if (!dialog) return;
 
@@ -4870,8 +4873,8 @@
         `準備新增標記至目前開啟的 <strong>【${escapeHtml(cat)}】處方圖層</strong>，請輸入名稱標記、說明與設定樣式：`;
       document.getElementById("newCustomPinLat").value = maintState.pendingCustomPin.lat;
       document.getElementById("newCustomPinLng").value = maintState.pendingCustomPin.lng;
-      document.getElementById("newCustomPinName").value = "";
-      document.getElementById("newCustomPinDesc").value = "";
+      document.getElementById("newCustomPinName").value = defaultName || "";
+      document.getElementById("newCustomPinDesc").value = defaultDesc || "";
       document.getElementById("newCustomPinPhotoInput").value = "";
       document.getElementById("newCustomPinPhotoPreview").innerHTML = "";
 
@@ -4880,8 +4883,92 @@
       dialog.showModal();
       setTimeout(() => {
         const nameInput = document.getElementById("newCustomPinName");
-        if (nameInput) nameInput.focus();
+        if (nameInput) {
+          nameInput.focus();
+          if (defaultName) nameInput.select();
+        }
       }, 60);
+    }
+
+    // 選項 3：取得目前 GPS 位置並開啟自訂座標點新增標記視窗
+    async function handleAddPointFromGps() {
+      const gpsBtn = document.getElementById("toolGpsModeBtn");
+      if (!navigator.geolocation) {
+        alert("⚠️ 您的裝置或瀏覽器不支援 GPS 定位功能。");
+        return;
+      }
+
+      const origText = gpsBtn ? gpsBtn.innerHTML : "";
+      if (gpsBtn) {
+        gpsBtn.innerHTML = "📡 定位中...";
+        gpsBtn.disabled = true;
+      }
+
+      const hintEl = document.getElementById("maintMapHint");
+      if (hintEl) {
+        hintEl.textContent = `📡 正在取得您的目前 GPS 座標，準備新增至【${maintState.selectedLayer}】生活處方圖層...`;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          if (gpsBtn) {
+            gpsBtn.innerHTML = origText;
+            gpsBtn.disabled = false;
+          }
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          // 平移維護地圖至 GPS 位置並適度放大
+          if (maintState.maintMap) {
+            maintState.maintMap.panTo({ lat, lng });
+            maintState.maintMap.setZoom(17);
+          }
+
+          let defaultName = "目前 GPS 位置服務點";
+          let defaultDesc = `GPS 定位座標：${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+          // 逆向地理編碼嘗試取得道路或門牌地址
+          if (state.isGoogleMapsReady) {
+            try {
+              const { Geocoder } = await google.maps.importLibrary("geocoding");
+              const geocoder = new Geocoder();
+              const res = await geocoder.geocode({ location: { lat, lng } });
+              if (res && res.results && res.results.length > 0) {
+                const addr = res.results[0].formatted_address || "";
+                defaultDesc = addr;
+                const comp = res.results[0].address_components || [];
+                const routeComp = comp.find(c => c.types.includes("route"));
+                if (routeComp) {
+                  defaultName = `${routeComp.long_name}生活處方服務點`;
+                }
+              }
+            } catch (geoErr) {
+              console.warn("GPS 逆向地理編碼：", geoErr);
+            }
+          }
+
+          if (hintEl) {
+            hintEl.textContent = `✅ 已成功取得 GPS 座標 (${lat.toFixed(4)}, ${lng.toFixed(4)})，請於彈出視窗輸入服務點名稱！`;
+          }
+
+          openCustomCoordMarkerModal(lat, lng, defaultName, defaultDesc);
+        },
+        (err) => {
+          if (gpsBtn) {
+            gpsBtn.innerHTML = origText;
+            gpsBtn.disabled = false;
+          }
+          let errMsg = "無法取得 GPS 位置，請確認裝置是否已開啟定位權限。";
+          if (err.code === 1) errMsg = "GPS 定位權限已被拒絕，請在瀏覽器設定中允許位置存取。";
+          else if (err.code === 2) errMsg = "定位信號遺失或暫時無法取得位置。";
+          else if (err.code === 3) errMsg = "GPS 定位請求逾時，請再試一次。";
+          alert(`⚠️ ${errMsg}`);
+          if (hintEl) {
+            hintEl.textContent = `⚠️ ${errMsg}`;
+          }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
     }
 
     function renderPendingCustomPinStyleSelectors() {
@@ -5842,7 +5929,14 @@
       const opt2Card = document.getElementById("optAddCustomCoordBtn");
       const btnSelectMode = document.getElementById("toolSelectModeBtn");
       const btnAddPinMode = document.getElementById("toolAddPinModeBtn");
+      const btnGpsMode = document.getElementById("toolGpsModeBtn");
       const btnMovePinMode = document.getElementById("toolMovePinModeBtn");
+
+      if (btnGpsMode) {
+        btnGpsMode.addEventListener("click", () => {
+          handleAddPointFromGps();
+        });
+      }
 
       if (opt1Card) {
         opt1Card.addEventListener("click", () => {
