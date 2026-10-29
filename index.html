@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="build-version" content="20261028204120" />
+  <meta name="build-version" content="20261029082238" />
   <title>南投縣草屯鎮｜生活處方完整版（資料查詢＋資料維護）</title>
   <style>
     :root {
@@ -3299,6 +3299,8 @@
         const isSelected = state.selectedItem && state.selectedItem.id === item.id;
         li.className = "nearest-item" + (isSelected ? " selected" : "");
         li.style.setProperty("--cat-color", meta.color);
+        const listDesc = (item.description && item.description.trim()) ? `\n處方服務點補充說明：${item.description.trim()}` : "";
+        li.title = `第 ${rankNum} 處：${item.name}${listDesc}`;
 
         li.innerHTML = `
           <div class="nearest-left">
@@ -3392,6 +3394,54 @@
       }
     }
 
+    let selectedPointInfoWindow = null;
+
+    // 在地圖所選服務點標記上方開啟詳細資訊與補充說明 InfoWindow 視窗
+    function openSelectedPointInfoWindow(item, rankStr) {
+      if (!state.googleMap || !item) return;
+      if (selectedPointInfoWindow) {
+        selectedPointInfoWindow.close();
+        selectedPointInfoWindow = null;
+      }
+      const InfoWindowCtor = window.GoogleMapsInfoWindow || google.maps.InfoWindow;
+      if (!InfoWindowCtor) return;
+
+      const meta = CATEGORY_META[item.category] || { color: "#0f766e", icon: "📍" };
+      const modeKey = state.selectedTravelMode;
+      const modeMeta = TRAVEL_MODE_META[modeKey] || TRAVEL_MODE_META.DRIVING;
+
+      const descHtml = (item.description && item.description.trim()) ? `
+        <div style="margin-top:6px; padding:6px 8px; background:#f0fdfa; border:1px solid #99f6e4; border-radius:6px; font-size:0.75rem; color:#0f766e; line-height:1.45;">
+          <strong>📝 處方服務點補充說明：</strong><br/>
+          <span style="color:#0f172a; white-space:pre-line;">${escapeHtml(item.description.trim())}</span>
+        </div>
+      ` : "";
+
+      const content = document.createElement("div");
+      content.style.padding = "4px 2px";
+      content.style.maxWidth = "290px";
+      content.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+          <span style="background:${meta.color}; color:#fff; font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:999px;">
+            ${rankStr ? `第 ${rankStr} 處・` : ""}${meta.icon || "📍"} ${escapeHtml(item.category)}
+          </span>
+        </div>
+        <h4 style="margin:2px 0 4px; font-size:0.92rem; font-weight:800; color:#0f172a; line-height:1.3;">${escapeHtml(item.name)}</h4>
+        ${descHtml}
+        <div style="margin-top:6px; font-size:0.72rem; color:#64748b; line-height:1.3;">
+          ${modeMeta.icon} ${escapeHtml(modeMeta.label)}規劃路程・詳細資訊請見左側步驟 4 欄位
+        </div>
+      `;
+
+      selectedPointInfoWindow = new InfoWindowCtor({
+        content: content,
+        position: { lat: Number(item.lat), lng: Number(item.lng) }
+      });
+      selectedPointInfoWindow.open({
+        map: state.googleMap
+      });
+    }
+
     // 在地圖上繪製標記：畫面上一次只要顯示一個我選的處方資源點（與起點「我」）
     async function renderMapMarkers(fitAllBounds = false) {
       const meta = CATEGORY_META[state.selectedCategory] || { color: "#0f766e" };
@@ -3400,6 +3450,10 @@
         const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
         const { LatLngBounds } = await google.maps.importLibrary("core");
 
+        if (selectedPointInfoWindow) {
+          selectedPointInfoWindow.close();
+          selectedPointInfoWindow = null;
+        }
         state.googleMarkers.forEach(m => { m.map = null; });
         state.googleMarkers = [];
         if (state.googleUserMarker) {
@@ -3437,6 +3491,11 @@
           const allIdx = (state.allSortedCandidates || []).findIndex(c => c.id === selItem.id);
           const rankStr = allIdx >= 0 ? String(allIdx + 1) : "1";
 
+          const descText = (selItem.description && selItem.description.trim())
+            ? `\n處方服務點補充說明：${selItem.description.trim()}`
+            : "";
+          const markerTitle = `所選處方服務點（第 ${rankStr} 處）：${selItem.name}${descText}`;
+
           const selPin = new PinElement({
             background: meta.color, // 同一圖層標註顏色完全一致
             borderColor: "#000000",
@@ -3447,11 +3506,20 @@
           const marker = new AdvancedMarkerElement({
             map: state.googleMap,
             position: pos,
-            title: `所選處方服務點（第 ${rankStr} 處）：${selItem.name}`,
+            title: markerTitle,
             gmpClickable: true,
             zIndex: 995
           });
           marker.append(selPin);
+
+          if (marker.element) {
+            marker.element.title = markerTitle;
+            marker.element.setAttribute("title", markerTitle);
+          }
+          if (selPin && selPin.element) {
+            selPin.element.title = markerTitle;
+            selPin.element.setAttribute("title", markerTitle);
+          }
 
           let handledClick = false;
           const onSelectMarker = () => {
@@ -3459,6 +3527,7 @@
             handledClick = true;
             setTimeout(() => { handledClick = false; }, 150);
             selectServicePoint(selItem);
+            openSelectedPointInfoWindow(selItem, rankStr);
           };
           marker.addEventListener("gmp-click", onSelectMarker);
           marker.addEventListener("click", onSelectMarker);
@@ -3520,8 +3589,10 @@
 
         const r = isSelected ? 18 : 14;
         const fill = meta.color; // 圖面各服務點顏色完全一致
+        const suppText = (item.description && item.description.trim()) ? `&#10;處方服務點補充說明：${escapeHtml(item.description.trim())}` : '';
         pointsSvg += `
           <g class="radar-point" data-id="${item.id}" style="cursor:pointer;">
+            <title>${escapeHtml(item.name)}${suppText}</title>
             <circle cx="${px}" cy="${py}" r="${r + 4}" fill="${fill}" opacity="${isSelected ? 0.25 : 0}" />
             <circle cx="${px}" cy="${py}" r="${r}" fill="${fill}" stroke="#ffffff" stroke-width="2.5" />
             <text x="${px}" y="${py + 4}" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">${idx + 1}</text>
@@ -5797,14 +5868,22 @@
           scale: isSelected ? 1.35 : 1.05
         });
 
+        const maintDesc = (item.description && item.description.trim())
+          ? `\n處方服務點補充說明：${item.description.trim()}`
+          : "";
+        const maintTitle = `[${item.category}] ${item.name}${maintDesc}`;
         const marker = new AdvancedMarkerElement({
           map: maintState.maintMap,
           position: pos,
-          title: `[${item.category}] ${item.name}`,
+          title: maintTitle,
           gmpClickable: true,
           zIndex: isSelected ? 999 : 200
         });
         marker.append(pin);
+        if (marker.element) {
+          marker.element.title = maintTitle;
+          marker.element.setAttribute("title", maintTitle);
+        }
 
         const onMarkerClick = () => {
           maintState.selectedPointId = item.id;
