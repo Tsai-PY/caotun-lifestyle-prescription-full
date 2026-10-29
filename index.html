@@ -1932,6 +1932,9 @@
         <span class="status-dot active" id="apiStatusDot"></span>
         <span id="apiStatusText">已連線網站資料庫（正在載入 Google Maps...）</span>
       </div>
+      <button type="button" class="btn-header" id="btnSyncLatestData" title="立即同步官方最新處方服務點說明與圖片資料（iPad / 行動裝置可即時更新）" style="background:#0284c7; color:#ffffff; font-weight:700;">
+        🔄 同步最新資料
+      </button>
       <label class="btn-header" for="kmlFileInput" title="載入自訂或更新後的 KML 檔案">
         📂 匯入 KML 檔
         <input type="file" id="kmlFileInput" accept=".kml,.xml" style="display: none;" />
@@ -2397,7 +2400,7 @@
 
   <!-- 載入本機環境變數設定檔 (.env / env-config.js)、KML 生活處方群組資料與草屯鎮實際道路幾何路網 -->
   <script src="./env-config.js"></script>
-  <script src="./kml-data.js"></script>
+  <script src="./kml-data.js?v=20261030_061606"></script>
   <script src="./caotun-roads.js"></script>
 
   <script>
@@ -4131,7 +4134,7 @@
           <div class="info-item full-width">
             <div class="info-label">📷 處方服務點照片 (${item.images.length} 張)</div>
             <div style="display:flex; gap:6px; overflow-x:auto; padding:4px 0;">
-              ${item.images.map((src, i) => `<img src="${escapeAttr(src)}" alt="服務點照片 ${i+1}" style="height:68px; width:95px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1;" />`).join("")}
+              ${item.images.map((src, i) => `<img src="${escapeAttr(src)}" alt="服務點照片 ${i+1}" title="點選放大檢視照片" style="height:68px; width:95px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1; cursor:pointer;" onclick="window.open('${escapeAttr(src)}', '_blank')" />`).join("")}
             </div>
           </div>` : ""}
         </div>
@@ -4487,21 +4490,171 @@
       });
     }
 
-    // 載入已儲存於瀏覽器資料庫之維護後 KML 資料
+    const MAINT_STORAGE_VERSION_KEY = "CAOTUN_FULL_KML_VERSION_V1";
+
+    // 智能合併官方最新處方服務點資料庫與本機維護紀錄（確保補充說明與實景照片同步更新）
+    function mergeKmlDatasets(defaultList, localList) {
+      if (!Array.isArray(defaultList) || defaultList.length === 0) return localList || [];
+      if (!Array.isArray(localList) || localList.length === 0) return defaultList;
+
+      const localMap = new Map();
+      localList.forEach(item => {
+        if (!item || !item.name) return;
+        const key = `${item.category}|${item.name.trim()}`;
+        localMap.set(key, item);
+      });
+
+      const merged = [];
+      const usedLocalKeys = new Set();
+
+      defaultList.forEach(def => {
+        const key = `${def.category}|${def.name.trim()}`;
+        const loc = localMap.get(key);
+        if (loc) {
+          usedLocalKeys.add(key);
+          // 若本機點位的說明或照片為空，但官方資料庫已有新補充說明/圖片，自動同步更新！
+          const mergedDesc = (loc.description && loc.description.trim()) ? loc.description : (def.description || "");
+          const mergedImgs = (Array.isArray(loc.images) && loc.images.length > 0) ? loc.images : (Array.isArray(def.images) ? def.images : []);
+
+          merged.push({
+            ...def,
+            ...loc,
+            description: mergedDesc,
+            images: mergedImgs,
+            id: loc.id || def.id
+          });
+        } else {
+          // 官方新增的服務點直接加入
+          merged.push(def);
+        }
+      });
+
+      // 保留使用者自行新增、不在官方預設列表中的自訂點位
+      localList.forEach(loc => {
+        if (!loc || !loc.name) return;
+        const key = `${loc.category}|${loc.name.trim()}`;
+        if (!usedLocalKeys.has(key)) {
+          merged.push(loc);
+        }
+      });
+
+      return merged;
+    }
+
+    // 載入已儲存於瀏覽器資料庫之維護後 KML 資料，並自動比對官方最新版本
     function loadPersistedKmlItems() {
+      const defaultVersion = (window.DEFAULT_KML_DATA && window.DEFAULT_KML_DATA.version) || "20261028_v280";
+      const defaultItems = (window.DEFAULT_KML_DATA && Array.isArray(window.DEFAULT_KML_DATA.items)) ? window.DEFAULT_KML_DATA.items : [];
+
       try {
+        const savedVersion = localStorage.getItem(MAINT_STORAGE_VERSION_KEY);
         const savedJson = localStorage.getItem(MAINT_STORAGE_KEY);
         if (savedJson) {
           const parsed = JSON.parse(savedJson);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            state.allItems = normalizeKmlItems(parsed);
-            return;
+            // 若官方資料庫版本更新（或本機無版本記錄、或官方資料筆數/補充內容更新），執行智能合併與更新，確保補充說明與照片即時同步
+            const hasDescInDefault = defaultItems.some(i => i.description && i.description.trim());
+            const hasDescInParsed = parsed.some(i => i.description && i.description.trim());
+            const shouldUpgrade = (savedVersion !== defaultVersion) || (parsed.length < defaultItems.length) || (hasDescInDefault && !hasDescInParsed);
+
+            if (shouldUpgrade) {
+              console.log("偵測到官方最新處方服務點資料版本更新，正在同步合併說明與圖片資料...", defaultVersion);
+              const merged = mergeKmlDatasets(defaultItems, parsed);
+              state.allItems = normalizeKmlItems(merged);
+              localStorage.setItem(MAINT_STORAGE_KEY, JSON.stringify(state.allItems));
+              localStorage.setItem(MAINT_STORAGE_VERSION_KEY, defaultVersion);
+              return;
+            } else {
+              state.allItems = normalizeKmlItems(parsed);
+              return;
+            }
           }
         }
       } catch (e) {
         console.warn("讀取本機維護資料提醒：", e);
       }
-      state.allItems = normalizeKmlItems(state.allItems);
+      state.allItems = normalizeKmlItems(defaultItems.length > 0 ? defaultItems : state.allItems);
+      try {
+        localStorage.setItem(MAINT_STORAGE_KEY, JSON.stringify(state.allItems));
+        localStorage.setItem(MAINT_STORAGE_VERSION_KEY, defaultVersion);
+      } catch (e) {}
+    }
+
+    // 手動/自動同步最新官方處方服務點資料庫（防 iOS/Safari 磁碟快取）
+    async function syncLatestOfficialData(isManual = true) {
+      const syncBtn = document.getElementById("btnSyncLatestData");
+      if (syncBtn) {
+        syncBtn.disabled = true;
+        syncBtn.textContent = "⏳ 正在同步...";
+      }
+
+      try {
+        let latestData = window.DEFAULT_KML_DATA;
+        try {
+          const resp = await fetch(`./kml-data.js?v=20261030_061606?t=${Date.now()}`, { cache: "no-store" });
+          if (resp.ok) {
+            const jsText = await resp.text();
+            const prefix = "window.DEFAULT_KML_DATA = ";
+            const startIdx = jsText.indexOf(prefix);
+            if (startIdx >= 0) {
+              const rawJson = jsText.substring(startIdx + prefix.length).replace(/;\s*$/, "");
+              const parsedData = JSON.parse(rawJson);
+              if (parsedData && Array.isArray(parsedData.items) && parsedData.items.length > 0) {
+                latestData = parsedData;
+                window.DEFAULT_KML_DATA = parsedData;
+              }
+            }
+          }
+        } catch (fetchErr) {
+          console.warn("透過網路重新獲取 kml-data.js?v=20261030_061606 失敗，使用記憶體中最新資料：", fetchErr);
+        }
+
+        const defaultVersion = (latestData && latestData.version) || "20261028_v280";
+        const defaultItems = (latestData && Array.isArray(latestData.items)) ? latestData.items : [];
+
+        let localItems = [];
+        try {
+          const saved = localStorage.getItem(MAINT_STORAGE_KEY);
+          if (saved) localItems = JSON.parse(saved);
+        } catch (e) {}
+
+        const merged = mergeKmlDatasets(defaultItems, localItems);
+        state.allItems = normalizeKmlItems(merged);
+
+        localStorage.setItem(MAINT_STORAGE_KEY, JSON.stringify(state.allItems));
+        localStorage.setItem(MAINT_STORAGE_VERSION_KEY, defaultVersion);
+
+        state.placeCache.clear();
+        state.routeCache.clear();
+        updateCategoryCounts();
+        renderNearestList();
+        if (state.selectedItem) {
+          const updatedSelected = state.allItems.find(i => i.id === state.selectedItem.id || i.name === state.selectedItem.name);
+          if (updatedSelected) {
+            selectServicePoint(updatedSelected);
+          }
+        }
+        if (maintState && typeof renderMaintPointsList === "function") {
+          renderMaintPointsList();
+        }
+
+        const descCount = state.allItems.filter(i => i.description && i.description.trim()).length;
+        const imgCount = state.allItems.filter(i => Array.isArray(i.images) && i.images.length > 0).length;
+
+        if (isManual) {
+          alert(`✅ 處方服務點資料已同步更新成功！\n\n・總服務點：共 ${state.allItems.length} 筆\n・含補充說明服務點：${descCount} 筆\n・含實景照片服務點：${imgCount} 筆\n\n已成功將 PC 端更新補充之說明與照片同步至本裝置。`);
+        }
+      } catch (err) {
+        console.error("同步失敗：", err);
+        if (isManual) {
+          alert("❌ 同步資料時發生錯誤，請確認網路連線或稍後再試。");
+        }
+      } finally {
+        if (syncBtn) {
+          syncBtn.disabled = false;
+          syncBtn.textContent = "🔄 同步最新資料";
+        }
+      }
     }
 
     // 儲存維護後的 KML 資料至 localStorage 與 IndexedDB，並即時同步更新第一部分查詢介面
@@ -4591,6 +4744,8 @@
       state.allItems = normalizeKmlItems(state.allItems);
       try {
         localStorage.setItem(MAINT_STORAGE_KEY, JSON.stringify(state.allItems));
+        const curVer = (window.DEFAULT_KML_DATA && window.DEFAULT_KML_DATA.version) || "20261028_v280";
+        localStorage.setItem(MAINT_STORAGE_VERSION_KEY, curVer);
       } catch (e) {
         console.warn("儲存至 localStorage 提醒（改由 IndexedDB 儲存）：", e);
       }
