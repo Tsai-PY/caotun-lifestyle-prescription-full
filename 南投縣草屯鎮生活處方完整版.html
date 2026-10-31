@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="build-version" content="20261029082238" />
+  <meta name="build-version" content="20261031152156" />
   <title>南投縣草屯鎮｜生活處方完整版（資料查詢＋資料維護）</title>
   <style>
     :root {
@@ -172,6 +172,33 @@
     .step-card.active-step {
       border-color: #99f6e4;
       box-shadow: var(--shadow-md);
+    }
+
+    
+    /* 游標指到服務點時即時浮動預覽卡片（支援文字與最新圖片資料） */
+    #pointHoverPreviewCard {
+      position: fixed;
+      z-index: 999999;
+      pointer-events: none;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1.5px solid #0f766e;
+      border-radius: 10px;
+      box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.25), 0 4px 10px -2px rgba(15, 23, 42, 0.15);
+      padding: 10px 12px;
+      width: 290px;
+      max-width: 90vw;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      opacity: 0;
+      transform: translateY(6px);
+      display: none;
+      font-family: inherit;
+    }
+    #pointHoverPreviewCard.visible {
+      opacity: 1;
+      transform: translateY(0);
+      display: block;
     }
 
     /* 步驟 1 ~ 步驟 4 專屬柔和背景色與邊框 */
@@ -2135,7 +2162,10 @@
             <span id="mapAttributionInline" style="font-weight:700;">Google Maps</span>
           </div>
         </div>
-        <div id="map"></div>
+          <!-- 全域游標指到服務點即時浮動卡片（文字 + 最近增加的圖片資料） -->
+  <div id="pointHoverPreviewCard" class="point-hover-preview-card" aria-hidden="true"></div>
+
+<div id="map"></div>
       </section>
     </div>
   </main>
@@ -3322,7 +3352,22 @@
           </div>
         `;
 
+        // 游標指到步驟 3 清單的服務點時：即時顯示文字資料與最近增加的圖片資料
+        li.addEventListener("mouseenter", (e) => {
+          showPointHoverCard(item, rankNum, e);
+          if (state.isGoogleMapsReady && state.googleMap && state.selectedItem && state.selectedItem.id === item.id) {
+            openSelectedPointInfoWindow(item, String(rankNum));
+          }
+        });
+        li.addEventListener("mousemove", (e) => {
+          updatePointHoverCardPos(e);
+        });
+        li.addEventListener("mouseleave", () => {
+          hidePointHoverCard();
+        });
+
         li.addEventListener("click", () => {
+          hidePointHoverCard();
           state.selectedItem = item;
           renderNearestList();
           renderMapMarkers(false);
@@ -3399,7 +3444,110 @@
 
     let selectedPointInfoWindow = null;
 
-    // 在地圖所選服務點標記上方開啟詳細資訊與補充說明 InfoWindow 視窗
+    // 全域游標指到服務點即時浮動卡片控制
+    function showPointHoverCard(item, rankNum, evt) {
+      const card = document.getElementById("pointHoverPreviewCard");
+      if (!card || !item) return;
+
+      const meta = CATEGORY_META[item.category] || { color: "#0f766e", icon: "📍" };
+      const modeKey = state.selectedTravelMode;
+      const modeMeta = TRAVEL_MODE_META[modeKey] || TRAVEL_MODE_META.DRIVING;
+      const images = Array.isArray(item.images) ? item.images : [];
+      const latestImg = images.length > 0 ? images[images.length - 1] : null;
+
+      const descHtml = (item.description && item.description.trim()) ? `
+        <div style="margin-top:5px; padding:5px 8px; background:#f0fdfa; border:1px solid #99f6e4; border-radius:6px; font-size:0.72rem; color:#0f766e; line-height:1.4;">
+          <strong>📝 處方服務點補充說明：</strong><br/>
+          <span style="color:#0f172a; white-space:pre-line;">${escapeHtml(item.description.trim())}</span>
+        </div>
+      ` : "";
+
+      const imgHtml = latestImg ? `
+        <div style="margin-top:6px; padding:5px 7px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px;">
+          <div style="font-size:0.7rem; font-weight:700; color:#334155; margin-bottom:4px; display:flex; align-items:center; justify-content:space-between;">
+            <span>📷 最近增加的圖片資料 (${images.length} 張)</span>
+            <span style="font-size:0.65rem; background:#0f766e; color:#ffffff; padding:1px 6px; border-radius:999px; font-weight:700;">✨ 最新上傳</span>
+          </div>
+          <div style="position:relative; width:100%; height:120px; border-radius:5px; overflow:hidden; border:1px solid #cbd5e1; background:#0f172a;">
+            <img src="${escapeAttr(latestImg)}" alt="最近增加的圖片" style="width:100%; height:100%; object-fit:cover; display:block;" />
+            <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 100%); color:#ffffff; font-size:0.65rem; padding:3px 6px; display:flex; justify-content:space-between;">
+              <span>最近增加</span>
+              <span>點擊查看 ↗</span>
+            </div>
+          </div>
+        </div>
+      ` : `
+        <div style="margin-top:5px; font-size:0.68rem; color:#94a3b8; text-align:center; padding:3px; background:#f8fafc; border-radius:4px; border:1px dashed #e2e8f0;">
+          📷 尚未上傳服務點圖片資料
+        </div>
+      `;
+
+      card.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:4px; margin-bottom:3px;">
+          <span style="background:${meta.color}; color:#fff; font-size:0.68rem; font-weight:700; padding:1px 6px; border-radius:999px;">
+            ${rankNum ? `第 ${rankNum} 處・` : ""}${meta.icon || "📍"} ${escapeHtml(item.category)}
+          </span>
+          <span style="font-size:0.7rem; font-weight:700; color:#0f766e;">
+            ${modeMeta.icon} ${escapeHtml(item.durationText || "")}
+          </span>
+        </div>
+        <h4 style="margin:2px 0 3px; font-size:0.88rem; font-weight:800; color:#0f172a; line-height:1.25;">${escapeHtml(item.name)}</h4>
+        <div style="font-size:0.7rem; color:#64748b; margin-bottom:3px;">
+          直線 ${formatDistance(item.straightMeters || 0)}・路程約 ${formatDistance(item.routeDistanceMeters || item.straightMeters || 0)}
+        </div>
+        ${descHtml}
+        ${imgHtml}
+      `;
+
+      card.style.display = "block";
+      requestAnimationFrame(() => {
+        card.classList.add("visible");
+      });
+      positionPointHoverCard(evt);
+    }
+
+    function updatePointHoverCardPos(evt) {
+      positionPointHoverCard(evt);
+    }
+
+    function positionPointHoverCard(evt) {
+      const card = document.getElementById("pointHoverPreviewCard");
+      if (!card || !evt) return;
+
+      const margin = 16;
+      let x = (evt.clientX || 0) + 18;
+      let y = (evt.clientY || 0) - 20;
+
+      const cardRect = card.getBoundingClientRect();
+      const cardW = cardRect.width || 290;
+      const cardH = cardRect.height || 220;
+
+      // 若超出視窗右側，改在游標左側
+      if (x + cardW > window.innerWidth - margin) {
+        x = Math.max(margin, (evt.clientX || 0) - cardW - 18);
+      }
+      // 若超出視窗下側，往上調整
+      if (y + cardH > window.innerHeight - margin) {
+        y = Math.max(margin, window.innerHeight - cardH - margin);
+      }
+      if (y < margin) y = margin;
+
+      card.style.left = `${x}px`;
+      card.style.top = `${y}px`;
+    }
+
+    function hidePointHoverCard() {
+      const card = document.getElementById("pointHoverPreviewCard");
+      if (!card) return;
+      card.classList.remove("visible");
+      setTimeout(() => {
+        if (!card.classList.contains("visible")) {
+          card.style.display = "none";
+        }
+      }, 150);
+    }
+
+    // 在地圖所選服務點標記上方開啟詳細資訊、補充說明與最近增加的圖片 InfoWindow 視窗
     function openSelectedPointInfoWindow(item, rankStr) {
       if (!state.googleMap || !item) return;
       if (selectedPointInfoWindow) {
@@ -3420,9 +3568,38 @@
         </div>
       ` : "";
 
+      // 📷 最近增加的圖片資料
+      const images = Array.isArray(item.images) ? item.images : [];
+      let imagesHtml = "";
+      if (images.length > 0) {
+        const latestImg = images[images.length - 1];
+        imagesHtml = `
+          <div style="margin-top:6px; padding:6px 8px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px;">
+            <div style="font-size:0.72rem; font-weight:700; color:#334155; margin-bottom:5px; display:flex; align-items:center; justify-content:space-between;">
+              <span>📷 處方服務點照片 (${images.length} 張)</span>
+              <span style="font-size:0.67rem; background:#0f766e; color:#ffffff; padding:1px 6px; border-radius:999px; font-weight:600;">✨ 最近增加圖片</span>
+            </div>
+            <div style="position:relative; width:100%; border-radius:6px; overflow:hidden; border:1px solid #cbd5e1; background:#0f172a; cursor:pointer;" onclick="window.open('${escapeAttr(latestImg)}', '_blank')" title="點擊在瀏覽器新分頁放大檢視照片">
+              <img src="${escapeAttr(latestImg)}" alt="最近增加的圖片" style="width:100%; height:130px; object-fit:cover; display:block;" />
+              <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 100%); color:#ffffff; font-size:0.68rem; padding:4px 8px; display:flex; justify-content:space-between; align-items:center;">
+                <span>🏷️ 最近增加圖片</span>
+                <span style="font-size:0.62rem; opacity:0.9;">🔍 點擊看大圖 ↗</span>
+              </div>
+            </div>
+            ${images.length > 1 ? `
+              <div style="display:flex; gap:4px; margin-top:5px; overflow-x:auto; padding-bottom:2px;">
+                ${images.map((src, i) => `
+                  <img src="${escapeAttr(src)}" alt="服務點照片 ${i+1}" style="width:42px; height:32px; object-fit:cover; border-radius:4px; border:1.5px solid ${i === images.length - 1 ? '#0f766e' : '#cbd5e1'}; cursor:pointer; flex-shrink:0;" onclick="window.open('${escapeAttr(src)}', '_blank')" title="服務點照片 ${i+1}${i === images.length - 1 ? '（最近增加）' : ''}" />
+                `).join("")}
+              </div>
+            ` : ""}
+          </div>
+        `;
+      }
+
       const content = document.createElement("div");
       content.style.padding = "4px 2px";
-      content.style.maxWidth = "290px";
+      content.style.maxWidth = "300px";
       content.innerHTML = `
         <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
           <span style="background:${meta.color}; color:#fff; font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:999px;">
@@ -3431,6 +3608,7 @@
         </div>
         <h4 style="margin:2px 0 4px; font-size:0.92rem; font-weight:800; color:#0f172a; line-height:1.3;">${escapeHtml(item.name)}</h4>
         ${descHtml}
+        ${imagesHtml}
         <div style="margin-top:6px; font-size:0.72rem; color:#64748b; line-height:1.3;">
           ${modeMeta.icon} ${escapeHtml(modeMeta.label)}規劃路程・詳細資訊請見左側步驟 4 欄位
         </div>
@@ -3525,7 +3703,7 @@
           }
 
           let handledClick = false;
-          const onSelectMarker = () => {
+          const onSelectMarker = (e) => {
             if (handledClick) return;
             handledClick = true;
             setTimeout(() => { handledClick = false; }, 150);
@@ -3534,6 +3712,27 @@
           };
           marker.addEventListener("gmp-click", onSelectMarker);
           marker.addEventListener("click", onSelectMarker);
+
+          // 游標指到服務點標記時：即時顯示文字資料與最近增加的圖片資料
+          const onHoverMarker = (e) => {
+            openSelectedPointInfoWindow(selItem, rankStr);
+            if (e && e.clientX) {
+              showPointHoverCard(selItem, Number(rankStr), e);
+            }
+          };
+          marker.addEventListener("pointerenter", onHoverMarker);
+          marker.addEventListener("mouseenter", onHoverMarker);
+          if (marker.element) {
+            marker.element.addEventListener("pointerenter", onHoverMarker);
+            marker.element.addEventListener("mouseenter", onHoverMarker);
+            marker.element.addEventListener("mouseleave", hidePointHoverCard);
+          }
+          if (selPin && selPin.element) {
+            selPin.element.addEventListener("pointerenter", onHoverMarker);
+            selPin.element.addEventListener("mouseenter", onHoverMarker);
+            selPin.element.addEventListener("mouseleave", hidePointHoverCard);
+          }
+
           state.googleMarkers.push(marker);
         }
 
@@ -3639,9 +3838,17 @@
       `;
 
       mapContainer.querySelectorAll(".radar-point").forEach(el => {
+        const id = el.getAttribute("data-id");
+        const found = (state.nearestFive || []).find(p => p.id === id) || state.allItems.find(p => p.id === id);
+        if (found) {
+          const allIdx = (state.allSortedCandidates || []).findIndex(c => c.id === found.id);
+          const rankNum = allIdx >= 0 ? allIdx + 1 : 1;
+          el.addEventListener("mouseenter", (e) => { showPointHoverCard(found, rankNum, e); });
+          el.addEventListener("mousemove", (e) => { updatePointHoverCardPos(e); });
+          el.addEventListener("mouseleave", () => { hidePointHoverCard(); });
+        }
         el.addEventListener("click", () => {
-          const id = el.getAttribute("data-id");
-          const found = state.nearestFive.find(p => p.id === id);
+          hidePointHoverCard();
           if (found) {
             state.selectedItem = found;
             renderNearestList();
@@ -4164,6 +4371,13 @@
           apiKeyDialog.showModal();
         });
       });
+
+      // 自動在地圖所選點上方展開即時資訊與最近增加的圖片視窗
+      if (state.isGoogleMapsReady && state.googleMap) {
+        const allIdx = (state.allSortedCandidates || []).findIndex(c => c.id === item.id);
+        const rankStr = allIdx >= 0 ? String(allIdx + 1) : "1";
+        openSelectedPointInfoWindow(item, rankStr);
+      }
     }
 
     // 支援使用者動態上傳/更新 KML 檔案
