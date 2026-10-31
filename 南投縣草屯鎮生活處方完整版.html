@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="build-version" content="20261031152156" />
+  <meta name="build-version" content="20261031155016" />
   <title>南投縣草屯鎮｜生活處方完整版（資料查詢＋資料維護）</title>
   <style>
     :root {
@@ -3450,10 +3450,19 @@
       if (!card || !item) return;
 
       const meta = CATEGORY_META[item.category] || { color: "#0f766e", icon: "📍" };
-      const modeKey = state.selectedTravelMode;
+      const modeKey = state.selectedTravelMode || "DRIVING";
       const modeMeta = TRAVEL_MODE_META[modeKey] || TRAVEL_MODE_META.DRIVING;
       const images = Array.isArray(item.images) ? item.images : [];
       const latestImg = images.length > 0 ? images[images.length - 1] : null;
+
+      // 若在維護模式或未計算路徑時，顯示維護座標與距離
+      const hasRoute = Boolean(item.durationText);
+      const subMetaText = hasRoute
+        ? `直線 ${formatDistance(item.straightMeters || 0)}・路程約 ${formatDistance(item.routeDistanceMeters || item.straightMeters || 0)}`
+        : `經緯度座標：${Number(item.lat || 0).toFixed(6)}, ${Number(item.lng || 0).toFixed(6)}`;
+      const timeBadgeHtml = hasRoute
+        ? `<span style="font-size:0.7rem; font-weight:700; color:#0f766e;">${modeMeta.icon} ${escapeHtml(item.durationText || "")}</span>`
+        : `<span style="font-size:0.67rem; font-weight:700; color:#475569; background:#f1f5f9; padding:1px 6px; border-radius:4px;">資料維護模式</span>`;
 
       const descHtml = (item.description && item.description.trim()) ? `
         <div style="margin-top:5px; padding:5px 8px; background:#f0fdfa; border:1px solid #99f6e4; border-radius:6px; font-size:0.72rem; color:#0f766e; line-height:1.4;">
@@ -3487,13 +3496,11 @@
           <span style="background:${meta.color}; color:#fff; font-size:0.68rem; font-weight:700; padding:1px 6px; border-radius:999px;">
             ${rankNum ? `第 ${rankNum} 處・` : ""}${meta.icon || "📍"} ${escapeHtml(item.category)}
           </span>
-          <span style="font-size:0.7rem; font-weight:700; color:#0f766e;">
-            ${modeMeta.icon} ${escapeHtml(item.durationText || "")}
-          </span>
+          ${timeBadgeHtml}
         </div>
         <h4 style="margin:2px 0 3px; font-size:0.88rem; font-weight:800; color:#0f172a; line-height:1.25;">${escapeHtml(item.name)}</h4>
         <div style="font-size:0.7rem; color:#64748b; margin-bottom:3px;">
-          直線 ${formatDistance(item.straightMeters || 0)}・路程約 ${formatDistance(item.routeDistanceMeters || item.straightMeters || 0)}
+          ${subMetaText}
         </div>
         ${descHtml}
         ${imgHtml}
@@ -5760,7 +5767,22 @@
           </div>
         `;
 
+        // 維護模式列表游標指到服務點時：即時顯示文字資料與最近增加的圖片資料
+        row.addEventListener("mouseenter", (e) => {
+          showPointHoverCard(item, 0, e);
+          if (state.isGoogleMapsReady && maintState.maintMap) {
+            openMaintPointInfoWindow(item);
+          }
+        });
+        row.addEventListener("mousemove", (e) => {
+          updatePointHoverCardPos(e);
+        });
+        row.addEventListener("mouseleave", () => {
+          hidePointHoverCard();
+        });
+
         row.addEventListener("click", () => {
+          hidePointHoverCard();
           maintState.selectedPointId = item.id;
           renderMaintPointsList();
           renderMaintInspector();
@@ -5768,6 +5790,7 @@
           if (maintState.maintMap) {
             maintState.maintMap.panTo({ lat: item.lat, lng: item.lng });
             if (maintState.maintMap.getZoom() < 16) maintState.maintMap.setZoom(16);
+            openMaintPointInfoWindow(item);
           }
         });
 
@@ -6207,6 +6230,81 @@
       persistAndSyncKmlItems(`已刪除「${target.name}」`);
     }
 
+    let maintPointInfoWindow = null;
+
+    // 在維護地圖所選服務點標記上方開啟詳細資訊、補充說明與最近增加圖片的 InfoWindow 視窗
+    function openMaintPointInfoWindow(item) {
+      if (!maintState.maintMap || !item) return;
+      if (maintPointInfoWindow) {
+        maintPointInfoWindow.close();
+        maintPointInfoWindow = null;
+      }
+      const InfoWindowCtor = window.GoogleMapsInfoWindow || google.maps.InfoWindow;
+      if (!InfoWindowCtor) return;
+
+      const meta = CATEGORY_META[item.category] || { color: item.color || "#FF5252", icon: "📍" };
+      const images = Array.isArray(item.images) ? item.images : [];
+      const latestImg = images.length > 0 ? images[images.length - 1] : null;
+
+      const descHtml = (item.description && item.description.trim()) ? `
+        <div style="margin-top:6px; padding:6px 8px; background:#f0fdfa; border:1px solid #99f6e4; border-radius:6px; font-size:0.75rem; color:#0f766e; line-height:1.45;">
+          <strong>📝 處方服務點補充說明：</strong><br/>
+          <span style="color:#0f172a; white-space:pre-line;">${escapeHtml(item.description.trim())}</span>
+        </div>
+      ` : "";
+
+      let imagesHtml = "";
+      if (images.length > 0) {
+        imagesHtml = `
+          <div style="margin-top:6px; padding:6px 8px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px;">
+            <div style="font-size:0.72rem; font-weight:700; color:#334155; margin-bottom:5px; display:flex; align-items:center; justify-content:space-between;">
+              <span>📷 處方服務點照片 (${images.length} 張)</span>
+              <span style="font-size:0.67rem; background:#0f766e; color:#ffffff; padding:1px 6px; border-radius:999px; font-weight:600;">✨ 最近增加圖片</span>
+            </div>
+            <div style="position:relative; width:100%; border-radius:6px; overflow:hidden; border:1px solid #cbd5e1; background:#0f172a; cursor:pointer;" onclick="window.open('${escapeAttr(latestImg)}', '_blank')" title="點擊在瀏覽器新分頁放大檢視照片">
+              <img src="${escapeAttr(latestImg)}" alt="最近增加的圖片" style="width:100%; height:130px; object-fit:cover; display:block;" />
+              <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 100%); color:#ffffff; font-size:0.68rem; padding:4px 8px; display:flex; justify-content:space-between; align-items:center;">
+                <span>🏷️ 最近增加圖片</span>
+                <span style="font-size:0.62rem; opacity:0.9;">🔍 點擊看大圖 ↗</span>
+              </div>
+            </div>
+            ${images.length > 1 ? `
+              <div style="display:flex; gap:4px; margin-top:5px; overflow-x:auto; padding-bottom:2px;">
+                ${images.map((src, i) => `
+                  <img src="${escapeAttr(src)}" alt="服務點照片 ${i+1}" style="width:42px; height:32px; object-fit:cover; border-radius:4px; border:1.5px solid ${i === images.length - 1 ? '#0f766e' : '#cbd5e1'}; cursor:pointer; flex-shrink:0;" onclick="window.open('${escapeAttr(src)}', '_blank')" title="服務點照片 ${i+1}${i === images.length - 1 ? '（最近增加）' : ''}" />
+                `).join("")}
+              </div>
+            ` : ""}
+          </div>
+        `;
+      }
+
+      const content = document.createElement("div");
+      content.style.padding = "4px 2px";
+      content.style.maxWidth = "300px";
+      content.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+          <span style="background:${item.color || meta.color}; color:#fff; font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:999px;">
+            ${meta.icon || "📍"} 【${escapeHtml(item.category)}】生活處方圖層
+          </span>
+        </div>
+        <h4 style="margin:2px 0 4px; font-size:0.92rem; font-weight:800; color:#0f172a; line-height:1.3;">${escapeHtml(item.name)}</h4>
+        ${descHtml}
+        ${imagesHtml}
+        <div style="margin-top:6px; font-size:0.72rem; color:#64748b; line-height:1.3;">
+          📍 座標：${item.lat.toFixed(6)}, ${item.lng.toFixed(6)}・左側卡片可進行編輯與管理
+        </div>
+      `;
+
+      maintPointInfoWindow = new InfoWindowCtor({
+        content: content,
+        position: { lat: Number(item.lat), lng: Number(item.lng) }
+      });
+      maintPointInfoWindow.open({
+        map: maintState.maintMap
+      });
+    }
+
     // 在維護模式 Google Map 上渲染「唯一開啟圖層」之標記（六種資料圖層同時只能開啟一種圖層）
     async function renderMaintMapMarkers(fitBoundsFlag = false) {
       if (!state.isGoogleMapsReady || !maintState.maintMap) return;
@@ -6214,6 +6312,10 @@
       const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
       const { LatLngBounds } = await google.maps.importLibrary("core");
 
+      if (maintPointInfoWindow) {
+        maintPointInfoWindow.close();
+        maintPointInfoWindow = null;
+      }
       maintState.maintMarkers.forEach(m => { m.map = null; });
       maintState.maintMarkers = [];
 
@@ -6254,11 +6356,13 @@
           marker.element.setAttribute("title", maintTitle);
         }
 
-        const onMarkerClick = () => {
+        const onMarkerClick = (e) => {
+          hidePointHoverCard();
           maintState.selectedPointId = item.id;
           renderMaintPointsList();
           renderMaintInspector();
           renderMaintMapMarkers(false);
+          openMaintPointInfoWindow(item);
           if (maintState.mapToolMode === "ADD_CUSTOM_PIN") {
             alert(`🚫 「${item.name}」已經在【${item.category}】圖層中，已經在圖層中的資料不能被新增！（已為您選取該筆現有資料）`);
             setMaintMapToolMode("GOOGLE_POI");
@@ -6276,6 +6380,27 @@
         };
         marker.addEventListener("gmp-click", onMarkerClick);
         marker.addEventListener("click", onMarkerClick);
+
+        // 維護模式地圖上游標指到服務點標記時：即時顯示文字資料與最近增加的圖片資料
+        const onMaintHoverMarker = (e) => {
+          openMaintPointInfoWindow(item);
+          if (e && e.clientX) {
+            showPointHoverCard(item, 0, e);
+          }
+        };
+        marker.addEventListener("pointerenter", onMaintHoverMarker);
+        marker.addEventListener("mouseenter", onMaintHoverMarker);
+        if (marker.element) {
+          marker.element.addEventListener("pointerenter", onMaintHoverMarker);
+          marker.element.addEventListener("mouseenter", onMaintHoverMarker);
+          marker.element.addEventListener("mouseleave", hidePointHoverCard);
+        }
+        if (pin && pin.element) {
+          pin.element.addEventListener("pointerenter", onMaintHoverMarker);
+          pin.element.addEventListener("mouseenter", onMaintHoverMarker);
+          pin.element.addEventListener("mouseleave", hidePointHoverCard);
+        }
+
         maintState.maintMarkers.push(marker);
       });
 
