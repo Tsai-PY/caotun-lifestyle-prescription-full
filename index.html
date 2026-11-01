@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="build-version" content="20261101183307" />
+  <meta name="build-version" content="20261101185934" />
   <title>南投縣草屯鎮｜生活處方完整版（資料查詢＋資料維護）</title>
   <style>
     :root {
@@ -1959,7 +1959,7 @@
         <span class="status-dot active" id="apiStatusDot"></span>
         <span id="apiStatusText">已連線網站資料庫（正在載入 Google Maps...）</span>
       </div>
-      <button type="button" class="btn-header" id="btnSyncLatestData" title="立即同步官方最新處方服務點說明與圖片資料（iPad / 行動裝置可即時更新）" style="background:#0284c7; color:#ffffff; font-weight:700;">
+      <button type="button" class="btn-header" id="btnSyncLatestData" title="立即同步官方最新處方服務點說明與圖片資料（iPad / 行動裝置可即時更新）" style="background:#0284c7; color:#ffffff; font-weight:700; transition: background 0.25s ease, color 0.25s ease;">
         🔄 同步最新資料
       </button>
       <label class="btn-header" for="kmlFileInput" title="載入自訂或更新後的 KML 檔案">
@@ -4602,6 +4602,14 @@
         apiKeyDialog.close();
         window.location.reload();
       });
+
+      // 同步最新資料按鈕點擊事件
+      const syncBtnEl = document.getElementById("btnSyncLatestData");
+      if (syncBtnEl) {
+        syncBtnEl.addEventListener("click", () => {
+          syncLatestOfficialData(true);
+        });
+      }
     }
 
 
@@ -4862,18 +4870,33 @@
         const descCount = state.allItems.filter(i => i.description && i.description.trim()).length;
         const imgCount = state.allItems.filter(i => Array.isArray(i.images) && i.images.length > 0).length;
 
+        // 完成同步最新資料後，改顯示橘色「已同步最新資料」，1 秒鐘後再回復原本的藍色「同步最新資料」
+        if (syncBtn) {
+          syncBtn.disabled = false;
+          syncBtn.style.setProperty("background", "#ea580c", "important"); // 亮橘色
+          syncBtn.style.setProperty("color", "#ffffff", "important");
+          syncBtn.textContent = "✅ 已同步最新資料";
+
+          setTimeout(() => {
+            syncBtn.style.setProperty("background", "#0284c7", "important"); // 原本藍色
+            syncBtn.style.setProperty("color", "#ffffff", "important");
+            syncBtn.textContent = "🔄 同步最新資料";
+          }, 1000);
+        }
+
         if (isManual) {
-          alert(`✅ 處方服務點資料已同步更新成功！\n\n・總服務點：共 ${state.allItems.length} 筆\n・含補充說明服務點：${descCount} 筆\n・含實景照片服務點：${imgCount} 筆\n\n已成功將 PC 端更新補充之說明與照片同步至本裝置。`);
+          console.log(`[同步完成] 共 ${state.allItems.length} 筆，含補充說明 ${descCount} 筆，含照片 ${imgCount} 筆`);
         }
       } catch (err) {
         console.error("同步失敗：", err);
-        if (isManual) {
-          alert("❌ 同步資料時發生錯誤，請確認網路連線或稍後再試。");
-        }
-      } finally {
         if (syncBtn) {
           syncBtn.disabled = false;
+          syncBtn.style.setProperty("background", "#0284c7", "important");
+          syncBtn.style.setProperty("color", "#ffffff", "important");
           syncBtn.textContent = "🔄 同步最新資料";
+        }
+        if (isManual) {
+          alert("❌ 同步資料時發生錯誤，請確認網路連線或稍後再試。");
         }
       }
     }
