@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="build-version" content="20261101185934" />
+  <meta name="build-version" content="20261101190801" />
   <title>南投縣草屯鎮｜生活處方完整版（資料查詢＋資料維護）</title>
   <style>
     :root {
@@ -4820,7 +4820,7 @@
       try {
         let latestData = window.DEFAULT_KML_DATA;
         try {
-          const resp = await fetch(`./kml-data.js?v=20261030_061606?t=${Date.now()}`, { cache: "no-store" });
+          const resp = await fetch(`./kml-data.js?t=${Date.now()}`, { cache: "no-store" });
           if (resp.ok) {
             const jsText = await resp.text();
             const prefix = "window.DEFAULT_KML_DATA = ";
@@ -4855,8 +4855,8 @@
 
         state.placeCache.clear();
         state.routeCache.clear();
-        updateCategoryCounts();
-        renderNearestList();
+        renderCategoryButtons();
+        updateNearestFive();
         if (state.selectedItem) {
           const updatedSelected = state.allItems.find(i => i.id === state.selectedItem.id || i.name === state.selectedItem.name);
           if (updatedSelected) {
