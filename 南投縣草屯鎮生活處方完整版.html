@@ -2080,6 +2080,107 @@
       color: #0f172a !important;
     }
 
+  
+    /* === NCC 1A 無障礙快速鍵與定位點標記樣式 === */
+    .accesskey-marker {
+      display: inline-block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #64748b;
+      text-decoration: none;
+      padding: 1px 5px;
+      margin-right: 4px;
+      border-radius: 4px;
+      vertical-align: middle;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+
+    .accesskey-marker:focus,
+    .accesskey-marker:hover {
+      outline: 3px solid #2563eb;
+      outline-offset: 2px;
+      background: #fef08a;
+      color: #0f172a;
+      border-color: #ca8a04;
+      text-decoration: underline;
+    }
+
+    .app-header .accesskey-marker {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .app-header .accesskey-marker:focus,
+    .app-header .accesskey-marker:hover {
+      color: #0f172a;
+      background: #fef08a;
+    }
+
+    .footer-a11y-section {
+      width: 100%;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px dashed #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .a11y-badge-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      color: #334155;
+      line-height: 1.5;
+    }
+
+    .a11y-stamp {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #047857;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .accesskey-guide-table {
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      color: #334155;
+    }
+
+    .accesskey-guide-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #0f172a;
+    }
+
+    .accesskey-guide-table ul {
+      margin: 0;
+      padding-left: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 4px 14px;
+    }
+
+    .accesskey-tips {
+      margin-top: 8px;
+      font-size: 0.74rem;
+      color: #64748b;
+      line-height: 1.45;
+    }
   </style>
 
 </head>
@@ -2089,6 +2190,7 @@
 
   <!-- 頂部標題與工具列 -->
   <header class="app-header">
+    <a href="#accesskey-u" id="accesskey-u" accesskey="U" class="accesskey-marker" title="上方導覽功能區 (快速鍵 Alt+U)">:::</a>
     <div class="brand-group">
       <div class="brand-badge" aria-hidden="true">🌿</div>
       <div>
@@ -2144,9 +2246,11 @@
   </section>
 
   <!-- 主要內容區 -->
-  <main class="main-layout" id="queryModuleView">
+  <main class="main-layout" id="queryModuleView" role="main" aria-label="生活處方資料查詢模組" tabindex="-1">
+    <a href="#accesskey-c" id="accesskey-c" accesskey="C" class="accesskey-marker" title="主要內容區 (快速鍵 Alt+C)" style="grid-column:1 / -1; margin-bottom:-6px;">:::</a>
     <!-- 左欄：定位 + 步驟 1 ~ 步驟 4 垂直操作流程 -->
-    <div class="control-column">
+    <div class="control-column" role="region" aria-label="處方查詢與導航控制區">
+      <a href="#accesskey-l" id="accesskey-l" accesskey="L" class="accesskey-marker" title="左側處方查詢控制區 (快速鍵 Alt+L)">:::</a>
       <!-- 目前所在位置／查詢地點設定 -->
       <section class="step-card" aria-label="查詢地點設定">
         <div class="step-header">
@@ -2293,7 +2397,8 @@
     </div>
 
     <!-- 右欄：常駐互動式地圖與路線規劃 -->
-    <div class="right-column">
+    <div class="right-column" role="region" aria-label="生活處方地圖導航區">
+      <a href="#accesskey-r" id="accesskey-r" accesskey="R" class="accesskey-marker" title="右側地圖導航區 (快速鍵 Alt+R)">:::</a>
       <!-- 互動地圖區 -->
       <section class="map-card" aria-label="草屯鎮生活處方互動地圖">
         <div class="map-toolbar">
@@ -2360,7 +2465,7 @@
           type="text"
           id="maintPointSearchInput"
           class="maint-search-input"
-          placeholder="🔍 篩選此開啟圖層內的服務點名稱或說明..."
+          placeholder="🔍 篩選此開啟圖層內的服務點名稱或說明..." aria-label="篩選此開啟圖層內的服務點名稱或補充說明"
         />
         <div class="maint-points-scroll" id="maintPointsList">
           <!-- 由 JS 渲染目前開啟圖層內的服務點清單 -->
@@ -2430,7 +2535,7 @@
             <input
               type="text"
               id="maintMapSearchInput"
-              placeholder="🔍 搜尋 Google 地圖已有地標..."
+              placeholder="🔍 搜尋 Google 地圖已有地標..." aria-label="搜尋 Google 地圖已有地標以加入圖層"
               style="padding:4px 8px; font-size:0.75rem; border:1.5px solid #86efac; border-radius:6px; min-width:150px; background:#ffffff;"
             />
             <button type="submit" class="btn-kml-action primary" style="padding:4px 10px; font-size:0.75rem;">搜尋標記</button>
@@ -2507,11 +2612,11 @@
       </div>
       <div class="dialog-steps">
         <label style="display:flex; align-items:center; gap:8px; margin-bottom:6px; cursor:pointer; font-weight:600;">
-          <input type="checkbox" id="exportKeepOnlineCheck" checked />
+          <input type="checkbox" id="exportKeepOnlineCheck" checked aria-label="保持資料最新狀態（包含所有自訂樣式、資料點說明與圖片資料）" />
           保持資料最新狀態（包含所有自訂樣式、資料點說明與圖片資料）
         </label>
         <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600;">
-          <input type="checkbox" id="exportStandardKmlCheck" checked />
+          <input type="checkbox" id="exportStandardKmlCheck" checked aria-label="匯出為標準 KML 格式檔案" />
           匯出為標準 <code>.kml</code> 格式檔案（而非壓縮之 .kmz，方便直接檢視與還原）
         </label>
       </div>
@@ -2523,15 +2628,40 @@
   </dialog>
 
   <!-- 頁尾法規與條款聲明 -->
-  <footer class="app-footer">
-    <div>
-      資料基底：南投縣草屯鎮生活處方群組資料.kml（社交、紓壓、營養、運動、睡眠、藥物安全）
-    </div>
-    <div>
-      使用 Google Maps Platform 服務須遵守
-      <a href="https://cloud.google.com/maps-platform/terms?utm_campaign=gmp_git_agentskills_v1" target="_blank" rel="noopener">Google Maps Platform 服務條款</a>
-      ｜
-      <a href="https://docs.cloud.google.com/api-keys/docs/add-restrictions-api-keys?utm_campaign=gmp_git_agentskills_v1" target="_blank" rel="noopener">API 金鑰安全限制說明</a>
+  <footer class="app-footer" role="contentinfo">
+    <div style="width:100%;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <a href="#accesskey-b" id="accesskey-b" accesskey="B" class="accesskey-marker" title="下方頁尾資訊區 (快速鍵 Alt+B)">:::</a>
+          <span><strong>資料基底：</strong>南投縣草屯鎮生活處方群組資料.kml（社交、紓壓、營養、運動、睡眠、藥物安全）</span>
+        </div>
+        <div>
+          使用 Google Maps Platform 服務須遵守
+          <a href="https://cloud.google.com/maps-platform/terms?utm_campaign=gmp_git_agentskills_v1" target="_blank" rel="noopener">Google Maps Platform 服務條款</a>
+          ｜
+          <a href="https://docs.cloud.google.com/api-keys/docs/add-restrictions-api-keys?utm_campaign=gmp_git_agentskills_v1" target="_blank" rel="noopener">API 金鑰安全限制說明</a>
+        </div>
+      </div>
+
+      <div class="footer-a11y-section">
+        <div class="a11y-badge-box">
+          <span class="a11y-stamp" title="符合國家通訊傳播委員會 (NCC) 無障礙網頁規範 2.1 版 A 級 (Level A)">無障礙 1A</span>
+          <span>本系統依據國家通訊傳播委員會 (NCC)「無障礙網頁開發規範 2.1 版」A 級 (Level A) 標準進行設計與檢測，並遵循 W3C WCAG 2.1/2.2 Level A 規範，提供全鍵盤存取、螢幕報讀友善與清晰定位導引環境。</span>
+        </div>
+        <div class="accesskey-guide-table">
+          <div class="accesskey-guide-title">⌨️ 網頁定位點 (:::) 與鍵盤快速鍵 (Accesskey) 操作導引：</div>
+          <ul>
+            <li><strong>Alt + U</strong>：移至上方導覽與功能區（標題、連線狀態、同步最新資料、匯入 KML 與 API 設定）。</li>
+            <li><strong>Alt + C</strong>：移至中央主要內容區（處方查詢與資料維護切換）。</li>
+            <li><strong>Alt + L</strong>：移至左側處方查詢控制區（步驟 1 ~ 步驟 4 完整操作與導航資訊）。</li>
+            <li><strong>Alt + R</strong>：移至右側生活處方地圖導航區（Google 地圖圖台與導航路徑）。</li>
+            <li><strong>Alt + B</strong>：移至下方頁尾與無障礙資訊區。</li>
+          </ul>
+          <div class="accesskey-tips">
+            ※ 快速鍵操作提醒：Windows 請使用 <code>Alt + 快速鍵代碼</code>；Firefox 瀏覽器請使用 <code>Alt + Shift + 快速鍵代碼</code>；macOS 請使用 <code>Control + Option + 快速鍵代碼</code>。若需跳至主要內容，載入時可按 <code>Tab</code> 鍵使用「跳至主要內容區」功能。
+          </div>
+        </div>
+      </div>
     </div>
   </footer>
 
@@ -6084,7 +6214,7 @@
               <input
                 type="url"
                 id="maintImageUrlInput"
-                placeholder="或貼上圖片網址 (https://...)"
+                placeholder="或貼上圖片網址 (https://...)" aria-label="貼上圖片網址 (https://...)"
                 style="flex:1; padding:4px 7px; font-size:0.75rem; border:1px solid #cbd5e1; border-radius:6px;"
               />
               <button type="button" class="btn-kml-action" id="btnAddImageUrl">➕ 加入網址圖片</button>
@@ -6162,7 +6292,7 @@
           }
           ${imgCount > 0 ? `
             <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:4px;">
-              ${item.images.map(src => `<img src="${escapeAttr(src)}" alt="" style="height:54px; width:76px; object-fit:cover; border-radius:5px; border:1px solid #cbd5e1;" />`).join("")}
+              ${item.images.map(src => `<img src="${escapeAttr(src)}" alt="處方服務點照片" style="height:54px; width:76px; object-fit:cover; border-radius:5px; border:1px solid #cbd5e1;" />`).join("")}
             </div>
           ` : ""}
 
@@ -6695,7 +6825,7 @@
           const descText = (pm.description || "").trim();
           let descXml = "";
           if (descText || imgs.length > 0) {
-            const imgTags = imgs.map(u => `<img src="${u}" height="200" width="auto" />`).join("<br>");
+            const imgTags = imgs.map(u => `<img src="${u}" alt="處方服務點照片" height="200" width="auto" />`).join("<br>");
             const htmlBody = [imgTags, descText.replace(/\n/g, "<br>")].filter(Boolean).join("<br><br>");
             descXml = `\n        <description><![CDATA[${htmlBody}]]></description>`;
           }
