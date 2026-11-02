@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="build-version" content="20261102124500" />
+  <meta name="build-version" content="20261103033535" />
   <title>南投縣草屯鎮｜生活處方完整版（資料查詢＋資料維護）</title>
   <style>
     :root {
@@ -705,22 +705,6 @@
       color: #ef4444;
     }
 
-    .loc-chip-btn {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 999px;
-      padding: 2px 8px;
-      font-size: 0.72rem;
-      color: #334155;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .loc-chip-btn:hover {
-      background: #e0f2fe;
-      border-color: #0284c7;
-      color: #0369a1;
-      transform: translateY(-1px);
-    }
 
     .nearest-item {
       border: 1.5px solid #e2e8f0;
@@ -2010,8 +1994,7 @@
     .prescription-btn,
     .travel-btn,
     .nearest-item,
-    .maint-point-row,
-    .loc-chip-btn {
+    .maint-point-row {
       touch-action: manipulation;
     }
 
@@ -2211,7 +2194,7 @@
                 id="customLocationInput"
                 name="locationQuery"
                 class="input-location-search"
-                placeholder="請輸入我的地點（例：草屯國小、碧山路、草屯鎮農會、敦和宮）"
+                placeholder="請輸入我的地點（例：草屯鎮公所、碧山路、中興路、成功路...）"
                 autocomplete="street-address"
                 autocorrect="off"
                 autocapitalize="off"
@@ -4712,14 +4695,6 @@
         });
       }
 
-      // 常見查詢地點快捷按鈕事件
-      document.querySelectorAll(".loc-chip-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const place = btn.getAttribute("data-place");
-          if (customLocInput) customLocInput.value = place;
-          searchAndSetUserLocation(place);
-        });
-      });
 
       // 步驟 3：下拉展開／收合切換按鈕事件
       const dropdownToggleBtn = document.getElementById("nearestDropdownToggleBtn");
