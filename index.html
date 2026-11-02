@@ -2081,41 +2081,7 @@
     }
 
   
-    /* === NCC 1A 無障礙快速鍵與定位點標記樣式 === */
-    .accesskey-marker {
-      display: inline-block;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: #64748b;
-      text-decoration: none;
-      padding: 1px 5px;
-      margin-right: 4px;
-      border-radius: 4px;
-      vertical-align: middle;
-      border: 1px solid transparent;
-      user-select: none;
-    }
-
-    .accesskey-marker:focus,
-    .accesskey-marker:hover {
-      outline: 3px solid #2563eb;
-      outline-offset: 2px;
-      background: #fef08a;
-      color: #0f172a;
-      border-color: #ca8a04;
-      text-decoration: underline;
-    }
-
-    .app-header .accesskey-marker {
-      color: rgba(255, 255, 255, 0.75);
-    }
-
-    .app-header .accesskey-marker:focus,
-    .app-header .accesskey-marker:hover {
-      color: #0f172a;
-      background: #fef08a;
-    }
-
+    /* === 頁尾無障礙宣告樣式 === */
     .footer-a11y-section {
       width: 100%;
       margin-top: 14px;
@@ -2152,35 +2118,6 @@
       flex-shrink: 0;
       letter-spacing: 0.5px;
     }
-
-    .accesskey-guide-table {
-      background: #f1f5f9;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 0.78rem;
-      color: #334155;
-    }
-
-    .accesskey-guide-title {
-      font-weight: 700;
-      margin-bottom: 6px;
-      color: #0f172a;
-    }
-
-    .accesskey-guide-table ul {
-      margin: 0;
-      padding-left: 20px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 4px 14px;
-    }
-
-    .accesskey-tips {
-      margin-top: 8px;
-      font-size: 0.74rem;
-      color: #64748b;
-      line-height: 1.45;
-    }
   </style>
 
 </head>
@@ -2190,8 +2127,7 @@
 
   <!-- 頂部標題與工具列 -->
   <header class="app-header">
-    <a href="#accesskey-u" id="accesskey-u" accesskey="U" class="accesskey-marker" title="上方導覽功能區 (快速鍵 Alt+U)">:::</a>
-    <div class="brand-group">
+        <div class="brand-group">
       <div class="brand-badge" aria-hidden="true">🌿</div>
       <div>
         <h1 class="brand-title">南投縣草屯鎮｜生活處方完整版系統</h1>
@@ -2247,11 +2183,9 @@
 
   <!-- 主要內容區 -->
   <main class="main-layout" id="queryModuleView" role="main" aria-label="生活處方資料查詢模組" tabindex="-1">
-    <a href="#accesskey-c" id="accesskey-c" accesskey="C" class="accesskey-marker" title="主要內容區 (快速鍵 Alt+C)" style="grid-column:1 / -1; margin-bottom:-6px;">:::</a>
-    <!-- 左欄：定位 + 步驟 1 ~ 步驟 4 垂直操作流程 -->
+        <!-- 左欄：定位 + 步驟 1 ~ 步驟 4 垂直操作流程 -->
     <div class="control-column" role="region" aria-label="處方查詢與導航控制區">
-      <a href="#accesskey-l" id="accesskey-l" accesskey="L" class="accesskey-marker" title="左側處方查詢控制區 (快速鍵 Alt+L)">:::</a>
-      <!-- 目前所在位置／查詢地點設定 -->
+            <!-- 目前所在位置／查詢地點設定 -->
       <section class="step-card" aria-label="查詢地點設定">
         <div class="step-header">
           <div class="step-title-group">
@@ -2398,8 +2332,7 @@
 
     <!-- 右欄：常駐互動式地圖與路線規劃 -->
     <div class="right-column" role="region" aria-label="生活處方地圖導航區">
-      <a href="#accesskey-r" id="accesskey-r" accesskey="R" class="accesskey-marker" title="右側地圖導航區 (快速鍵 Alt+R)">:::</a>
-      <!-- 互動地圖區 -->
+            <!-- 互動地圖區 -->
       <section class="map-card" aria-label="草屯鎮生活處方互動地圖">
         <div class="map-toolbar">
           <span id="mapModeHint" style="font-weight: 600; color: #0f172a;">💡 提示：點擊地圖上任意位置可重設「目前所在位置」；點選標記可切換服務點</span>
@@ -2631,9 +2564,8 @@
   <footer class="app-footer" role="contentinfo">
     <div style="width:100%;">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-        <div style="display:flex; align-items:center; gap:6px;">
-          <a href="#accesskey-b" id="accesskey-b" accesskey="B" class="accesskey-marker" title="下方頁尾資訊區 (快速鍵 Alt+B)">:::</a>
-          <span><strong>資料基底：</strong>南投縣草屯鎮生活處方群組資料.kml（社交、紓壓、營養、運動、睡眠、藥物安全）</span>
+        <div>
+          <strong>資料基底：</strong>南投縣草屯鎮生活處方群組資料.kml（社交、紓壓、營養、運動、睡眠、藥物安全）
         </div>
         <div>
           使用 Google Maps Platform 服務須遵守
@@ -2645,21 +2577,8 @@
 
       <div class="footer-a11y-section">
         <div class="a11y-badge-box">
-          <span class="a11y-stamp" title="符合國家通訊傳播委員會 (NCC) 無障礙網頁規範 2.1 版 A 級 (Level A)">無障礙 1A</span>
-          <span>本系統依據國家通訊傳播委員會 (NCC)「無障礙網頁開發規範 2.1 版」A 級 (Level A) 標準進行設計與檢測，並遵循 W3C WCAG 2.1/2.2 Level A 規範，提供全鍵盤存取、螢幕報讀友善與清晰定位導引環境。</span>
-        </div>
-        <div class="accesskey-guide-table">
-          <div class="accesskey-guide-title">⌨️ 網頁定位點 (:::) 與鍵盤快速鍵 (Accesskey) 操作導引：</div>
-          <ul>
-            <li><strong>Alt + U</strong>：移至上方導覽與功能區（標題、連線狀態、同步最新資料、匯入 KML 與 API 設定）。</li>
-            <li><strong>Alt + C</strong>：移至中央主要內容區（處方查詢與資料維護切換）。</li>
-            <li><strong>Alt + L</strong>：移至左側處方查詢控制區（步驟 1 ~ 步驟 4 完整操作與導航資訊）。</li>
-            <li><strong>Alt + R</strong>：移至右側生活處方地圖導航區（Google 地圖圖台與導航路徑）。</li>
-            <li><strong>Alt + B</strong>：移至下方頁尾與無障礙資訊區。</li>
-          </ul>
-          <div class="accesskey-tips">
-            ※ 快速鍵操作提醒：Windows 請使用 <code>Alt + 快速鍵代碼</code>；Firefox 瀏覽器請使用 <code>Alt + Shift + 快速鍵代碼</code>；macOS 請使用 <code>Control + Option + 快速鍵代碼</code>。若需跳至主要內容，載入時可按 <code>Tab</code> 鍵使用「跳至主要內容區」功能。
-          </div>
+          <span class="a11y-stamp" title="符合無障礙網頁規範 2.1 版 A 級 (Level A)">無障礙 1A</span>
+          <span>本系統依據「無障礙網頁規範」A 級 (Level A) 標準進行設計與檢測，並遵循 W3C WCAG 2.1/2.2 Level A 規範，提供全鍵盤（Tab / Shift+Tab）巡迴存取、螢幕報讀友善與高對比環境。頁面載入時亦可按 <code>Tab</code> 鍵使用「跳至主要內容區」功能。</span>
         </div>
       </div>
     </div>
