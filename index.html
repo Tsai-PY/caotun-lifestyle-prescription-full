@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <meta name="build-version" content="20261103033535" />
+  <meta name="build-version" content="20261103035309" />
   <title>南投縣草屯鎮｜生活處方完整版（資料查詢＋資料維護）</title>
   <style>
     :root {
@@ -363,11 +363,17 @@
 
     /* 輸入地標或地址定位表單 (符合 Modern Web Guidance `forms` 規範) */
     .location-search-form {
-      border-top: 1px dashed #cbd5e1;
-      padding-top: 5px;
-      margin-top: 1px;
       display: flex;
       flex-direction: column;
+      margin-top: 1px;
+    }
+
+    .location-gps-row {
+      border-top: 1px dashed #cbd5e1;
+      padding-top: 5px;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
     }
 
     .location-search-label {
@@ -2177,15 +2183,10 @@
           </div>
         </div>
         <div class="location-bar">
-          <div class="location-current">
-            <div class="location-coords" id="userLocationLabel">
-              📍 目前查詢地點：草屯鎮公所周邊 (23.9742, 120.6824)
-            </div>
-            <button type="button" class="btn-locate" id="gpsLocateBtn">
-              📡 取得目前 GPS 位置
-            </button>
+          <div class="location-coords" id="userLocationLabel">
+            📍 目前查詢地點：草屯鎮公所周邊 (23.9742, 120.6824)
           </div>
-          <!-- 輸入查詢地點（地標或地址）定位一欄 -->
+          <!-- 輸入查詢地點（地標或地址）定位一欄（點選我的位置） -->
           <form id="customLocationForm" class="location-search-form" action="#" method="GET">
             <label for="customLocationInput" class="location-search-label">🔍 輸入我的地點（地標或地址）：</label>
             <div class="location-search-row">
@@ -2209,6 +2210,11 @@
             </div>
             <div id="locationSearchFeedback" class="location-search-feedback" aria-live="polite"></div>
           </form>
+          <div class="location-gps-row">
+            <button type="button" class="btn-locate" id="gpsLocateBtn">
+              📡 取得目前 GPS 位置
+            </button>
+          </div>
         </div>
       </section>
 
