@@ -3020,17 +3020,7 @@
 
     .maint-points-scroll {
 
-      max-height: 230px;
-
-      overflow-y: auto;
-
       margin-top: 5px;
-
-      border: 1px solid #e2e8f0;
-
-      border-radius: 6px;
-
-      background: #fafafa;
 
     }
 
@@ -11809,9 +11799,11 @@
 
       const kw = (maintState.filterKeyword || "").trim().toLowerCase();
 
-      const layerItems = state.allItems.filter(item => {
+      const allLayerItems = state.allItems.filter(item => item.category === maintState.selectedLayer);
 
-        if (item.category !== maintState.selectedLayer) return false;
+
+
+      const layerItems = allLayerItems.filter(item => {
 
         if (!kw) return true;
 
@@ -11823,7 +11815,7 @@
 
       if (layerItems.length === 0) {
 
-        listEl.innerHTML = `<div class="empty-hint" style="padding:12px;">此圖層尚無符合條件的服務點，可使用下方 2 種新增標記方式建立。</div>`;
+        listEl.innerHTML = `<div class="empty-hint" style="padding:10px; font-size:0.75rem; text-align:center;">此圖層尚無符合條件的服務點，可使用上方 4 種新增標記方式建立。</div>`;
 
         return;
 
@@ -11831,139 +11823,147 @@
 
 
 
-      layerItems.forEach((item) => {
+      // 取得目前被選中的服務點（若無則預設選中第一筆）
 
-        const row = document.createElement("div");
+      let selItem = layerItems.find(item => item.id === maintState.selectedPointId);
 
-        const isSel = item.id === maintState.selectedPointId;
+      if (!selItem) {
 
-        row.className = "maint-point-row" + (isSel ? " selected" : "");
+        selItem = layerItems[0];
 
-        row.setAttribute("role", "button");
+        maintState.selectedPointId = selItem.id;
 
-        row.setAttribute("tabindex", "0");
-
-        row.setAttribute("aria-label", `處方服務點：${item.name}，按 Enter 鍵選取以進行維護編輯。`);
-
-        row.setAttribute("aria-pressed", isSel ? "true" : "false");
-
-        const hasDesc = Boolean(item.description && item.description.trim());
-
-        const imgCount = Array.isArray(item.images) ? item.images.length : 0;
+      }
 
 
 
-        row.innerHTML = `
+      const hasDesc = Boolean(selItem.description && selItem.description.trim());
 
-          <div class="maint-point-left">
+      const imgCount = Array.isArray(selItem.images) ? selItem.images.length : 0;
 
-            ${getMyMapsCategoryIcon(item.category, 20)}
 
-            <span class="maint-point-title">${escapeHtml(item.name)}</span>
+
+      // 1. 依使用者要求：只要顯示目前被選中的那個服務點
+
+      const selCard = document.createElement("div");
+
+      selCard.className = "maint-selected-point-box";
+
+      selCard.style.cssText = "padding:7px 9px; background:#eff6ff; border:1.5px solid #60a5fa; border-radius:8px; display:flex; flex-direction:column; gap:4px; box-shadow:0 1px 3px rgba(37,99,235,0.08); margin-bottom:4px;";
+
+      selCard.innerHTML = `
+
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+
+          <div style="display:flex; align-items:center; gap:6px; min-width:0;">
+
+            ${getMyMapsCategoryIcon(selItem.category, 22)}
+
+            <strong style="font-size:0.85rem; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(selItem.name)}</strong>
 
           </div>
 
-          <div class="maint-point-badges">
+          <span style="font-size:0.67rem; font-weight:800; background:#0284c7; color:#ffffff; padding:2px 7px; border-radius:999px; white-space:nowrap; flex-shrink:0;">
 
-            ${hasDesc ? `<span title="已填寫資料點說明">📝</span>` : ""}
+            ✓ 目前選中
 
-            ${imgCount > 0 ? `<span title="已加入 ${imgCount} 張圖片">🖼️${imgCount}</span>` : ""}
+          </span>
+
+        </div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.7rem; color:#475569; padding-left:28px;">
+
+          <span>📍 座標：${selItem.lat.toFixed(5)}, ${selItem.lng.toFixed(5)}</span>
+
+          <div style="display:flex; gap:4px;">
+
+            ${hasDesc ? `<span style="background:#f0fdfa; color:#0f766e; border:1px solid #99f6e4; padding:1px 5px; border-radius:4px;" title="已填寫說明">📝已填說明</span>` : ""}
+
+            ${imgCount > 0 ? `<span style="background:#f8fafc; color:#334155; border:1px solid #cbd5e1; padding:1px 5px; border-radius:4px;" title="照片數量">🖼️${imgCount}張照片</span>` : ""}
 
           </div>
 
-        `;
+        </div>
+
+      `;
+
+      listEl.appendChild(selCard);
 
 
 
-        // 維護模式列表游標指到服務點時：即時顯示文字資料與最近增加的圖片資料
+      // 2. 下拉切換選單：提供切換此圖層其他服務點的便利途徑
 
-        row.addEventListener("mouseenter", (e) => {
+      const dropdownWrap = document.createElement("div");
 
-          showPointHoverCard(item, 0, e);
+      dropdownWrap.style.cssText = "margin-top:2px;";
 
-          if (state.isGoogleMapsReady && maintState.maintMap) {
+      dropdownWrap.innerHTML = `
 
-            openMaintPointInfoWindow(item);
+        <label for="maintPointSelectDropdown" class="sr-only">切換選擇此圖層其他服務點</label>
 
-          }
+        <select id="maintPointSelectDropdown" style="width:100%; padding:5px 8px; font-size:0.75rem; border:1px solid #cbd5e1; border-radius:6px; background:#ffffff; color:#334155; font-weight:600; cursor:pointer;" title="可由此下拉切換選擇【${maintState.selectedLayer}】圖層的其他服務點">
 
-        });
+          <option value="" disabled>▼ 切換選擇【${maintState.selectedLayer}】其他服務點（共 ${allLayerItems.length} 處）...</option>
 
-        row.addEventListener("mousemove", (e) => {
+          ${layerItems.map((item, idx) => `
 
-          updatePointHoverCardPos(e);
+            <option value="${item.id}" ${item.id === selItem.id ? "selected" : ""}>
 
-        });
+              ${idx + 1}. ${escapeHtml(item.name)}${item.id === selItem.id ? " (目前選中)" : ""}
 
-        row.addEventListener("mouseleave", () => {
+            </option>
 
-          hidePointHoverCard();
+          `).join("")}
 
-        });
+        </select>
 
-
-
-        const handleMaintSelectAction = () => {
-
-          hidePointHoverCard();
-
-          maintState.selectedPointId = item.id;
-
-          renderMaintPointsList();
-
-          renderMaintInspector();
-
-          renderMaintMapMarkers(false);
-
-          if (maintState.maintMap) {
-
-            maintState.maintMap.panTo({ lat: item.lat, lng: item.lng });
-
-            if (maintState.maintMap.getZoom() < 16) maintState.maintMap.setZoom(16);
-
-            openMaintPointInfoWindow(item);
-
-          }
-
-        };
+      `;
 
 
 
-        row.addEventListener("click", handleMaintSelectAction);
+      const selectEl = dropdownWrap.querySelector("#maintPointSelectDropdown");
 
-        row.addEventListener("keydown", (e) => {
+      if (selectEl) {
 
-          if (e.key === "Enter" || e.key === " ") {
+        selectEl.addEventListener("change", (e) => {
 
-            e.preventDefault();
+          const newId = e.target.value;
 
-            handleMaintSelectAction();
+          if (!newId) return;
 
-          }
+          const targetItem = state.allItems.find(it => it.id === newId);
 
-        });
+          if (targetItem) {
 
-        row.addEventListener("focus", () => {
+            maintState.selectedPointId = targetItem.id;
 
-          if (state.isGoogleMapsReady && maintState.maintMap) {
+            renderMaintPointsList();
 
-            openMaintPointInfoWindow(item);
+            renderMaintInspector();
+
+            renderMaintMapMarkers(false);
+
+            if (maintState.maintMap) {
+
+              maintState.maintMap.panTo({ lat: targetItem.lat, lng: targetItem.lng });
+
+              if (maintState.maintMap.getZoom() < 16) maintState.maintMap.setZoom(16);
+
+              openMaintPointInfoWindow(targetItem);
+
+            }
 
           }
 
         });
 
+      }
 
-
-        listEl.appendChild(row);
-
-      });
+      listEl.appendChild(dropdownWrap);
 
     }
 
 
-
-    // 渲染 Google My Maps 風格服務點檢視與維護卡片（含右下角五個功能圖示：樣式、編輯、圖片、路徑、刪除）
 
     function renderMaintInspector() {
 
@@ -12948,6 +12948,28 @@
 
 
 
+      const isCurrentlySelected = (item.id === maintState.selectedPointId);
+
+      const actionBtnHtml = isCurrentlySelected ? `
+
+        <div style="margin-top:8px; padding:6px 10px; background:#eff6ff; border:1.5px solid #3b82f6; border-radius:6px; color:#1d4ed8; font-size:0.78rem; font-weight:700; text-align:center; display:flex; align-items:center; justify-content:center; gap:5px;">
+
+          <span>✔ 目前已選取此服務點（左側卡片編輯中）</span>
+
+        </div>
+
+      ` : `
+
+        <button type="button" id="btnSelectMaintPointInMap" style="margin-top:8px; width:100%; padding:7px 12px; background:#0f766e; color:#ffffff; border:none; border-radius:6px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.18s ease; box-shadow:0 2px 6px rgba(15,118,110,0.25);">
+
+          <span>📍 點選此服務點（於左側檢視與維護資料）</span>
+
+        </button>
+
+      `;
+
+
+
       const content = document.createElement("div");
 
       content.style.padding = "4px 2px";
@@ -12972,6 +12994,8 @@
 
         ${imagesHtml}
 
+        ${actionBtnHtml}
+
         <div style="margin-top:6px; font-size:0.72rem; color:#64748b; line-height:1.3;">
 
           📍 座標：${item.lat.toFixed(6)}, ${item.lng.toFixed(6)}・左側卡片可進行編輯與管理
@@ -12990,6 +13014,42 @@
 
       });
 
+
+
+      google.maps.event.addListenerOnce(maintPointInfoWindow, "domready", () => {
+
+        const selBtn = document.getElementById("btnSelectMaintPointInMap");
+
+        if (selBtn) {
+
+          selBtn.addEventListener("click", () => {
+
+            hidePointHoverCard();
+
+            maintState.selectedPointId = item.id;
+
+            renderMaintPointsList();
+
+            renderMaintInspector();
+
+            renderMaintMapMarkers(false);
+
+            openMaintPointInfoWindow(item);
+
+            if (maintState.maintMap) {
+
+              maintState.maintMap.panTo({ lat: item.lat, lng: item.lng });
+
+            }
+
+          });
+
+        }
+
+      });
+
+
+
       maintPointInfoWindow.open({
 
         map: maintState.maintMap
@@ -12999,8 +13059,6 @@
     }
 
 
-
-    // 在維護模式 Google Map 上渲染「唯一開啟圖層」之標記（六種資料圖層同時只能開啟一種圖層）
 
     async function renderMaintMapMarkers(fitBoundsFlag = false) {
 
