@@ -10494,19 +10494,12 @@
 
 
         maintState.maintMap.addListener("click", async (ev) => {
-
           if (!ev.latLng) return;
-
           const lat = Number(ev.latLng.lat().toFixed(7));
-
           const lng = Number(ev.latLng.lng().toFixed(7));
 
-
-
           // 1. 若目前為「選項 2：在 Google Map 上任意選擇座標點再加入名稱標記 (ADD_CUSTOM_PIN)」
-
           if (maintState.mapToolMode === "ADD_CUSTOM_PIN") {
-
             if (typeof ev.stop === "function") ev.stop();
 
             // 驗證所選座標位置是否在南投縣草屯鎮內
@@ -10517,34 +10510,47 @@
             }
 
             openCustomCoordMarkerModal(lat, lng, "", caotunCheck.topAddress ? `📍 地址：${caotunCheck.topAddress}` : "");
-
             return;
-
           }
-
-
 
           // 2. 若目前為「選項 1：點選 Google Map 上已有標示點加入 (GOOGLE_POI)」
-
           // 無論是點擊帶有 placeId 之店家圖示，或是直接點擊地圖上的地標與位置，皆觸發店家擷取與地圖新增視窗
-
           if (maintState.mapToolMode === "GOOGLE_POI") {
-
             if (typeof ev.stop === "function") ev.stop();
 
+            // 先快速檢查座標是否在草屯鎮內，若不在草屯鎮內則直接取消並提示
+            const caotunCheck = await checkIsLocationInCaotun(lat, lng);
+            if (!caotunCheck.inCaotun) {
+              alert("您要新增的服務點位置不在南投縣草屯鎮內，請重新選擇");
+              return;
+            }
+
             await handleGoogleMapExistingPoiClick(ev.placeId || null, lat, lng);
-
             return;
-
           }
 
+          // 3. 若目前為「移動標記模式 (MOVE_PIN)」
+          if (maintState.mapToolMode === "MOVE_PIN") {
+            if (typeof ev.stop === "function") ev.stop();
+            const caotunCheck = await checkIsLocationInCaotun(lat, lng);
+            if (!caotunCheck.inCaotun) {
+              alert("您要新增的服務點位置不在南投縣草屯鎮內，請重新選擇");
+              return;
+            }
+            const item = getSelectedMaintPoint();
+            if (item) {
+              item.lat = lat;
+              item.lng = lng;
+              renderMaintInspector();
+              renderMaintMapMarkers(false);
+              persistAndSyncKmlItems(`已更新「${item.name}」座標至南投縣草屯鎮內新位置`);
+              setMaintMapToolMode("GOOGLE_POI");
+            }
+            return;
+          }
         });
-
       }
-
     }
-
-
 
     let currentPoiInfoWindow = null;
 
@@ -11394,21 +11400,88 @@
 
 
 
-    // 檢查座標位置及地址是否均位於南投縣草屯鎮內（座標及地址皆須符合，否則判定為非草屯鎮）
+    // 南投縣草屯鎮精準行政邊界多邊形頂點座標 [經度 lng, 緯度 lat]（取自國土測繪與官方行政邊界）
+    const CAOTUN_TOWNSHIP_BOUNDARY_POLYGON = [[120.6361, 23.99793], [120.6375, 23.99374], [120.64495, 23.98989], [120.65009, 23.98492], [120.64631, 23.97324], [120.64672, 23.96401], [120.64798, 23.9612], [120.65758, 23.95235], [120.66159, 23.95111], [120.66238, 23.94776], [120.66452, 23.94597], [120.66794, 23.94603], [120.67126, 23.94477], [120.67416, 23.94963], [120.68034, 23.95227], [120.68088, 23.9556], [120.68359, 23.95621], [120.68356, 23.95788], [120.68532, 23.95799], [120.68599, 23.96127], [120.68839, 23.95985], [120.69048, 23.95975], [120.69226, 23.9611], [120.69334, 23.96053], [120.69706, 23.96251], [120.69788, 23.96434], [120.70001, 23.96546], [120.70164, 23.96292], [120.70182, 23.96076], [120.70463, 23.95894], [120.70611, 23.95943], [120.70899, 23.95846], [120.71039, 23.95686], [120.7106, 23.95493], [120.71184, 23.95419], [120.71285, 23.95491], [120.71545, 23.9545], [120.72322, 23.95162], [120.72693, 23.95555], [120.73414, 23.94946], [120.73839, 23.94828], [120.74016, 23.95008], [120.73983, 23.9519], [120.74282, 23.95111], [120.74149, 23.95378], [120.74236, 23.95603], [120.74922, 23.95424], [120.74885, 23.95639], [120.75104, 23.95749], [120.75077, 23.96044], [120.75399, 23.96169], [120.75473, 23.96119], [120.75566, 23.96284], [120.7571, 23.96219], [120.75854, 23.9644], [120.76066, 23.96446], [120.76382, 23.96785], [120.76707, 23.96767], [120.76698, 23.96569], [120.77031, 23.96457], [120.77002, 23.9624], [120.77287, 23.96082], [120.7752, 23.95762], [120.7754, 23.95568], [120.77638, 23.95554], [120.77825, 23.9564], [120.77877, 23.9588], [120.78076, 23.9596], [120.78237, 23.95818], [120.78417, 23.95828], [120.78622, 23.95624], [120.78924, 23.95919], [120.79177, 23.9597], [120.79317, 23.96105], [120.79454, 23.95978], [120.79806, 23.96031], [120.80284, 23.96302], [120.8061, 23.96925], [120.81092, 23.97163], [120.81181, 23.96981], [120.81912, 23.96958], [120.82134, 23.96855], [120.82359, 23.9695], [120.82832, 23.96891], [120.83477, 23.97048], [120.83499, 23.97137], [120.8332, 23.9753], [120.83556, 23.98348], [120.83459, 23.98552], [120.83256, 23.98659], [120.83087, 23.99263], [120.82803, 23.99391], [120.82696, 23.99292], [120.8253, 23.99487], [120.82329, 23.99473], [120.82242, 23.99359], [120.8193, 23.99839], [120.81472, 24.00073], [120.80825, 24.00187], [120.80986, 24.00735], [120.80344, 24.00855], [120.80251, 24.01094], [120.79866, 24.01535], [120.79491, 24.01628], [120.78614, 24.01575], [120.7818, 24.01772], [120.77953, 24.0201], [120.77549, 24.0188], [120.77137, 24.01438], [120.77067, 24.00914], [120.76777, 24.00916], [120.76266, 24.00626], [120.75796, 24.00611], [120.75593, 24.00356], [120.75324, 24.00234], [120.75095, 24.00279], [120.74603, 23.99856], [120.74365, 24.00217], [120.73172, 24.00901], [120.71924, 24.00966], [120.70639, 24.00519], [120.69487, 24.00712], [120.67876, 24.01423], [120.67599, 24.01071], [120.67008, 24.00996], [120.67369, 24.00809], [120.67258, 24.00585], [120.66358, 24.0081], [120.64941, 24.00808], [120.64602, 24.00916], [120.64338, 24.00831], [120.64244, 24.00895], [120.64034, 24.00573], [120.63809, 24.00741], [120.63819, 24.00376], [120.6361, 23.99793]];
+
+    // 計算點到線段的最短歐氏距離平方（用於邊界交界處之緩衝容差判定）
+    function distPointToSegmentSq(px, py, x1, y1, x2, y2) {
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      if (dx === 0 && dy === 0) {
+        return (px - x1) * (px - x1) + (py - y1) * (py - y1);
+      }
+      let t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
+      if (t < 0) t = 0;
+      else if (t > 1) t = 1;
+      const cx = x1 + t * dx;
+      const cy = y1 + t * dy;
+      return (px - cx) * (px - cx) + (py - cy) * (py - cy);
+    }
+
+    // 射線交叉法（Ray-Casting Algorithm）判斷座標點是否精確位於草屯鎮邊界多邊形內（或貼近邊界緩衝區 ~130m 內）
+    function isPointInCaotunPolygon(lat, lng) {
+      const numLat = Number(lat);
+      const numLng = Number(lng);
+      if (isNaN(numLat) || isNaN(numLng)) return false;
+
+      // 1. 快速外包矩形檢查 (草屯鎮極限地理範圍)
+      if (numLat < 23.940 || numLat > 24.025 || numLng < 120.635 || numLng > 120.840) {
+        return false;
+      }
+
+      // 2. 射線交叉演算法 (Ray-Casting Algorithm)
+      const poly = CAOTUN_TOWNSHIP_BOUNDARY_POLYGON;
+      let inside = false;
+      const n = poly.length;
+      let p1Lng = poly[0][0];
+      let p1Lat = poly[0][1];
+
+      for (let i = 1; i <= n; i++) {
+        const p2 = poly[i % n];
+        const p2Lng = p2[0];
+        const p2Lat = p2[1];
+
+        if (Math.min(p1Lat, p2Lat) < numLat && numLat <= Math.max(p1Lat, p2Lat)) {
+          if (numLng <= Math.max(p1Lng, p2Lng)) {
+            let xinters = p1Lng;
+            if (p1Lat !== p2Lat) {
+              xinters = (numLat - p1Lat) * (p2Lng - p1Lng) / (p2Lat - p1Lat) + p1Lng;
+            }
+            if (p1Lng === p2Lng || numLng <= xinters) {
+              inside = !inside;
+            }
+          }
+        }
+        p1Lng = p2Lng;
+        p1Lat = p2Lat;
+      }
+
+      if (inside) return true;
+
+      // 3. 邊界線段緩衝區檢查 (允許邊界交界處約 130 公尺 / 0.0012 度微幅誤差，避免邊界地標因小數點捨入遭誤判)
+      const maxDistSq = 0.0012 * 0.0012;
+      for (let i = 0; i < n; i++) {
+        const p1 = poly[i];
+        const p2 = poly[(i + 1) % n];
+        if (distPointToSegmentSq(numLng, numLat, p1[0], p1[1], p2[0], p2[1]) <= maxDistSq) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    // 檢查座標位置及地址是否均位於南投縣草屯鎮內（嚴格限制只能新增任意位置在南投縣草屯鎮內之座標點）
     async function checkIsLocationInCaotun(lat, lng, explicitAddressOrDesc = "") {
       const numLat = Number(lat);
       const numLng = Number(lng);
 
-      // 1. 座標位置範圍檢查 (南投縣草屯鎮地理邊界範圍：緯度 23.890 ~ 24.035，經度 120.630 ~ 120.835)
-      const isInBoundingBox = (!isNaN(numLat) && !isNaN(numLng) &&
-        numLat >= 23.890 && numLat <= 24.035 &&
-        numLng >= 120.630 && numLng <= 120.835);
-
-      if (!isInBoundingBox) {
+      // 1. 嚴格草屯鎮精準多邊形邊界檢查 (任何超出草屯鎮邊界之任意座標點皆立即判定不合格)
+      if (!isPointInCaotunPolygon(numLat, numLng)) {
         return { inCaotun: false, reason: "座標位置不在南投縣草屯鎮地理邊界範圍內" };
       }
 
-      // 2. 檢查使用者輸入、編輯或外部帶入之地址文字
+      // 2. 檢查使用者輸入、編輯或外部帶入之地址文字（若包含其他縣市或非草屯鄉鎮，嚴格判定不合格）
       let addressToCheck = "";
       if (explicitAddressOrDesc && typeof explicitAddressOrDesc === "string") {
         const addrMatch = explicitAddressOrDesc.match(/📍\s*地址[：:]\s*([^\n\r]+)/);
@@ -11481,6 +11554,19 @@
             let topAddress = res.results[0].formatted_address || "";
             let routeName = "";
 
+            // 若首要門牌地址明確標示為其他鄉鎮市區（如霧峰、芬園、南投市等），即使地理交界處也不允許新增
+            const topIsNonCaotun = [
+              "霧峰", "大里", "烏日", "芬園", "南投市", "中寮", "國姓", "埔里", "臺中", "台中", "彰化"
+            ].some(k => topAddress.includes(k) && !topAddress.includes("草屯"));
+
+            if (topIsNonCaotun) {
+              return {
+                inCaotun: false,
+                topAddress,
+                reason: "座標反向地址屬於其他行政區而非南投縣草屯鎮"
+              };
+            }
+
             for (const r of res.results) {
               const formatted = r.formatted_address || "";
               if (formatted.includes("草屯") || formatted.includes("Caotun") || formatted.includes("542")) {
@@ -11521,12 +11607,12 @@
             };
           }
         } catch (geoErr) {
-          console.warn("草屯鎮位置地理編碼檢查失敗，採用邊界與地址字串判定：", geoErr);
+          console.warn("草屯鎮位置地理編碼檢查失敗，採用精準多邊形邊界與地址字串判定：", geoErr);
         }
       }
 
-      // 若 Geocoder 離線或無法呼叫，因已通過經緯度外包矩形與地址字串檢查，視為合格
-      return { inCaotun: true, reason: "位於草屯鎮地理邊界內" };
+      // 已通過精準多邊形邊界與地址字串嚴格檢查
+      return { inCaotun: true, reason: "位於草屯鎮精準行政邊界內" };
     }
 
 
@@ -11823,7 +11909,7 @@
 
         if (hintEl) {
 
-          hintEl.textContent = `📍 【選項 2：任意選擇座標點新增標記】滑鼠已切換為十字準星，請在下方 Google Map 任意位置點一下，即可跳出視窗輸入名稱標記與說明！`;
+          hintEl.textContent = `📍 【選項 2：任意選擇座標點新增標記】滑鼠已切換為十字準星，請在下方 Google Map 點選南投縣草屯鎮內的任意位置，即可跳出視窗輸入名稱標記與說明！`;
 
         }
 
