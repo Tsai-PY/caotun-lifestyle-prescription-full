@@ -7352,156 +7352,117 @@
     // 在地圖所選服務點標記上方開啟詳細資訊、補充說明與最近增加的圖片 InfoWindow 視窗
 
     function openSelectedPointInfoWindow(item, rankStr) {
-
       if (!state.googleMap || !item) return;
-
       if (selectedPointInfoWindow) {
-
         selectedPointInfoWindow.close();
-
         selectedPointInfoWindow = null;
-
       }
-
       const InfoWindowCtor = window.GoogleMapsInfoWindow || google.maps.InfoWindow;
-
       if (!InfoWindowCtor) return;
 
-
-
       const meta = CATEGORY_META[item.category] || { color: "#0f766e", icon: "📍" };
-
-      const modeKey = state.selectedTravelMode;
-
+      const modeKey = state.selectedTravelMode || "DRIVING";
       const modeMeta = TRAVEL_MODE_META[modeKey] || TRAVEL_MODE_META.DRIVING;
 
-
-
       const descHtml = (item.description && item.description.trim()) ? `
-
         <div style="margin-top:6px; padding:6px 8px; background:#f0fdfa; border:1px solid #99f6e4; border-radius:6px; font-size:0.75rem; color:#0f766e; line-height:1.45;">
-
           <strong>📝 處方服務點補充說明：</strong><br/>
-
           <span style="color:#0f172a; white-space:pre-line;">${escapeHtml(item.description.trim())}</span>
-
         </div>
-
       ` : "";
 
-
-
       // 📷 最近增加的圖片資料
-
       const images = Array.isArray(item.images) ? item.images : [];
-
       let imagesHtml = "";
-
       if (images.length > 0) {
-
         const latestImg = images[images.length - 1];
-
         imagesHtml = `
-
           <div style="margin-top:6px; padding:6px 8px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px;">
-
             <div style="font-size:0.72rem; font-weight:700; color:#334155; margin-bottom:5px; display:flex; align-items:center; justify-content:space-between;">
-
               <span>📷 處方服務點照片 (${images.length} 張)</span>
-
               <span style="font-size:0.67rem; background:#0f766e; color:#ffffff; padding:1px 6px; border-radius:999px; font-weight:600;">✨ 最近增加圖片</span>
-
             </div>
-
             <div style="position:relative; width:100%; border-radius:6px; overflow:hidden; border:1px solid #cbd5e1; background:#0f172a; cursor:pointer;" onclick="window.open('${escapeAttr(latestImg)}', '_blank')" title="點擊在瀏覽器新分頁放大檢視照片">
-
               <img src="${escapeAttr(latestImg)}" alt="最近增加的圖片" style="width:100%; height:130px; object-fit:cover; display:block;" />
-
               <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 100%); color:#ffffff; font-size:0.68rem; padding:4px 8px; display:flex; justify-content:space-between; align-items:center;">
-
                 <span>🏷️ 最近增加圖片</span>
-
                 <span style="font-size:0.62rem; opacity:0.9;">🔍 點擊看大圖 ↗</span>
-
               </div>
-
             </div>
-
             ${images.length > 1 ? `
-
               <div style="display:flex; gap:4px; margin-top:5px; overflow-x:auto; padding-bottom:2px;">
-
                 ${images.map((src, i) => `
-
                   <img src="${escapeAttr(src)}" alt="服務點照片 ${i+1}" style="width:42px; height:32px; object-fit:cover; border-radius:4px; border:1.5px solid ${i === images.length - 1 ? '#0f766e' : '#cbd5e1'}; cursor:pointer; flex-shrink:0;" onclick="window.open('${escapeAttr(src)}', '_blank')" title="服務點照片 ${i+1}${i === images.length - 1 ? '（最近增加）' : ''}" />
-
                 `).join("")}
-
               </div>
-
             ` : ""}
-
           </div>
-
         `;
-
       }
 
+      // 是否為目前已經選取並規劃導航中之服務點
+      const isCurrentlySelected = Boolean(state.selectedItem && state.selectedItem.id === item.id);
 
-
-      const content = document.createElement("div");
-
-      content.style.padding = "4px 2px";
-
-      content.style.maxWidth = "300px";
-
-      content.innerHTML = `
-
-        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
-
-          <span style="background:${meta.color}; color:#fff; font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:999px;">
-
-            ${rankStr ? `第 ${rankStr} 處・` : ""}${meta.icon || "📍"} ${escapeHtml(item.category)}
-
-          </span>
-
+      const actionBtnHtml = isCurrentlySelected ? `
+        <div style="margin-top:8px; padding:7px 10px; background:#f0fdf4; border:1.5px solid #22c55e; border-radius:6px; color:#15803d; font-size:0.8rem; font-weight:700; text-align:center; display:flex; align-items:center; justify-content:center; gap:5px; box-shadow:0 1px 3px rgba(34,197,94,0.15);">
+          <span>✔ 目前已選擇此服務點（正在規劃導航路線）</span>
         </div>
-
-        <h4 style="margin:2px 0 4px; font-size:0.92rem; font-weight:800; color:#0f172a; line-height:1.3;">${escapeHtml(item.name)}</h4>
-
-        ${descHtml}
-
-        ${imagesHtml}
-
-        <div style="margin-top:6px; font-size:0.72rem; color:#64748b; line-height:1.3;">
-
-          ${modeMeta.icon} ${escapeHtml(modeMeta.label)}規劃路程・詳細資訊請見左側步驟 4 欄位
-
-        </div>
-
+      ` : `
+        <button type="button" id="btnSelectPoiInMapWindow" style="margin-top:8px; width:100%; padding:8px 12px; background:#0f766e; color:#ffffff; border:none; border-radius:6px; font-size:0.83rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.18s ease; box-shadow:0 2px 6px rgba(15,118,110,0.3);">
+          <span>📍 點選此服務點（切換道路導航與詳細資訊）</span>
+        </button>
       `;
 
+      const content = document.createElement("div");
+      content.style.padding = "4px 2px";
+      content.style.maxWidth = "300px";
+      content.innerHTML = `
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+          <span style="background:${meta.color}; color:#fff; font-size:0.7rem; font-weight:700; padding:1px 6px; border-radius:999px;">
+            ${rankStr ? `第 ${rankStr} 處・` : ""}${meta.icon || "📍"} ${escapeHtml(item.category)}
+          </span>
+        </div>
+        <h4 style="margin:2px 0 4px; font-size:0.92rem; font-weight:800; color:#0f172a; line-height:1.3;">${escapeHtml(item.name)}</h4>
+        ${descHtml}
+        ${imagesHtml}
+        <div style="margin-top:6px; font-size:0.72rem; color:#64748b; line-height:1.3;">
+          ${modeMeta.icon} ${escapeHtml(modeMeta.label)}規劃路程・詳細資訊請見左側步驟 4 欄位
+        </div>
+        ${actionBtnHtml}
+      `;
 
+      // 綁定地圖浮動視窗內的「點選此服務點」動作按鈕
+      const selectBtn = content.querySelector("#btnSelectPoiInMapWindow");
+      if (selectBtn) {
+        const handleSelectClick = (ev) => {
+          if (ev) {
+            if (typeof ev.stopPropagation === "function") ev.stopPropagation();
+            if (typeof ev.preventDefault === "function") ev.preventDefault();
+          }
+          state.selectedItem = item;
+          renderNearestList();
+          renderMapMarkers(false);
+          selectServicePoint(item);
+          openSelectedPointInfoWindow(item, rankStr);
+          const step4El = document.getElementById("step4Card");
+          if (step4El) {
+            step4El.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        };
+        selectBtn.addEventListener("click", handleSelectClick);
+        selectBtn.addEventListener("pointerdown", (ev) => {
+          if (ev && typeof ev.stopPropagation === "function") ev.stopPropagation();
+        });
+      }
 
       selectedPointInfoWindow = new InfoWindowCtor({
-
         content: content,
-
         position: { lat: Number(item.lat), lng: Number(item.lng) }
-
       });
-
       selectedPointInfoWindow.open({
-
         map: state.googleMap
-
       });
-
     }
-
-
-
-    // 在地圖上繪製標記：畫面上一次只要顯示一個我選的處方資源點（與起點「我」）
 
     async function renderMapMarkers(fitAllBounds = false) {
       const meta = CATEGORY_META[state.selectedCategory] || { color: "#0f766e" };
@@ -7613,6 +7574,12 @@
 
           marker.addEventListener("gmp-click", onSelectMarker);
           marker.addEventListener("click", onSelectMarker);
+          if (marker.element) {
+            marker.element.addEventListener("click", onSelectMarker);
+          }
+          if (pin && pin.element) {
+            pin.element.addEventListener("click", onSelectMarker);
+          }
 
           const onHoverMarker = (e) => {
             openSelectedPointInfoWindow(item, rankStr);
