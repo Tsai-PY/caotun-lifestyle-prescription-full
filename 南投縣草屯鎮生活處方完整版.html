@@ -4727,7 +4727,7 @@
 
       <div class="map-card">
 
-        <div class="maint-map-top-controls" style="background:#f0fdf4; border-bottom:1.5px solid #86efac; padding:10px 14px;">
+        <div class="maint-map-top-controls" style="background:#f0fdf4; border-bottom:1.5px solid #86efac; padding:8px 14px;">
 
           <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
 
@@ -4755,6 +4755,32 @@
 
             </button>
 
+            <!-- 選項四：輸入搜尋標記以加入圖層 -->
+
+            <form id="maintMapSearchAddForm" style="display:inline-flex; align-items:center; gap:5px; margin:0;" action="#" method="GET">
+
+              <input
+
+                type="text"
+
+                id="maintMapSearchInput"
+
+                placeholder="輸入地標或地址..."
+
+                aria-label="搜尋 Google 地圖已有地標以加入圖層"
+
+                style="padding:4px 8px; font-size:0.75rem; border:1.5px solid #86efac; border-radius:6px; min-width:140px; background:#ffffff;"
+
+              />
+
+              <button type="submit" class="btn-kml-action primary" id="btnSubmitSearchPoi" style="padding:4px 10px; font-size:0.75rem;" title="輸入地標名稱或地址搜尋並新增標記">
+
+                🔍 選項四輸入搜尋標記
+
+              </button>
+
+            </form>
+
             <button type="button" class="btn-undo-action" id="btnUndoTopAction" title="回復上一步動作" disabled style="padding:4px 10px;">
 
               ↩️ 回復上一步
@@ -4762,26 +4788,6 @@
             </button>
 
           </div>
-
-          <!-- 搜尋 Google Map 上已有名稱地標以加入圖層 -->
-
-          <form id="maintMapSearchAddForm" style="display:flex; gap:5px; margin:0;" action="#" method="GET">
-
-            <input
-
-              type="text"
-
-              id="maintMapSearchInput"
-
-              placeholder="🔍 搜尋 Google 地圖已有地標..." aria-label="搜尋 Google 地圖已有地標以加入圖層"
-
-              style="padding:4px 8px; font-size:0.75rem; border:1.5px solid #86efac; border-radius:6px; min-width:150px; background:#ffffff;"
-
-            />
-
-            <button type="submit" class="btn-kml-action primary" style="padding:4px 10px; font-size:0.75rem;">搜尋標記</button>
-
-          </form>
 
         </div>
 
@@ -13961,7 +13967,13 @@
 
           const q = (inp && inp.value || "").trim();
 
-          if (!q) return;
+          if (!q) {
+            if (inp) {
+              inp.focus();
+              inp.placeholder = "請輸入草屯地標或地址...";
+            }
+            return;
+          }
 
           const scoped = (q.includes("草屯") || q.includes("南投")) ? q : `南投縣草屯鎮 ${q}`;
 
