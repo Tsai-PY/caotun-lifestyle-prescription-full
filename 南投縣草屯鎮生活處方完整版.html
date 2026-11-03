@@ -7504,246 +7504,146 @@
     // 在地圖上繪製標記：畫面上一次只要顯示一個我選的處方資源點（與起點「我」）
 
     async function renderMapMarkers(fitAllBounds = false) {
-
       const meta = CATEGORY_META[state.selectedCategory] || { color: "#0f766e" };
 
-
-
       if (state.isGoogleMapsReady && state.googleMap) {
-
         const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
-
         const { LatLngBounds } = await google.maps.importLibrary("core");
 
-
-
         if (selectedPointInfoWindow) {
-
           selectedPointInfoWindow.close();
-
           selectedPointInfoWindow = null;
-
         }
-
         state.googleMarkers.forEach(m => { m.map = null; });
-
         state.googleMarkers = [];
-
         if (state.googleUserMarker) {
-
           state.googleUserMarker.map = null;
-
         }
-
-
 
         const bounds = new LatLngBounds();
-
         const userPos = { lat: state.userLocation.lat, lng: state.userLocation.lng };
-
         bounds.extend(userPos);
 
-
-
-        // 目前位置標記 (使用 PinElement.glyphText 與 marker.append 符合 CF7 規範)
-
+        // 目前位置標記（起點「我」，藍色立體標記）
         const userPin = new PinElement({
-
           background: "#0284c7",
-
           borderColor: "#ffffff",
-
           glyphColor: "#ffffff",
-
           glyphText: "我",
-
-          scale: 1.2
-
+          scale: 1.25
         });
-
         const userMarker = new AdvancedMarkerElement({
-
           map: state.googleMap,
-
           position: userPos,
-
           title: `目前位置：${state.userLocation.label}`,
-
           zIndex: 999
-
         });
-
         userMarker.append(userPin);
-
         state.googleUserMarker = userMarker;
 
+        // 取得距離目前位置最近的五個服務點
+        const topFive = (state.allSortedCandidates && state.allSortedCandidates.length > 0)
+          ? state.allSortedCandidates.slice(0, 5)
+          : (state.nearestFive || []).slice(0, 5);
 
+        // 整理要在地圖上呈現的服務點清單（包含前五個最近服務點；若所選服務點不在前五名中，亦一併納入顯示）
+        const pointsToShow = [];
+        topFive.forEach((item, idx) => {
+          pointsToShow.push({ item, rankStr: String(idx + 1), isTopFive: true });
+        });
 
-        // 地圖顯示畫面上一次只要顯示一個所選的處方資源點！
+        if (state.selectedItem && !pointsToShow.some(p => p.item.id === state.selectedItem.id)) {
+          const allIdx = (state.allSortedCandidates || []).findIndex(c => c.id === state.selectedItem.id);
+          const rankStr = allIdx >= 0 ? String(allIdx + 1) : "選";
+          pointsToShow.push({ item: state.selectedItem, rankStr, isTopFive: false });
+        }
 
-        if (state.selectedItem) {
-
-          const selItem = state.selectedItem;
-
-          const pos = { lat: Number(selItem.lat), lng: Number(selItem.lng) };
-
+        // 在地圖上逐一繪製五個最近服務點標記（標示 1 至 5，所選服務點放大標示）
+        pointsToShow.forEach(({ item, rankStr }) => {
+          const pos = { lat: Number(item.lat), lng: Number(item.lng) };
           bounds.extend(pos);
 
-
-
-          // 找出他在全部排序中的順位（第 1 近、第 2 近...）
-
-          const allIdx = (state.allSortedCandidates || []).findIndex(c => c.id === selItem.id);
-
-          const rankStr = allIdx >= 0 ? String(allIdx + 1) : "1";
-
-
-
-          const descText = (selItem.description && selItem.description.trim())
-
-            ? `\n處方服務點補充說明：${selItem.description.trim()}`
-
+          const isSelected = state.selectedItem && state.selectedItem.id === item.id;
+          const descText = (item.description && item.description.trim())
+            ? `\n處方服務點補充說明：${item.description.trim()}`
             : "";
+          const markerTitle = `處方服務點（第 ${rankStr} 處）：${item.name}${descText}`;
 
-          const markerTitle = `所選處方服務點（第 ${rankStr} 處）：${selItem.name}${descText}`;
-
-
-
-          const selPin = new PinElement({
-
-            background: meta.color, // 同一圖層標註顏色完全一致
-
-            borderColor: "#000000",
-
+          const pin = new PinElement({
+            background: meta.color,
+            borderColor: isSelected ? "#000000" : "#ffffff",
             glyphColor: "#ffffff",
-
             glyphText: rankStr,
-
-            scale: 1.35
-
+            scale: isSelected ? 1.35 : 1.08
           });
 
           const marker = new AdvancedMarkerElement({
-
             map: state.googleMap,
-
             position: pos,
-
             title: markerTitle,
-
             gmpClickable: true,
-
-            zIndex: 995
-
+            zIndex: isSelected ? 1000 : (980 + (10 - Math.min(10, Number(rankStr) || 0)))
           });
-
-          marker.append(selPin);
-
-
+          marker.append(pin);
 
           if (marker.element) {
-
             marker.element.title = markerTitle;
-
             marker.element.setAttribute("title", markerTitle);
-
           }
-
-          if (selPin && selPin.element) {
-
-            selPin.element.title = markerTitle;
-
-            selPin.element.setAttribute("title", markerTitle);
-
+          if (pin && pin.element) {
+            pin.element.title = markerTitle;
+            pin.element.setAttribute("title", markerTitle);
           }
-
-
 
           let handledClick = false;
-
           const onSelectMarker = (e) => {
-
             if (handledClick) return;
-
             handledClick = true;
-
             setTimeout(() => { handledClick = false; }, 150);
-
-            selectServicePoint(selItem);
-
-            openSelectedPointInfoWindow(selItem, rankStr);
-
+            state.selectedItem = item;
+            renderNearestList();
+            renderMapMarkers(false);
+            selectServicePoint(item);
+            openSelectedPointInfoWindow(item, rankStr);
+            const step4El = document.getElementById("step4Card");
+            if (step4El) {
+              step4El.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
           };
 
           marker.addEventListener("gmp-click", onSelectMarker);
-
           marker.addEventListener("click", onSelectMarker);
 
-
-
-          // 游標指到服務點標記時：即時顯示文字資料與最近增加的圖片資料
-
           const onHoverMarker = (e) => {
-
-            openSelectedPointInfoWindow(selItem, rankStr);
-
+            openSelectedPointInfoWindow(item, rankStr);
             if (e && e.clientX) {
-
-              showPointHoverCard(selItem, Number(rankStr), e);
-
+              showPointHoverCard(item, Number(rankStr) || 1, e);
             }
-
           };
-
           marker.addEventListener("pointerenter", onHoverMarker);
-
           marker.addEventListener("mouseenter", onHoverMarker);
-
           if (marker.element) {
-
             marker.element.addEventListener("pointerenter", onHoverMarker);
-
             marker.element.addEventListener("mouseenter", onHoverMarker);
-
             marker.element.addEventListener("mouseleave", hidePointHoverCard);
-
           }
-
-          if (selPin && selPin.element) {
-
-            selPin.element.addEventListener("pointerenter", onHoverMarker);
-
-            selPin.element.addEventListener("mouseenter", onHoverMarker);
-
-            selPin.element.addEventListener("mouseleave", hidePointHoverCard);
-
+          if (pin && pin.element) {
+            pin.element.addEventListener("pointerenter", onHoverMarker);
+            pin.element.addEventListener("mouseenter", onHoverMarker);
+            pin.element.addEventListener("mouseleave", hidePointHoverCard);
           }
-
-
 
           state.googleMarkers.push(marker);
+        });
 
-        }
-
-
-
-        // 自動縮放以同時呈現起點「我」與目前所選處方資源點
-
-        state.googleMap.fitBounds(bounds, 80);
-
+        // 自動調整視角邊界，使起點「我」與所有顯示之最近服務點皆舒適呈現在地圖畫面內
+        state.googleMap.fitBounds(bounds, 65);
         return;
-
       }
 
-
-
-      // 未設定 Google Maps API Key 時：繪製原生互動式 SVG 相對方位雷達圖（僅顯示所選點）
-
+      // 未設定 Google Maps API Key 時：繪製原生互動式 SVG 相對方位雷達圖
       renderFallbackRadarCanvas();
-
     }
-
-
 
     // 原生 SVG 相對方位與距離雷達圖（免金鑰降級預覽）
 
