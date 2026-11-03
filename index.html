@@ -4723,76 +4723,34 @@
 
       <div class="map-card">
 
-        <div class="maint-map-top-controls" style="background:#f0fdf4; border-bottom:1.5px solid #86efac; padding:8px 14px;">
-
-          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-
-            <span style="font-size:1.05rem; font-weight:900; color:#14532d; background:#dcfce7; padding:5px 12px; border-radius:8px; border:1.5px solid #86efac; display:inline-flex; align-items:center; gap:5px; box-shadow:0 1px 2px rgba(22,101,52,0.08); letter-spacing:0.5px;">
-
-              ➕ 新增生活處方服務點：
-
-            </span>
-
-            <button type="button" class="mymaps-tool-pill active" id="toolSelectModeBtn" title="點擊地圖上已有的 Google 地標名稱標記直接加入圖層">
-
-              🏪 選項 1：點選 Google Map 已有名稱標記
-
+                <div class="maint-map-top-controls" style="background:#f0fdf4; border-bottom:1.5px solid #86efac; padding:5px 10px; display:flex; align-items:center; gap:6px; flex-wrap:nowrap; overflow-x:auto;">
+          <span style="font-size:0.78rem; font-weight:800; color:#14532d; background:#dcfce7; padding:3px 8px; border-radius:6px; border:1px solid #86efac; display:inline-flex; align-items:center; gap:4px; flex-shrink:0; white-space:nowrap;">
+            ➕ 新增生活處方服務點：
+          </span>
+          <button type="button" class="mymaps-tool-pill active" id="toolSelectModeBtn" title="點擊地圖上已有的 Google 地標名稱標記直接加入圖層" style="white-space:nowrap; flex-shrink:0; font-size:0.72rem; padding:3px 9px;">
+            🏪 選項1:點選已有名稱標記
+          </button>
+          <button type="button" class="mymaps-tool-pill" id="toolAddPinModeBtn" title="在地圖上任意位置點擊座標點，再輸入名稱標記與說明" style="white-space:nowrap; flex-shrink:0; font-size:0.72rem; padding:3px 9px;">
+            📍 選項2:任選座標新增標記
+          </button>
+          <button type="button" class="mymaps-tool-pill" id="toolGpsModeBtn" title="取得目前手機或電腦 GPS 位置，直接新增標記至目前開啟的生活處方圖層" style="white-space:nowrap; flex-shrink:0; font-size:0.72rem; padding:3px 9px;">
+            📡 選項 3：取得目前 GPS 位置
+          </button>
+          <!-- 選項四：輸入搜尋標記以加入圖層 -->
+          <form id="maintMapSearchAddForm" style="display:inline-flex; align-items:center; gap:4px; margin:0; flex-shrink:0;" action="#" method="GET">
+            <input
+              type="text"
+              id="maintMapSearchInput"
+              placeholder="輸入地標或地址..."
+              aria-label="搜尋 Google 地圖已有地標以加入圖層"
+              style="padding:3px 7px; font-size:0.72rem; border:1.5px solid #86efac; border-radius:6px; width:115px; background:#ffffff;"
+            />
+            <button type="submit" class="btn-kml-action primary" id="btnSubmitSearchPoi" style="padding:3px 8px; font-size:0.72rem; white-space:nowrap;" title="輸入地標名稱或地址搜尋並新增標記">
+              🔍 選項輸入搜尋標記
             </button>
-
-            <button type="button" class="mymaps-tool-pill" id="toolAddPinModeBtn" title="在地圖上任意位置點擊座標點，再輸入名稱標記與說明">
-
-              📍 選項 2：任意選座標點新增標記
-
-            </button>
-
-            <button type="button" class="mymaps-tool-pill" id="toolGpsModeBtn" title="取得目前手機或電腦 GPS 位置，直接新增標記至目前開啟的生活處方圖層">
-
-              📡 選項 3：取得目前 GPS 位置
-
-            </button>
-
-            <!-- 選項四：輸入搜尋標記以加入圖層 -->
-
-            <form id="maintMapSearchAddForm" style="display:inline-flex; align-items:center; gap:5px; margin:0;" action="#" method="GET">
-
-              <input
-
-                type="text"
-
-                id="maintMapSearchInput"
-
-                placeholder="輸入地標或地址..."
-
-                aria-label="搜尋 Google 地圖已有地標以加入圖層"
-
-                style="padding:4px 8px; font-size:0.75rem; border:1.5px solid #86efac; border-radius:6px; min-width:140px; background:#ffffff;"
-
-              />
-
-              <button type="submit" class="btn-kml-action primary" id="btnSubmitSearchPoi" style="padding:4px 10px; font-size:0.75rem;" title="輸入地標名稱或地址搜尋並新增標記">
-
-                🔍 選項四輸入搜尋標記
-
-              </button>
-
-            </form>
-
-            <button type="button" class="btn-undo-action" id="btnUndoTopAction" title="回復上一步動作" disabled style="padding:4px 10px;">
-
-              ↩️ 回復上一步
-
-            </button>
-
-          </div>
-
-        </div>
-
-        <div style="padding:7px 14px; background:#dcfce7; border-bottom:1.5px solid #86efac; font-size:0.75rem; color:#14532d; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px; font-weight:600;">
-
-          <span id="maintMapHint">💡 提示：點擊右側地圖上已有的 Google 地標名稱（或現有標記）即可查看詳情並新增至圖層</span>
-
-          <span style="font-weight:800; color:#15803d;">Google My Maps 維護引擎</span>
-
+          </form>
+          <!-- 隱藏提示錨點（保持 JS 相容性，不佔用畫面空間） -->
+          <span id="maintMapHint" style="display:none;" aria-hidden="true"></span>
         </div>
 
         <!-- 維護模式 Google 地圖容器 -->
