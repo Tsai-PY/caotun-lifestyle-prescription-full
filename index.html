@@ -85,138 +85,88 @@
     /* 頂部導覽列 */
 
     .app-header {
-
       background: linear-gradient(135deg, #0f766e 0%, #0369a1 100%);
-
       color: #ffffff;
-
-      padding: 14px 24px;
-
+      padding: 6px 16px;
       display: flex;
-
       align-items: center;
-
       justify-content: space-between;
-
-      flex-wrap: wrap;
-
-      gap: 12px;
-
+      flex-wrap: nowrap;
+      gap: 10px;
       box-shadow: 0 2px 10px rgba(15, 23, 42, 0.15);
-
       position: sticky;
-
       top: 0;
-
       z-index: 1000;
-
     }
-
-
 
     .brand-group {
-
       display: flex;
-
       align-items: center;
-
-      gap: 12px;
-
+      gap: 8px;
+      flex-shrink: 1;
+      min-width: 0;
     }
 
-
+    .brand-text-block {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
 
     .brand-badge {
-
-      width: 42px;
-
-      height: 42px;
-
-      border-radius: 10px;
-
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
       background: rgba(255, 255, 255, 0.18);
-
       display: flex;
-
       align-items: center;
-
       justify-content: center;
-
-      font-size: 22px;
-
+      font-size: 18px;
+      flex-shrink: 0;
     }
-
-
 
     .brand-title {
-
       margin: 0;
-
-      font-size: 1.25rem;
-
+      font-size: 1.12rem;
       font-weight: 700;
-
       letter-spacing: 0.02em;
-
+      white-space: nowrap;
     }
-
-
 
     .brand-subtitle {
-
-      margin: 2px 0 0;
-
-      font-size: 0.82rem;
-
-      opacity: 0.9;
-
+      margin: 0;
+      font-size: 0.78rem;
+      opacity: 0.88;
+      color: #f1f5f9;
+      white-space: nowrap;
     }
-
-
 
     .header-actions {
-
       display: flex;
-
       align-items: center;
-
-      gap: 10px;
-
-      flex-wrap: wrap;
-
+      gap: 8px;
+      flex-wrap: nowrap;
+      flex-shrink: 0;
+      margin-left: auto;
     }
-
-
 
     .btn-header {
-
       background: rgba(255, 255, 255, 0.16);
-
       color: #ffffff;
-
       border: 1px solid rgba(255, 255, 255, 0.35);
-
-      border-radius: 8px;
-
-      padding: 7px 13px;
-
-      font-size: 0.85rem;
-
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.82rem;
       font-weight: 600;
-
       cursor: pointer;
-
       display: inline-flex;
-
       align-items: center;
-
-      gap: 6px;
-
+      gap: 5px;
+      white-space: nowrap;
       transition: background 0.18s ease, transform 0.12s ease;
-
     }
-
-
 
     .btn-header:hover {
 
@@ -2288,6 +2238,22 @@
 
 
 
+    @media (max-width: 1200px) {
+      .brand-subtitle {
+        font-size: 0.72rem;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .app-header {
+        flex-wrap: wrap;
+        padding: 6px 12px;
+      }
+      .brand-subtitle {
+        display: none;
+      }
+    }
+
     @media (max-width: 768px) {
 
       .mode-boxes-grid {
@@ -4194,58 +4160,31 @@
 
 
   <!-- 頂部標題與工具列 -->
-
   <header class="app-header">
-
-        <div class="brand-group">
-
+    <div class="brand-group">
       <div class="brand-badge" aria-hidden="true">🌿</div>
-
-      <div>
-
+      <div class="brand-text-block">
         <h1 class="brand-title">南投縣草屯鎮｜生活處方完整版系統</h1>
-
-        <p class="brand-subtitle">生活處方資料查詢（最近點與道路導航）＋ 生活處方資料維護（Google My Maps 風格 KML 圖層維護）</p>
-
+        <span class="brand-subtitle">生活處方資料查詢（最近點與道路導航）＋ 生活處方資料維護（Google My Maps 風格 KML 圖層維護）</span>
       </div>
-
     </div>
-
     <div class="header-actions">
-
       <div class="api-status-pill" id="apiStatusPill" title="目前地圖與查詢引擎狀態">
-
         <span class="status-dot active" id="apiStatusDot"></span>
-
         <span id="apiStatusText">已連線網站資料庫（正在載入 Google Maps...）</span>
-
       </div>
-
       <button type="button" class="btn-header" id="btnSyncLatestData" title="立即同步官方最新處方服務點說明與圖片資料（iPad / 行動裝置可即時更新）" style="background:#0284c7; color:#ffffff; font-weight:700; transition: background 0.25s ease, color 0.25s ease;">
-
         🔄 同步最新資料
-
       </button>
-
       <label class="btn-header" for="kmlFileInput" title="載入自訂或更新後的 KML 檔案">
-
         📂 匯入 KML 檔
-
         <input type="file" id="kmlFileInput" accept=".kml,.xml" style="display: none;" />
-
       </label>
-
       <button type="button" class="btn-header" id="openApiKeyBtn">
-
         🔑 API 金鑰（已內建）
-
       </button>
-
     </div>
-
   </header>
-
-
 
   <!-- 雙核心模組選擇區：第一部分與第二部分選項均以方框標起 -->
 
@@ -4495,7 +4434,7 @@
 
             <span class="step-badge">步驟 3</span>
 
-            <h2 class="step-title">距離目前位置最近的服務點 <span id="step3TotalCountBadge" style="font-size:0.75rem; font-weight:normal; color:#64748b;">（優先顯示最近 5 處，下拉可查看全部）</span></h2>
+            <h2 class="step-title">距離目前位置最近的五個服務點 <span id="step3TotalCountBadge" style="font-size:0.75rem; font-weight:normal; color:#64748b;">（顯示最近 5 處，下拉查看其餘）</span></h2>
 
           </div>
 
@@ -7135,97 +7074,56 @@
 
 
 
-      // 預設模式：僅顯示最近的 1 點，其餘放入下拉選單
-
-      const topItem = allItems[0];
+      // 預設模式：顯示距離目前位置最近的五個服務點，其餘放入下拉選單
+      const topFiveItems = allItems.slice(0, 5);
+      const restItems = allItems.slice(5);
 
       const step3TitleCount = document.getElementById("step3TotalCountBadge");
-
       if (step3TitleCount) {
-
-        step3TitleCount.textContent = `（顯示最近 1 點，下拉查看其餘共 ${allItems.length - 1} 處）`;
-
+        step3TitleCount.textContent = (allItems.length > 5)
+          ? `（顯示最近 5 處，下拉查看其餘共 ${allItems.length - 5} 處）`
+          : `（共 ${allItems.length} 處）`;
       }
 
-
-
-      // 渲染距離最近的第 1 處服務點
-
+      // 渲染距離最近的前 5 處服務點
       if (topOneContainer) {
-
         const topBadgeDiv = document.createElement("div");
-
-        topBadgeDiv.innerHTML = `<span class="nearest-top-one-badge" style="background:${meta.color};">📍 距離目前位置最近服務點（第 1 處）</span>`;
-
+        topBadgeDiv.innerHTML = `<span class="nearest-top-one-badge" style="background:${meta.color};">📍 距離目前位置最近的五個服務點（依距離排序）</span>`;
         topOneContainer.appendChild(topBadgeDiv);
-
-        topOneContainer.appendChild(createItemLi(topItem, 1));
-
+        topFiveItems.forEach((item, idx) => {
+          topOneContainer.appendChild(createItemLi(item, idx + 1));
+        });
       }
-
-
 
       // 其餘服務點下拉展開區
-
-      const restItems = allItems.slice(1);
-
       if (restItems.length > 0 && toggleBtn) {
-
         toggleBtn.style.display = "flex";
-
         const isOpen = Boolean(state.isNearestDropdownOpen);
 
-
-
-        // 如果目前選取的點在下拉列表中（第 2 點以後），於按鈕上標示已選資訊
-
-        const selectedInRest = state.selectedItem && state.selectedItem.id !== topItem.id;
-
+        // 如果目前選取的點在下拉列表中（第 6 點以後），於按鈕上標示已選資訊
+        const selectedInRest = state.selectedItem && restItems.some(c => c.id === state.selectedItem.id);
         const allSelIdx = selectedInRest ? allItems.findIndex(c => c.id === state.selectedItem.id) : -1;
-
         const selLabel = allSelIdx >= 0 ? `（已選：第 ${allSelIdx + 1} 處 ${state.selectedItem.name}）` : `（共 ${restItems.length} 處）`;
 
-
-
         if (isOpen) {
-
           toggleBtn.classList.add("expanded");
-
-          if (toggleText) toggleText.textContent = `▲ 收合其他服務點選單 ${selLabel}`;
-
+          if (toggleText) toggleText.textContent = `▲ 收合其餘服務點選單 ${selLabel}`;
           if (toggleArrow) toggleArrow.textContent = "▴";
-
           listEl.className = "nearest-list nearest-dropdown-list";
-
         } else {
-
           toggleBtn.classList.remove("expanded");
-
-          if (toggleText) toggleText.textContent = `▼ 下拉查看更多服務點 ${selLabel}`;
-
+          if (toggleText) toggleText.textContent = `▼ 下拉查看其餘服務點 ${selLabel}`;
           if (toggleArrow) toggleArrow.textContent = "▾";
-
           listEl.className = "nearest-list nearest-dropdown-list collapsed";
-
         }
 
-
-
         restItems.forEach((item, idx) => {
-
-          listEl.appendChild(createItemLi(item, idx + 2));
-
+          listEl.appendChild(createItemLi(item, idx + 6));
         });
-
       } else if (toggleBtn) {
-
         toggleBtn.style.display = "none";
-
       }
-
     }
-
-
 
     let selectedPointInfoWindow = null;
 
