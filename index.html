@@ -102,17 +102,8 @@
     .brand-group {
       display: flex;
       align-items: center;
-      gap: 8px;
-      flex-shrink: 1;
-      min-width: 0;
-    }
-
-    .brand-text-block {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      flex-wrap: wrap;
-      min-width: 0;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
     .brand-badge {
@@ -129,17 +120,9 @@
 
     .brand-title {
       margin: 0;
-      font-size: 1.12rem;
+      font-size: 1.15rem;
       font-weight: 700;
       letter-spacing: 0.02em;
-      white-space: nowrap;
-    }
-
-    .brand-subtitle {
-      margin: 0;
-      font-size: 0.78rem;
-      opacity: 0.88;
-      color: #f1f5f9;
       white-space: nowrap;
     }
 
@@ -2238,19 +2221,10 @@
 
 
 
-    @media (max-width: 1200px) {
-      .brand-subtitle {
-        font-size: 0.72rem;
-      }
-    }
-
     @media (max-width: 992px) {
       .app-header {
         flex-wrap: wrap;
         padding: 6px 12px;
-      }
-      .brand-subtitle {
-        display: none;
       }
     }
 
@@ -4163,10 +4137,7 @@
   <header class="app-header">
     <div class="brand-group">
       <div class="brand-badge" aria-hidden="true">🌿</div>
-      <div class="brand-text-block">
-        <h1 class="brand-title">南投縣草屯鎮｜生活處方完整版系統</h1>
-        <span class="brand-subtitle">生活處方資料查詢（最近點與道路導航）＋ 生活處方資料維護（Google My Maps 風格 KML 圖層維護）</span>
-      </div>
+      <h1 class="brand-title">南投縣草屯鎮｜生活處方完整版系統</h1>
     </div>
     <div class="header-actions">
       <div class="api-status-pill" id="apiStatusPill" title="目前地圖與查詢引擎狀態">
