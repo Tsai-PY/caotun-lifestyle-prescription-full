@@ -14,7 +14,7 @@
 
   <meta http-equiv="Expires" content="0" />
 
-  <meta name="build-version" content="20261103084504" />
+  <meta name="build-version" content="20261103091553" />
 
   <title>南投縣草屯鎮｜生活處方完整版（資料查詢＋資料維護）</title>
 
@@ -10906,7 +10906,7 @@
 
         if (addBtn) {
 
-          addBtn.addEventListener("click", () => {
+          addBtn.addEventListener("click", async () => {
 
             const descParts = [];
 
@@ -11234,7 +11234,7 @@
 
       if (confirmBtn && !existingItem) {
 
-        confirmBtn.addEventListener("click", () => {
+        confirmBtn.addEventListener("click", async () => {
 
           const added = await createNewServicePointAt(poi.lat, poi.lng, poi.name, combinedDesc);
 
@@ -11394,206 +11394,139 @@
 
 
 
-    // 檢查座標位置及地址是否均位於南投縣草屯鎮內
-
+    // 檢查座標位置及地址是否均位於南投縣草屯鎮內（座標及地址皆須符合，否則判定為非草屯鎮）
     async function checkIsLocationInCaotun(lat, lng, explicitAddressOrDesc = "") {
-
       const numLat = Number(lat);
-
       const numLng = Number(lng);
 
-
-
-      // 1. 經緯度範圍檢查 (草屯鎮外包矩形邊界：緯度 23.890 ~ 24.035，經度 120.630 ~ 120.835)
-
+      // 1. 座標位置範圍檢查 (南投縣草屯鎮地理邊界範圍：緯度 23.890 ~ 24.035，經度 120.630 ~ 120.835)
       const isInBoundingBox = (!isNaN(numLat) && !isNaN(numLng) &&
-
         numLat >= 23.890 && numLat <= 24.035 &&
-
         numLng >= 120.630 && numLng <= 120.835);
 
-
-
       if (!isInBoundingBox) {
-
         return { inCaotun: false, reason: "座標位置不在南投縣草屯鎮地理邊界範圍內" };
-
       }
 
-
-
-      // 2. 檢查使用者傳入或填寫之地址文字（若有填寫或自 Google Places 帶入）
-
+      // 2. 檢查使用者輸入、編輯或外部帶入之地址文字
       let addressToCheck = "";
-
       if (explicitAddressOrDesc && typeof explicitAddressOrDesc === "string") {
-
         const addrMatch = explicitAddressOrDesc.match(/📍\s*地址[：:]\s*([^\n\r]+)/);
-
         addressToCheck = addrMatch ? addrMatch[1].trim() : explicitAddressOrDesc.trim();
-
       }
-
-
-
-      // 非草屯的常見縣市與鄉鎮市區關鍵字（排除非草屯區域）
-
-      const nonCaotunRegions = [
-
-        "台中", "臺中", "彰化", "雲林", "嘉義", "台南", "臺南", "高雄", "屏東",
-
-        "苗栗", "新竹", "桃園", "新北", "台北", "臺北", "基隆", "宜蘭", "花蓮", "台東", "臺東", "澎湖", "金門", "連江",
-
-        "南投市", "埔里", "竹山", "集集", "名間", "鹿谷", "中寮", "魚池", "國姓", "水里", "信義", "仁愛",
-
-        "霧峰", "大里", "烏日", "芬園"
-
-      ];
-
-
 
       if (addressToCheck) {
+        const targetStr = addressToCheck;
+        const hasCaotun = targetStr.includes("草屯") || targetStr.toLowerCase().includes("caotun") || targetStr.includes("542");
 
-        for (const reg of nonCaotunRegions) {
+        // 台灣各主要縣市名稱（非南投縣草屯鎮）
+        const otherCounties = [
+          "台北", "臺北", "新北", "基隆", "桃園", "新竹", "苗栗", "台中", "臺中",
+          "彰化", "雲林", "嘉義", "台南", "臺南", "高雄", "屏東", "宜蘭", "花蓮", "台東", "臺東", "澎湖", "金門", "連江"
+        ];
 
-          if (addressToCheck.includes(reg)) {
+        // 南投縣其他非草屯之鄉鎮市
+        const otherTownsInNantou = [
+          "南投市", "埔里", "竹山", "集集", "名間", "鹿谷", "中寮", "魚池", "國姓", "水里", "信義", "仁愛"
+        ];
 
-            const hasCaotun = addressToCheck.includes("草屯") || addressToCheck.toLowerCase().includes("caotun") || addressToCheck.includes("542");
+        // 鄰近外縣市鄉鎮市區
+        const neighborDistricts = [
+          "霧峰", "大里", "烏日", "太平", "芬園", "員林", "大村", "花壇", "秀水", "福興", "鹿港", "社頭", "田中", "二水"
+        ];
 
-            if (!hasCaotun) {
-
-              return { inCaotun: false, reason: `地址包含非草屯區域：${reg}` };
-
+        // 檢查是否明確標註其他縣市名稱
+        for (const c of otherCounties) {
+          if (targetStr.includes(c)) {
+            if (!hasCaotun) return { inCaotun: false, reason: `地址屬於非草屯縣市：${c}` };
+            if (targetStr.includes(c + "市") || targetStr.includes(c + "縣")) {
+              if (!targetStr.includes("南投縣") || !targetStr.includes("草屯鎮")) {
+                return { inCaotun: false, reason: `地址非南投縣草屯鎮（標註${c}）` };
+              }
             }
-
-            if (reg === "南投市" && !addressToCheck.includes("草屯")) {
-
-              return { inCaotun: false, reason: "地址屬於南投市而非草屯鎮" };
-
-            }
-
           }
-
         }
 
+        // 檢查是否包含南投縣其他鄉鎮市
+        for (const t of otherTownsInNantou) {
+          if (targetStr.includes(t)) {
+            if (!hasCaotun) return { inCaotun: false, reason: `地址屬於南投縣${t}而非草屯鎮` };
+            if (!targetStr.includes("草屯鎮")) {
+              return { inCaotun: false, reason: `地址非草屯鎮（標註${t}）` };
+            }
+          }
+        }
+
+        // 檢查是否包含鄰近外縣市行政區
+        for (const n of neighborDistricts) {
+          if (targetStr.includes(n) && !hasCaotun) {
+            return { inCaotun: false, reason: `地址屬於鄰近之${n}而非草屯鎮` };
+          }
+        }
+
+        // 若文字呈現為完整門牌地址格式（含「縣/市/區/鄉/鎮」），但未出現草屯關鍵字
+        if (/[縣市區鄉鎮]/.test(targetStr) && !hasCaotun) {
+          return { inCaotun: false, reason: "地址未包含草屯鎮，非南投縣草屯鎮轄區" };
+        }
       }
-
-
 
       // 3. 若 Google Maps API 已就緒，透過 Geocoding 反向地址解析精準判定座標對應之行政區與門牌地址是否屬於草屯鎮
-
       if (state.isGoogleMapsReady && window.google && google.maps) {
-
         try {
-
           const { Geocoder } = await google.maps.importLibrary("geocoding");
-
           const geocoder = new Geocoder();
-
           const res = await geocoder.geocode({ location: { lat: numLat, lng: numLng } });
-
           if (res && res.results && res.results.length > 0) {
-
             let matchedCaotun = false;
-
             let topAddress = res.results[0].formatted_address || "";
-
             let routeName = "";
 
-
-
             for (const r of res.results) {
-
               const formatted = r.formatted_address || "";
-
               if (formatted.includes("草屯") || formatted.includes("Caotun") || formatted.includes("542")) {
-
                 matchedCaotun = true;
-
               }
-
               if (r.address_components) {
-
                 for (const comp of r.address_components) {
-
                   const name = comp.long_name || comp.short_name || "";
-
                   if (
-
                     name.includes("草屯") ||
-
                     name.toLowerCase().includes("caotun") ||
-
                     (comp.types && comp.types.includes("postal_code") && comp.short_name === "542")
-
                   ) {
-
                     matchedCaotun = true;
-
                   }
-
                   if (!routeName && comp.types && comp.types.includes("route")) {
-
                     routeName = comp.long_name;
-
                   }
-
                 }
-
               }
-
               if (matchedCaotun) break;
-
             }
-
-
 
             if (!matchedCaotun) {
-
               return {
-
                 inCaotun: false,
-
                 topAddress,
-
                 routeName,
-
                 reason: "座標反向地址解析不屬於南投縣草屯鎮"
-
               };
-
             }
 
-
-
             return {
-
               inCaotun: true,
-
               topAddress,
-
               routeName,
-
               reason: "符合南投縣草屯鎮行政區"
-
             };
-
           }
-
         } catch (geoErr) {
-
-          console.warn("草屯鎮位置地理編碼檢查失敗，採用邊界判定：", geoErr);
-
+          console.warn("草屯鎮位置地理編碼檢查失敗，採用邊界與地址字串判定：", geoErr);
         }
-
       }
 
-
-
       // 若 Geocoder 離線或無法呼叫，因已通過經緯度外包矩形與地址字串檢查，視為合格
-
       return { inCaotun: true, reason: "位於草屯鎮地理邊界內" };
-
     }
 
 
@@ -12732,7 +12665,7 @@
 
         if (saveBtn) {
 
-          saveBtn.addEventListener("click", () => {
+          saveBtn.addEventListener("click", async () => {
 
             const newName = document.getElementById("editPointName").value.trim() || item.name;
 
@@ -12749,6 +12682,13 @@
             const checkLat = !isNaN(newLat) ? newLat : item.lat;
 
             const checkLng = !isNaN(newLng) ? newLng : item.lng;
+
+            // 驗證服務點座標位置及地址是否都在南投縣草屯鎮內，否則取消剛剛的新增/修改動作
+            const caotunCheck = await checkIsLocationInCaotun(checkLat, checkLng, newDesc);
+            if (!caotunCheck.inCaotun) {
+              alert("您要新增的服務點位置不在南投縣草屯鎮內，請重新選擇");
+              return;
+            }
 
             const dup = findExistingPointInLayer(newName, checkLat, checkLng, newCat, item.id);
 
@@ -14139,6 +14079,7 @@
           if (!caotunCheck.inCaotun) {
             alert("您要新增的服務點位置不在南投縣草屯鎮內，請重新選擇");
             customPinDialog.close();
+            maintState.pendingCustomPin = null;
             return;
           }
 
