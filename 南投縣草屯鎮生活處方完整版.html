@@ -4723,7 +4723,7 @@
 
       <div class="map-card">
 
-                <div class="maint-map-top-controls" style="background:#f0fdf4; border-bottom:1.5px solid #86efac; padding:5px 10px; display:flex; align-items:center; gap:6px; flex-wrap:nowrap; overflow-x:auto;">
+                        <div class="maint-map-top-controls" style="background:#f0fdf4; border-bottom:1.5px solid #86efac; padding:5px 10px; display:flex; align-items:center; gap:6px; flex-wrap:nowrap; overflow-x:auto;">
           <span style="font-size:0.78rem; font-weight:800; color:#14532d; background:#dcfce7; padding:3px 8px; border-radius:6px; border:1px solid #86efac; display:inline-flex; align-items:center; gap:4px; flex-shrink:0; white-space:nowrap;">
             ➕ 新增生活處方服務點：
           </span>
@@ -4736,7 +4736,7 @@
           <button type="button" class="mymaps-tool-pill" id="toolGpsModeBtn" title="取得目前手機或電腦 GPS 位置，直接新增標記至目前開啟的生活處方圖層" style="white-space:nowrap; flex-shrink:0; font-size:0.72rem; padding:3px 9px;">
             📡 選項 3：取得目前 GPS 位置
           </button>
-          <!-- 選項四：輸入搜尋標記以加入圖層 -->
+          <!-- 選項 4：輸入搜尋標記以加入圖層 -->
           <form id="maintMapSearchAddForm" style="display:inline-flex; align-items:center; gap:4px; margin:0; flex-shrink:0;" action="#" method="GET">
             <input
               type="text"
@@ -4746,9 +4746,13 @@
               style="padding:3px 7px; font-size:0.72rem; border:1.5px solid #86efac; border-radius:6px; width:115px; background:#ffffff;"
             />
             <button type="submit" class="btn-kml-action primary" id="btnSubmitSearchPoi" style="padding:3px 8px; font-size:0.72rem; white-space:nowrap;" title="輸入地標名稱或地址搜尋並新增標記">
-              🔍 選項輸入搜尋標記
+              🔍 選項4:輸入搜尋標記
             </button>
           </form>
+          <!-- 回復上一步按鈕：加回並放在同一行最後 -->
+          <button type="button" class="btn-undo-action" id="btnUndoTopAction" onclick="performUndoAction()" title="目前無可回復的上一步動作" disabled style="padding:3px 9px; font-size:0.72rem; flex-shrink:0; white-space:nowrap;">
+            ↩️ 回復上一步
+          </button>
           <!-- 隱藏提示錨點（保持 JS 相容性，不佔用畫面空間） -->
           <span id="maintMapHint" style="display:none;" aria-hidden="true"></span>
         </div>
@@ -13765,6 +13769,14 @@
       }
 
       if (btnSelectMode) btnSelectMode.addEventListener("click", () => setMaintMapToolMode("GOOGLE_POI"));
+      const btnUndoTop = document.getElementById("btnUndoTopAction");
+      if (btnUndoTop) {
+        btnUndoTop.addEventListener("click", () => performUndoAction());
+      }
+      const btnUndoGlobal = document.getElementById("btnUndoGlobalAction");
+      if (btnUndoGlobal) {
+        btnUndoGlobal.addEventListener("click", () => performUndoAction());
+      }
 
       if (btnAddPinMode) btnAddPinMode.addEventListener("click", () => setMaintMapToolMode("ADD_CUSTOM_PIN"));
 
