@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>南投縣草屯鎮｜生活處方完整版系統 使用手冊（查詢與維護操作指南）</title>
+  <style>
+    :root {
+      --primary: #0f766e;
+      --primary-dark: #115e59;
+      --primary-light: #f0fdfa;
+      --accent: #0284c7;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border: #cbd5e1;
+      --bg-page: #f8fafc;
+      --bg-card: #ffffff;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.75;
+      font-size: 16px;
+    }
+
+    /* 頂部操作按鈕列 (列印時隱藏) */
+    .manual-top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: linear-gradient(135deg, #0f766e 0%, #0369a1 100%);
+      color: #ffffff;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.15);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .manual-top-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .manual-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-manual-action {
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-manual-action:hover {
+      background: rgba(255, 255, 255, 0.32);
+      transform: translateY(-1px);
+    }
+
+    .btn-manual-action.primary {
+      background: #f59e0b;
+      color: #0f172a;
+      border-color: #f59e0b;
+    }
+
+    .btn-manual-action.primary:hover {
+      background: #d97706;
+      color: #ffffff;
+    }
+
+    /* 手冊容器 */
+    .manual-container {
+      max-width: 980px;
+      margin: 24px auto 40px;
+      padding: 0 20px;
+    }
+
+    .manual-paper {
+      background: var(--bg-card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 44px 50px;
+      box-shadow: var(--shadow-md);
+    }
+
+    /* 封面 / 大標題 */
+    .manual-header {
+      border-bottom: 3px solid var(--primary);
+      padding-bottom: 24px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .manual-badge {
+      display: inline-block;
+      background: #dcfce7;
+      color: #14532d;
+      border: 1.5px solid #86efac;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .manual-title {
+      font-size: 2.1rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin: 0 0 10px;
+      line-height: 1.35;
+    }
+
+    .manual-subtitle {
+      font-size: 1.15rem;
+      color: var(--primary);
+      font-weight: 700;
+      margin: 0 0 16px;
+    }
+
+    .manual-meta {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* 目錄 */
+    .toc-box {
+      background: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 20px 26px;
+      margin-bottom: 36px;
+    }
+
+    .toc-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 0;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toc-list {
+      list-style-type: none;
+      padding-left: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 16px;
+    }
+
+    @media (max-width: 680px) {
+      .toc-list { grid-template-columns: 1fr; }
+    }
+
+    .toc-list li a {
+      color: #0369a1;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.92rem;
+      display: inline-block;
+      transition: color 0.15s ease;
+    }
+
+    .toc-list li a:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    /* 內容標題規範 */
+    h2.section-title {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #ffffff;
+      background: linear-gradient(135deg, #0f766e 0%, #0369a1 100%);
+      padding: 10px 18px;
+      border-radius: 8px;
+      margin-top: 40px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      scroll-margin-top: 70px;
+    }
+
+    h3.sub-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #0f766e;
+      border-left: 5px solid #0f766e;
+      padding-left: 10px;
+      margin-top: 28px;
+      margin-bottom: 14px;
+      scroll-margin-top: 70px;
+    }
+
+    h4 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    p { margin: 0 0 14px; }
+
+    /* 表格樣式 */
+    .table-responsive {
+      overflow-x: auto;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      background: #ffffff;
+    }
+
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 10px 12px;
+      text-align: left;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #0f172a;
+      font-weight: 800;
+    }
+
+    tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    /* 警示與提示卡片 (Callout Boxes) */
+    .callout {
+      border-left: 4px solid #0284c7;
+      background: #f0f9ff;
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 18px 0;
+      font-size: 0.92rem;
+    }
+
+    .callout.tip {
+      border-left-color: #10b981;
+      background: #f0fdf4;
+    }
+
+    .callout.warning {
+      border-left-color: #f59e0b;
+      background: #fffbeb;
+    }
+
+    .callout.danger {
+      border-left-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 800;
+    }
+
+    /* 步驟圖標與標籤 */
+    .step-pill {
+      background: #0f766e;
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 0.8rem;
+      margin-right: 6px;
+    }
+
+    .key-badge {
+      background: #e2e8f0;
+      color: #334155;
+      border: 1px solid #94a3b8;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.82rem;
+      font-family: monospace;
+      font-weight: 700;
+    }
+
+    /* 特殊功能卡片 */
+    .feature-card {
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin: 14px 0;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .feature-card-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 頁尾 */
+    .manual-footer {
+      text-align: center;
+      padding: 30px 0 10px;
+      color: #64748b;
+      font-size: 0.85rem;
+      border-top: 1px solid #cbd5e1;
+      margin-top: 40px;
+    }
+
+    /* 列印專用樣式 */
+    @media print {
+      body { background: #ffffff; font-size: 13pt; }
+      .manual-top-bar { display: none !important; }
+      .manual-container { max-width: 100%; margin: 0; padding: 0; }
+      .manual-paper { border: none; box-shadow: none; padding: 0; }
+      h2.section-title { page-break-before: always; color: #000000; background: none; border-bottom: 2pt solid #0f766e; padding-left: 0; }
+      .toc-box { border: 1pt solid #ccc; page-break-after: always; }
+      a { color: #000000; text-decoration: none; }
+      .callout { border-left-width: 3pt; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部功能工具列 (可列印為 PDF 或下載) -->
+  <div class="manual-top-bar">
+    <div class="manual-top-title">
+      <span>📖 南投縣草屯鎮生活處方完整版系統 使用手冊</span>
+    </div>
+    <div class="manual-actions">
+      <button type="button" class="btn-manual-action primary" onclick="window.print();" title="將手冊另存為 PDF 或直接列印">
+        🖨️ 列印 / 儲存為 PDF
+      </button>
+      <a href="./生活處方系統使用手冊.html" download="南投縣草屯鎮生活處方完整版系統_使用手冊.html" class="btn-manual-action" title="下載本手冊 HTML 離線檔案">
+        💾 下載 HTML 手冊
+      </a>
+      <a href="./生活處方系統使用手冊.md" download="南投縣草屯鎮生活處方完整版系統_使用手冊.md" class="btn-manual-action" title="下載本手冊 Markdown 檔案">
+        📄 下載 Markdown 手冊
+      </a>
+      <a href="./index.html" class="btn-manual-action" title="返回生活處方系統操作首頁">
+        🌐 返回系統首頁
+      </a>
+    </div>
+  </div>
+
+  <div class="manual-container">
+    <article class="manual-paper">
+
+      <!-- 手冊封面標頭 -->
+      <header class="manual-header">
+        <span class="manual-badge">官方完整操作與維護指引手冊・2026 最新版</span>
+        <h1 class="manual-title">南投縣草屯鎮｜生活處方完整版系統</h1>
+        <div class="manual-subtitle">生活處方需求即時查詢 ＋ Google My Maps 風格圖層資料維護 雙核心操作指南</div>
+        <div class="manual-meta">
+          <span>🏛️ <strong>主管轄區：</strong>南投縣草屯鎮</span>
+          <span>📊 <strong>基礎資料庫：</strong>271 筆經緯度標記＋照片說明</span>
+          <span>📅 <strong>手冊版本：</strong>Ver. 2026.11</span>
+        </div>
+      </header>
+
+      <!-- 目錄區塊 -->
+      <nav class="toc-box" aria-label="手冊章節目錄">
+        <div class="toc-title">📑 手冊章節目錄</div>
+        <ul class="toc-list">
+          <li><a href="#sec-intro">壹、系統簡介與核心架構</a></li>
+          <li><a href="#sec-layers">貳、六大生活處方分類與色彩規範</a></li>
+          <li><a href="#sec-query">參、第一部分：生活處方資料查詢操作</a></li>
+          <li><a href="#sec-query-steps">　• 查詢起點設定與 GPS 定位</a></li>
+          <li><a href="#sec-query-steps">　• 步驟 1～4：處方類別／交通／最近五點／導航</a></li>
+          <li><a href="#sec-query-map">　• 地圖即時資訊與圖面點選切換</a></li>
+          <li><a href="#sec-maint">肆、第二部分：生活處方資料維護操作</a></li>
+          <li><a href="#sec-kml-mgmt">　• KML 檔案載入、匯出備份與資料還原</a></li>
+          <li><a href="#sec-maint-steps">　• 步驟 1：選擇單一圖層與選中服務點</a></li>
+          <li><a href="#sec-maint-add">　• 四大新增服務點功能操作詳解</a></li>
+          <li><a href="#sec-boundary">　• 草屯鎮界 136 頂點防呆與重複性檢查</a></li>
+          <li><a href="#sec-maint-edit">　• 步驟 2：編輯文字、樣式、照片與刪除</a></li>
+          <li><a href="#sec-a11y">伍、無障礙規範與鍵盤操作指引</a></li>
+          <li><a href="#sec-faq">陸、常見問題與疑難排解 (FAQ)</a></li>
+        </ul>
+      </nav>
+
+      <!-- 壹、系統簡介與核心架構 -->
+      <section id="sec-intro">
+        <h2 class="section-title">壹、系統簡介與核心架構</h2>
+        <p>
+          <strong>「南投縣草屯鎮生活處方完整版系統」</strong>是一套專為社區基層民眾、醫事人員、社工與社區志工設計的現代化健康生活處方資訊平台。本系統深度結合 <strong>Google Maps Platform 官方雲端 API</strong>（包含 Maps JavaScript API、Places API (New) 與 Routes API），並內建草屯鎮專屬之高精密度現有路網拓撲幾何引擎（<code>caotun-roads.js</code>），達成免除配額消耗亦能進行實體道路規劃的雙軌架構。
+        </p>
+
+        <div class="feature-card">
+          <div class="feature-card-title">🌟 系統雙大核心模組架構</div>
+          <ul>
+            <li><strong>第一部分：生活處方資料查詢（民眾與照護者端）：</strong>
+              提供依目前所在位置（地標、地址或即時手機/電腦 GPS），一鍵檢索草屯鎮全轄區<strong>距離最近的 5 個生活處方服務點</strong>，並自動計算開車、機車、單車、步行之實際道路行車時間、公里數、即時營業狀態（營業中/休息中）、門牌地址與電話，並在地圖上繪製導航路線軌跡。
+            </li>
+            <li><strong>第二部分：生活處方資料維護（管理者與公所/衛生所端）：</strong>
+              採用 Google My Maps（我的地圖）直覺風格，提供六大處方圖層獨立維護，支援點選已有地標、任意座標點選、GPS定位、輸入搜尋等四大標記新增方式；具備草屯鎮界嚴格多邊形防呆檢核、重複新增防呆、照片上傳壓縮管理、還原上一步，並可隨時匯出／還原標準 KML 檔案。
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 貳、六大生活處方分類與色彩規範 -->
+      <section id="sec-layers">
+        <h2 class="section-title">貳、六大生活處方分類與色彩規範</h2>
+        <p>
+          本系統嚴格遵循生活型態醫學（Lifestyle Medicine）與衛福部生活處方指引，劃分六大生活處方類別，每類皆有專屬之標準顏色、內建圖示代碼與直觀符號：
+        </p>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:18%;">生活處方類別</th>
+                <th style="width:12%;">標準色碼</th>
+                <th style="width:14%;">圖示代碼</th>
+                <th style="width:28%;">服務涵蓋內涵</th>
+                <th style="width:28%;">草屯鎮代表性據點示例</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>🤝 社交處方</strong></td>
+                <td><span style="color:#FF5252; font-weight:800;">● #FF5252</span></td>
+                <td>1603 (活動中心)</td>
+                <td>社區關懷據點、長者共餐食堂、老人會、志工站、聚會所</td>
+                <td>草屯生活處方第一據點、草屯鎮老人會、各里活動中心</td>
+              </tr>
+              <tr>
+                <td><strong>🌿 紓壓處方</strong></td>
+                <td><span style="color:#4CAF50; font-weight:800;">● #4CAF50</span></td>
+                <td>1502 (咖啡/休閒)</td>
+                <td>咖啡廳、文化茶館、藝文空間、書局、公園綠地、療癒花園</td>
+                <td>瑪度咖啡、品皇咖啡、草屯鎮立圖書館、手工藝研究中心</td>
+              </tr>
+              <tr>
+                <td><strong>🍲 營養處方</strong></td>
+                <td><span style="color:#FF9800; font-weight:800;">● #FF9800</span></td>
+                <td>1577 (餐飲/農會)</td>
+                <td>生鮮超市、小農市集、草屯鎮農會門市、健康蔬食餐廳</td>
+                <td>草屯鎮農會生鮮超市、公有公有零售市場、生機飲食坊</td>
+              </tr>
+              <tr>
+                <td><strong>🏃 運動處方</strong></td>
+                <td><span style="color:#3F51B5; font-weight:800;">● #3F51B5</span></td>
+                <td>1540 (體育設施)</td>
+                <td>運動公園、健行步道、游泳池、市民健身中心、體育館</td>
+                <td>草屯植物公園、草屯運動公園、九九峰步道健行起點</td>
+              </tr>
+              <tr>
+                <td><strong>😴 睡眠處方</strong></td>
+                <td><span style="color:#795548; font-weight:800;">● #795548</span></td>
+                <td>1670 (安養/靜修)</td>
+                <td>靜心寺廟、心理諮商所、森林休閒步道、睡眠衛生衛教處</td>
+                <td>敦和宮廟埕休閒區、雷藏寺靜修步道、在地心理健康站</td>
+              </tr>
+              <tr>
+                <td><strong>💊 藥物安全處方</strong></td>
+                <td><span style="color:#9C27B0; font-weight:800;">● #9C27B0</span></td>
+                <td>1602 (醫療藥局)</td>
+                <td>健保特約藥局、社區藥事諮詢站、基層診所、草屯衛生所</td>
+                <td>草屯鎮衛生所、各里健保特約藥局、慢性病用藥諮詢站</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 參、第一部分：生活處方資料查詢操作指引 -->
+      <section id="sec-query">
+        <h2 class="section-title">參、第一部分：生活處方資料查詢操作指引</h2>
+        <p>
+          點擊網頁上方「<strong>第一部分：生活處方資料查詢</strong>」藍色方框，即可進入查詢模組。整體查詢流程分為順暢的四大步驟：
+        </p>
+
+        <div id="sec-query-steps">
+          <h3 class="sub-title">1. 設定查詢起點（位置設定）</h3>
+          <ul>
+            <li><strong>預設起點：</strong>系統預載以「南投縣草屯鎮公所周邊 (23.9742, 120.6824)」為預設查詢中心。</li>
+            <li><strong>地標／地址搜尋輸入：</strong>在「輸入我的地點（地標或地址）」欄位內輸入您所在的任何地標或門牌（如「草屯國小」、「惠德宮」或「南投縣草屯鎮中正路100號」）。</li>
+            <li><strong>點選我的位置：</strong>輸入完畢後點擊藍色「<span style="background:#0284c7; color:#fff; padding:2px 6px; border-radius:4px;">📍 點選我的位置</span>」按鈕，系統會立即在地圖上將地圖視角移動至該處，並重新計算全鎮據點至該位置之距離。</li>
+            <li><strong>取得目前 GPS 位置：</strong>若您使用具 GPS 定位功能的手機或平板，點擊「<span style="background:#0f766e; color:#fff; padding:2px 6px; border-radius:4px;">📡 取得目前 GPS 位置</span>」按鈕，瀏覽器跳出授權提示時請選擇「允許」，即可精準抓取現場座標作為導航起點。</li>
+          </ul>
+
+          <h3 class="sub-title">2. 步驟 1：選擇生活處方類別</h3>
+          <p>
+            點擊「🤝 社交」、「🌿 紓壓」、「🍲 營養」、「🏃 運動」、「😴 睡眠」、「💊 藥物安全」任一按鈕。點選後系統會將右側地圖與左側清單即時過濾為該處方類別的專屬點位。
+          </p>
+
+          <h3 class="sub-title">3. 步驟 2：選擇交通方式</h3>
+          <p>
+            支援四種交通模式切換：
+            <span class="key-badge">🚗 開車</span>
+            <span class="key-badge">🛵 機車</span>
+            <span class="key-badge">🚲 單車</span>
+            <span class="key-badge">🚶 步行</span>。
+            切換時，系統會依據草屯鎮實際道路速限與單行道限制，即時重新計算到達各據點的路線軌跡與到達時間。
+          </p>
+
+          <h3 class="sub-title">4. 步驟 3：距離目前位置最近的五個服務點</h3>
+          <p>
+            系統依「真實路程距離」與「直線距離」排序，直接列出最接近您的前 5 處生活處方據點：
+          </p>
+          <ul>
+            <li>每個項目標示排序編號（①～⑤）、據點名稱、直線與路程距離、以及交通工具預估行車時間（如：約 1 分鐘）。</li>
+            <li>點擊任一項目即可設為目前選取的目的地，右側地圖立即繪製高對比的道路導航軌跡線段。</li>
+            <li><strong>▼ 下拉查看其餘服務點：</strong>若想查看第 6 處以後的服務點，可點開下方下拉選單自由挑選。</li>
+            <li><strong>關鍵字篩選：</strong>可在「輸入查詢地點名稱或關鍵字」欄位輸入關鍵字，即時縮小清單範圍。</li>
+          </ul>
+
+          <h3 class="sub-title">5. 步驟 4：所選服務點詳細資訊與到達時間</h3>
+          <p>
+            呈現目的地之完整資料，包含：
+          </p>
+          <ul>
+            <li><strong>預計抵達鐘點：</strong>以目前時鐘為基準，加上交通耗時，顯示精確的預計抵達時間（例如：預計 14:28 抵達）。</li>
+            <li><strong>即時營業狀態：</strong>整合 Google Places API 即時顯示「營業中（至 18:00 關閉）」或「休息中」。</li>
+            <li><strong>詳細資訊：</strong>門牌地址、電話號碼、完整每週營業時間表與備註說明。</li>
+            <li><strong>🔍 聚焦規劃路線：</strong>點擊後地圖視角自動平移並最佳縮放，使出發起點與目標服務點完整呈現在畫面上。</li>
+            <li><strong>🗺️ 在 Google 地圖開啟外部導航：</strong>一鍵調用外部 Google Maps 網頁或手機 App，可立即啟動即時 turn-by-turn 語音導航。</li>
+          </ul>
+        </div>
+
+        <div id="sec-query-map">
+          <h3 class="sub-title">6. 地圖圖面互動與直覺點選切換</h3>
+          <div class="callout tip">
+            <strong>💡 地圖即時指針與選取功能</strong>
+            在地圖畫面上，游標移動到任何服務點圖釘時，會即時顯示該服務點的名稱、說明與最新照片；在視窗內點擊「<span style="background:#0f766e; color:#fff; padding:1px 6px; border-radius:4px;">📍 點選此服務點（切換道路導航與詳細資訊）</span>」，即可直接在圖面上將其切換為目標導航點，無需在左側清單來回尋找！
+          </div>
+        </div>
+      </section>
+
+      <!-- 肆、第二部分：生活處方資料維護操作指引 -->
+      <section id="sec-maint">
+        <h2 class="section-title">肆、第二部分：生活處方資料維護操作指引</h2>
+        <p>
+          點擊網頁上方「<strong>第二部分：生活處方資料維護</strong>」紫色方框，即可切換進入後台維護編輯模式。此模式採用 Google My Maps（我的地圖）設計規範，讓公所承辦人、社工或志工能輕鬆管理圖層。
+        </p>
+
+        <div id="sec-kml-mgmt">
+          <h3 class="sub-title">1. KML 檔案管理與安全備份</h3>
+          <p>左側頂部設有黃色外框的「KML 檔案管理」卡片：</p>
+          <ul>
+            <li><strong>📂 載入 KML 檔（還原）：</strong>可將本機先前備份的 <code>.kml</code> 檔案匯入系統，系統會即時重新剖析 Placemark 與 Folder，無縫還原歷史所有資料。</li>
+            <li><strong>💾 備份 KML 檔（匯出）：</strong>維護完畢後，點擊此按鈕可將全鎮最新 270+ 筆資料打包下載為 <code>草屯鎮生活處方群組資料_備份_西元年日時分.kml</code>。匯出的 KML 完全相容於 Google 地球（Google Earth）與 Google 我的地圖（Google My Maps）。</li>
+            <li><strong>🔄 還原預設值：</strong>若測試修改錯誤，可一鍵將資料庫恢復至系統出廠預載的 271 筆標準資料。</li>
+            <li><strong>↩️ 復原刪除橫幅：</strong>若不小心誤按刪除，上方會出現橘色「復原刪除」警示條，點擊即可瞬間救回誤刪的點位。</li>
+          </ul>
+        </div>
+
+        <div id="sec-maint-steps">
+          <h3 class="sub-title">2. 步驟 1：先選擇要維護的生活處方圖層</h3>
+          <p>
+            <strong>單一圖層開啟原則：</strong>本系統為避免不同處方點位在地圖上混雜導致誤選，一次僅開啟一種圖層進行維護（例如目前開啟【社交】處方圖層）。
+          </p>
+          <ul>
+            <li><strong>目前選中服務點卡片：</strong>為讓右方地圖擁有最大顯示視野，左側清單經過精簡優化，主要顯示目前正在編輯選中的「單一服務點卡片」。</li>
+            <li><strong>下拉切換其他服務點：</strong>卡片下方隨附單行下拉選單，可隨時點開切換至同圖層的其他服務點。</li>
+          </ul>
+        </div>
+
+        <div id="sec-maint-add">
+          <h3 class="sub-title">3. 地圖上方工具列：四大新增生活處方服務點功能</h3>
+          <p>位於右側地圖頂部的綠色工具列，提供四種直覺靈活的資料點新增途徑：</p>
+
+          <div class="feature-card">
+            <div class="feature-card-title">🏪 選項 1：點選 Google Map 已有名稱標記</div>
+            <p>
+              當草屯鎮上有新成立的店家、診所或據點已存在於 Google Maps 上時，直接在地圖上用滑鼠點選該店家圖示（POI），系統會透過 Places API 讀取官方註冊資料，並於地圖彈出確認卡，點擊「➕ 新增至【社交】圖層」即可自動帶入店名、電話、營業時間與地址。
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-card-title">📍 選項 2：任意選座標點新增標記</div>
+            <p>
+              若為無特定店家名稱的戶外聚會點、榕樹下涼亭、休閒步道起點，切換至選項 2，在草屯地圖上任意位置點擊一下，即可精確建立該點座標，並跳出視窗輸入名稱與備註。
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-card-title">📡 選項 3：取得目前 GPS 位置</div>
+            <p>
+              志工或工作人員親自前往現場勘查時，點擊選項 3，系統立即以現場行動裝置的高精度 GPS 座標建立新服務點。
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-card-title">🔍 選項四：輸入搜尋標記</div>
+            <p>
+              在工具列的輸入欄位中鍵入地標名稱（例如「草屯鎮立圖書館」、「惠德宮」或特定路名門牌），點擊「<strong>🔍 選項四輸入搜尋標記</strong>」或按 Enter，系統自動搜尋、校驗並將視角平移至該地標以供新增。
+            </p>
+          </div>
+        </div>
+
+        <div id="sec-boundary">
+          <h3 class="sub-title">4. 草屯鎮行政轄區邊界多邊形嚴格防呆</h3>
+          <div class="callout warning">
+            <strong>🛡️ 座標範圍檢核機制（Ray-Casting 136 頂點多邊形演算法）</strong>
+            為確保資料庫之純淨與正確性，無論透過「任意點選座標」、「GPS 定位」或「地標搜尋」，系統在新增前皆會強制執行草屯鎮多邊形交點射線檢驗：<br/>
+            👉 <strong>若點選座標超出草屯鎮行政疆界</strong>，系統將自動阻擋新增，並跳出提示視窗：<br/>
+            <code>「您要新增的服務點位置不在南投縣草屯鎮內，請重新選擇」</code><br/>
+            有效防止誤將南投市、台中市霧峰區或芬園鄉之非轄區點位存入系統。
+          </div>
+          <div class="callout warning">
+            <strong>🚫 重複資料新增防呆</strong>
+            若使用者點選或搜尋已建檔於該圖層之服務點，系統會主動阻擋重複建立，並自動定位與選定該筆現有資料供查閱與修改。
+          </div>
+        </div>
+
+        <div id="sec-maint-edit">
+          <h3 class="sub-title">5. 步驟 2：編輯服務點資料（文字、樣式、照片與刪除）</h3>
+          <p>選定特定點位後，左側下方即展開專屬編輯視窗：</p>
+
+          <h4>(1) 🎴 樣式規範</h4>
+          <p>
+            為維護系統圖層的一致性與標準化，各生活處方僅開放該圖層官方指定的原本標準色彩與專屬圖示，避免圖資色彩混亂。
+          </p>
+
+          <h4>(2) ✏️ 編輯服務點名稱與說明內容</h4>
+          <ul>
+            <li><strong>服務點名稱（&lt;name&gt;）：</strong>輸入或修改據點名稱。</li>
+            <li><strong>所屬圖層（&lt;Folder&gt;）：</strong>可隨時調整該據點所屬的六大處方類別。</li>
+            <li><strong>資料點說明（&lt;description&gt;）：</strong>紀錄開放時間、聯絡電話、服務對象、特色說明等。</li>
+            <li><strong>⚡ 自動從 Google Maps 帶入地址/電話/營業時間：</strong>點擊此功能鍵，系統自動呼叫 Places API 比對最新門牌與電話並自動填入說明欄。</li>
+            <li><strong>精準座標修正：</strong>提供緯度 (Lat) 與經度 (Lng) 欄位微調，調整後點擊「💾 儲存資料點變更」即時生效。</li>
+          </ul>
+
+          <h4>(3) 📷 圖片管理與上傳</h4>
+          <ul>
+            <li><strong>📁 上傳本機照片檔：</strong>支援從電腦或手機選取照片。系統內建前端 Canvas 智慧壓縮引擎，自動將照片最佳化為高品質且輕量之 Base64 資料，直接封裝入 KML 備份中。</li>
+            <li><strong>➕ 加入網址圖片：</strong>支援直接貼上外部圖片的 HTTPS 網址。</li>
+            <li><strong>相簿預覽與刪除：</strong>已上傳的照片會列於預覽區，可點擊放大觀看，或點擊「✕ 移除」刪除照片。</li>
+          </ul>
+
+          <h4>(4) 🗑️ 刪除服務點</h4>
+          <p>
+            點擊紅色「🗑️ 刪除」按鈕，系統會先跳出防呆確認對話框，確認後將該點從圖層移除，並自動產生復原快照以供隨時救回。
+          </p>
+        </div>
+      </section>
+
+      <!-- 伍、無障礙規範與鍵盤操作指引 -->
+      <section id="sec-a11y">
+        <h2 class="section-title">伍、無障礙規範與鍵盤操作指引</h2>
+        <p>
+          本系統遵循國家通訊傳播委員會 (NCC) <strong>「無障礙網頁開發規範 2.1 版」A 級標準</strong>及國際 <strong>W3C WCAG 2.1/2.2 AA 規範</strong>設計：
+        </p>
+        <ul>
+          <li><strong>跳至主要內容區：</strong>網頁載入後，按一下 <span class="key-badge">Tab</span> 鍵即可浮現「跳至主要內容區」捷徑，按 <span class="key-badge">Enter</span> 可略過上方導覽列直接進入操作區。</li>
+          <li><strong>全鍵盤巡迴（Keyboard Navigable）：</strong>所有按鈕、輸入框、圖層標籤皆支援 <span class="key-badge">Tab</span>（前進）與 <span class="key-badge">Shift + Tab</span>（後退）循環焦點移動，並具備雙層高對比藍色光暈外框提示。</li>
+          <li><strong>螢幕報讀器相容：</strong>所有互動控制元件均具備清晰的 <code>aria-label</code>、<code>role</code> 與 <code>aria-live</code> 狀態屬性，視障輔具使用者能完整理解當前處方步驟與導航結果。</li>
+          <li><strong>觸控最小尺寸：</strong>所有按鈕與觸控標籤點擊區域皆大於 44×44 像素，友善長輩與行動裝置操作。</li>
+        </ul>
+      </section>
+
+      <!-- 陸、常見問題與疑難排解 (FAQ) -->
+      <section id="sec-faq">
+        <h2 class="section-title">陸、常見問題與疑難排解 (FAQ)</h2>
+        <div class="feature-card">
+          <div class="feature-card-title">Q1：系統是否必須具備 Google Maps API Key 才能使用？</div>
+          <p>
+            <strong>不需要。</strong>本系統內建草屯鎮專屬實體路網拓撲圖（<code>caotun-roads.js</code>），即使未設定 API 金鑰或遇網路離線，仍可順暢進行距離排序、直線與路網道路路徑繪製。若有設定官方 API 金鑰，則可進一步享有路況即時動態到達時間、Google 官方地址電話自動帶入等進階雲端功能。
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-card-title">Q2：在「資料維護」模式修改新增的資料，換一台電腦還看得到嗎？</div>
+          <p>
+            修改的資料會即刻保存在當前瀏覽器的本機快取中。若要在多台電腦間移轉，或提供給同仁使用，<strong>請於維護完成後點擊「💾 備份 KML 檔」匯出 KML 檔案</strong>；在另一台電腦開啟本系統後，點擊「📂 載入 KML 檔」載入該檔案，所有新增修改的點位與照片便會完整同步。
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-card-title">Q3：為什麼新增點位時系統提示「不在南投縣草屯鎮內」？</div>
+          <p>
+            本系統內建南投縣草屯鎮官方界線多邊形座標（共 136 個邊界頂點），若搜尋或點選的座標位在芬園鄉、霧峰區或南投市等鄰近外鄉鎮，系統將基於轄區資料正確性自動阻擋，請確認選取座標確實位於草屯鎮內。
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-card-title">Q4：如何將生活處方地圖放上公所官網或大螢幕觸控機台？</div>
+          <p>
+            本系統以標準 HTML5 + CSS + JavaScript 架構建置，可直接以 <code>&lt;iframe&gt;</code> 內嵌於南投縣政府、草屯鎮公所官網或衛生所宣導網頁中；亦支援電腦開機全螢幕（F11 鍵）放置於公所服務台作為大觸控螢幕生活處方導覽機使用。
+          </p>
+        </div>
+      </section>
+
+      <footer class="manual-footer">
+        <p>© 2026 南投縣草屯鎮生活處方完整版系統版權所有｜系統依據無障礙網頁與 Google Maps Platform 規範建置</p>
+      </footer>
+
+    </article>
+  </div>
+
+</body>
+</html>
